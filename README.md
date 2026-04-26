@@ -1,12 +1,15 @@
-# TaiBaro
+# FormoAtlas
 
-台股大盤籌碼分析平台。後端每日自動從台灣證券交易所（TWSE）收集 15 項大盤籌碼指標，並透過 AI 解讀指標間的交互關係，輸出每日「晴雨等級」與盤勢摘要。前端以儀表板形式呈現晴雨表、籌碼速覽與趨勢圖表。
+以日期翻閱島嶼股海，讀懂每日留下的紅綠線索。
+
+FormoAtlas 是一個以日期為核心的台灣股市線索圖譜。後端每日盤後收集指數、籌碼、期權、匯率、類股與個股資料，前端讓使用者選取任一日期，對齊當日的大盤溫度、資金流向、類股強弱與熱門個股。
 
 ## 功能特色
 
-- **每日自動收集**：盤後 Cron 自動抓取加權指數、三大法人買賣超、融資融券、台指期未平倉、PUT/CALL Ratio、匯率等 15 項指標
-- **AI 晴雨分析**：結合技術指標（5MA / 20MA / 均量），輸出五層晴雨等級與 150–200 字中文盤勢摘要，結果快取於 DB
-- **儀表板 UI**：晴雨 Hero Card（天氣圖示 + AI 摘要 + 廣度比例條）、6 張籌碼速覽 Stat Cards、ECharts 趨勢圖表，支援日期導航與深/淺色主題切換
+- **日期導向觀察**：透過全域日期導航切換交易日，重新載入大盤、類股與個股層級的當日資料
+- **AI 晴雨分析**：結合籌碼與技術脈絡，輸出五層晴雨等級與中文摘要，結果快取於 DB
+- **多層線索圖譜**：包含晴雨 Hero Card、大盤 K 線、籌碼速覽、趨勢圖表、資金流向與熱門個股排行
+- **台股紅綠語意**：沿用台灣股市紅漲綠跌慣例，讓漲跌、買賣超與強弱變化更容易掃描
 
 ### 晴雨等級
 
@@ -37,7 +40,7 @@ npm install
 於專案根目錄建立 `.env`：
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/taibaro
+MONGODB_URI=mongodb://localhost:27017/formoatlas
 
 # API 一律連到獨立常駐的 Copilot CLI headless server
 COPILOT_CLI_URL=localhost:4321
@@ -79,3 +82,5 @@ npm run build:docker
 |------|------|
 | `GET /marketdata/barometer?date=YYYY-MM-DD` | 晴雨等級 + AI 摘要 |
 | `GET /marketdata/market-stats?startDate=&endDate=` | 大盤籌碼歷史數據 |
+| `GET /marketdata/sector-flow?date=&market=TSE\|OTC` | 類股資金流向 |
+| `GET /marketdata/hot-stocks?date=&market=TSE\|OTC` | 熱門個股排行 |

@@ -1,8 +1,20 @@
-# TaiBaro — Project Context
+# FormoAtlas — Project Context
 
 ## Overview
 
-TaiBaro 是一個台股大盤籌碼分析平台。後端每日自動從台股交易所（TWSE）收集 11 項大盤籌碼指標，並透過 LLM（GPT-4o-mini）解讀指標間的交互關係，輸出每日「晴雨等級」（五層）與盤勢摘要。前端以儀表板形式呈現晴雨表結果、籌碼速覽與趨勢圖表。
+FormoAtlas 是一個以日期為核心的台灣股市線索圖譜。
+
+> 以日期翻閱島嶼股海，讀懂每日留下的紅綠線索。
+
+後端每日盤後從台灣證券交易所、櫃買中心與期貨交易所相關資料來源收集大盤、籌碼、期權、匯率、類股與個股資料，並透過 LLM 解讀指標間的交互關係，輸出每日「晴雨等級」（五層）與摘要。前端以全域日期為中心，讓使用者在同一個交易日脈絡下查看大盤溫度、K 線、籌碼速覽、趨勢圖表、資金流向與熱門個股排行。
+
+Canonical product identity:
+
+| Field | Value |
+|-------|-------|
+| Display name | `FormoAtlas` |
+| Lowercase slug | `formoatlas` |
+| Chinese positioning | `以日期翻閱島嶼股海，讀懂每日留下的紅綠線索。` |
 
 ## Monorepo Structure
 
@@ -11,14 +23,14 @@ Nx monorepo，包含兩個 apps：
 | App | Path | Description |
 |-----|------|-------------|
 | `api` | `apps/api/` | NestJS REST API，資料收集 & AI 分析 |
-| `web` | `apps/web/` | Angular SPA，儀表板 UI |
+| `web` | `apps/web/` | Angular SPA，日期導向的市場線索圖譜 UI |
 
 ## Tech Stack
 
 ### Backend (`apps/api`)
 - **Framework**: NestJS 11
 - **Database**: MongoDB via Mongoose (`@nestjs/mongoose`)
-- **Data Source**: `node-twstock` / `nest-twstock`（台股 TWSE 資料抓取）
+- **Data Source**: `node-twstock` / `nest-twstock`（台股 TWSE/TPEx/TAIFEX 資料抓取）
 - **AI**: GitHub Copilot SDK (`@github/copilot-sdk`)；API 一律透過 `COPILOT_CLI_URL` 連線至 Copilot CLI headless server；使用 JSON parse + Zod schema 驗證
 - **Scheduling**: `@nestjs/schedule`（Cron jobs 每日盤後自動更新）
 - **Config**: `@nestjs/config`（`.env` 環境變數）
@@ -29,7 +41,7 @@ Nx monorepo，包含兩個 apps：
 ### Frontend (`apps/web`)
 - **Framework**: Angular 21（standalone components）
 - **UI Library**: Angular Material
-- **Charts**: ngx-echarts（Apache ECharts）— 支援雙 Y 軸趨勢圖
+- **Charts**: ngx-echarts（Apache ECharts）— 支援 K 線、趨勢圖與多軸圖表
 - **HTTP**: Angular `HttpClient`
 
 ### Shared / Tooling
@@ -43,7 +55,7 @@ Nx monorepo，包含兩個 apps：
 
 ### 大盤籌碼指標（MarketStats）
 
-`MarketStats` collection 每日儲存下列 11 項指標：
+`MarketStats` collection 每日儲存下列指標：
 
 | 欄位 | 說明 |
 |------|------|
@@ -90,6 +102,9 @@ Nx monorepo，包含兩個 apps：
 |--------|------|-------------|
 | `GET` | `/marketdata/barometer?date=` | 晴雨等級 + AI 分析摘要 |
 | `GET` | `/marketdata/market-stats?startDate=&endDate=` | 每日大盤籌碼數據列表 |
+| `GET` | `/marketdata/tickers?symbol=&startDate=&endDate=` | 指定代號 OHLC 資料 |
+| `GET` | `/marketdata/sector-flow?date=&market=` | 類股資金流向 |
+| `GET` | `/marketdata/hot-stocks?date=&market=` | 熱門個股排行 |
 
 ## Architecture Conventions
 
@@ -103,22 +118,10 @@ Nx monorepo，包含兩個 apps：
 
 ### Frontend
 - **Standalone components**: 所有 Angular component 使用 standalone 模式
-- **Feature-based structure**: `features/dashboard/`（頁面容器） + `core/`（models、services）+ `layout/`（toolbar 等），符合以下分層：
-  ```
-  features/dashboard/
-  ├── dashboard.component.ts
-  └── components/
-      ├── barometer-hero/
-      ├── stats-overview/
-      └── trend-chart/
-  core/
-  ├── models/
-  └── services/
-  layout/
-  └── toolbar/
-  ```
-- **HTTP strategy**: 頁面初始化發兩個請求（barometer + market-stats），`market-stats` 末筆複用為今日速覽數據
-- **趨勢圖**: TAIEX 固定左 Y 軸主折線；右 Y 軸由使用者透過 `MatChipListbox` 單選籌碼指標
+- **Feature-based structure**: `features/` 放頁面容器與頁面內元件，`core/` 放 models/services，`layout/` 放 toolbar/footer 等全域佈局
+- **Date-centered state**: 全域日期由 `DashboardStateService` 管理，Dashboard、Sector Flow、Hot Stocks 等頁面以相同日期脈絡重新載入資料
+- **HTTP strategy**: 頁面透過 core services 呼叫 API；多排行 overview 使用頁面導向聚合 endpoint 減少前端協調成本
+- **Charts**: TAIEX K 線與趨勢圖使用 ECharts；台股紅漲綠跌語意需維持一致
 
 ## Environment Variables
 
