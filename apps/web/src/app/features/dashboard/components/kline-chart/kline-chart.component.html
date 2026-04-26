@@ -16,7 +16,7 @@
     </div>
   </div>
   <div class="ma-bar">
-    @for (def of maDefs; track def.period; let i = $index) {
+    @for (def of visibleMaDefs(); track def.period; let i = $index) {
       <span class="ma-item" [style.color]="def.color">
         MA{{ def.period }}: {{ displayMaValues()[i] ?? '—' }}
       </span>

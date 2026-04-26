@@ -23,6 +23,42 @@ const MA_DEFS: { period: number; color: string }[] = [
   { period: 240, color: '#A3E635' },  // 黃綠
 ];
 
+const WEEKLY_VISIBLE_MA_MAX_PERIOD = 60;
+const KLINE_FETCH_YEARS = 5;
+
+function toFiniteNumber(value: unknown): number | null {
+  const numericValue = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function normalizeOhlcData(data: TickerOhlc[]): TickerOhlc[] {
+  return data.flatMap((entry) => {
+    const openPrice = toFiniteNumber(entry.openPrice);
+    const highPrice = toFiniteNumber(entry.highPrice);
+    const lowPrice = toFiniteNumber(entry.lowPrice);
+    const closePrice = toFiniteNumber(entry.closePrice);
+    const tradeValue = toFiniteNumber(entry.tradeValue) ?? 0;
+
+    if (openPrice === null || highPrice === null || lowPrice === null || closePrice === null) {
+      return [];
+    }
+
+    return [{
+      ...entry,
+      openPrice,
+      highPrice,
+      lowPrice,
+      closePrice,
+      tradeValue,
+    }];
+  });
+}
+
+export function getFetchStartDate(endDate: string): string {
+  const end = DateTime.fromISO(endDate);
+  return end.minus({ years: KLINE_FETCH_YEARS }).toISODate() ?? '';
+}
+
 function aggregateToWeekly(data: TickerOhlc[]): TickerOhlc[] {
   if (!data.length) return [];
   const weeks = new Map<string, TickerOhlc[]>();
@@ -49,7 +85,9 @@ function aggregateToWeekly(data: TickerOhlc[]): TickerOhlc[] {
 function calcMa(period: number, closes: number[]): (number | null)[] {
   return closes.map((_, i) => {
     if (i < period - 1) return null;
-    const sum = closes.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+    const window = closes.slice(i - period + 1, i + 1);
+    if (window.some((value) => !Number.isFinite(value))) return null;
+    const sum = window.reduce((a, b) => a + b, 0);
     return +( sum / period).toFixed(2);
   });
 }
@@ -57,6 +95,7 @@ function calcMa(period: number, closes: number[]): (number | null)[] {
 function buildKlineOption(
   displayData: TickerOhlc[],
   allData: TickerOhlc[],
+  maDefs: { period: number; color: string }[],
   onHover?: (idx: number) => void,
 ): EChartsOption {
   // MA 用全量資料算，避免 slice 後前段出現 null warmup 缺口
@@ -71,7 +110,7 @@ function buildKlineOption(
     itemStyle: { color: d.closePrice >= d.openPrice ? BULL_COLOR : BEAR_COLOR },
   }));
 
-  const maSeries = MA_DEFS.map(({ period, color }) => ({
+  const maSeries = maDefs.map(({ period, color }) => ({
     name: `MA${period}`,
     type: 'line' as const,
     xAxisIndex: 0,
@@ -198,6 +237,11 @@ export class KlineChartComponent implements OnDestroy {
   readonly maDefs = MA_DEFS;
   readonly localRange = signal<TimeRange>('3M');
   readonly chartInterval = signal<'D' | 'W'>('D');
+  readonly visibleMaDefs = computed(() =>
+    this.chartInterval() === 'W'
+      ? MA_DEFS.filter(({ period }) => period <= 60)
+      : MA_DEFS
+  );
 
   readonly ranges = computed<TimeRange[]>(() =>
     this.chartInterval() === 'W'
@@ -208,10 +252,12 @@ export class KlineChartComponent implements OnDestroy {
   readonly rawData = signal<TickerOhlc[]>([]);
   readonly hoveredIndex = signal<number | null>(null);
 
-  readonly weeklyData = computed<TickerOhlc[]>(() => aggregateToWeekly(this.rawData()));
+  readonly normalizedRawData = computed<TickerOhlc[]>(() => normalizeOhlcData(this.rawData()));
+
+  readonly weeklyData = computed<TickerOhlc[]>(() => aggregateToWeekly(this.normalizedRawData()));
 
   readonly filteredData = computed<TickerOhlc[]>(() => {
-    const data = this.chartInterval() === 'W' ? this.weeklyData() : this.rawData();
+    const data = this.chartInterval() === 'W' ? this.weeklyData() : this.normalizedRawData();
     if (!data.length) return data;
     const end = this.state.endDate();
     const months = RANGE_MONTHS[this.localRange()];
@@ -222,27 +268,28 @@ export class KlineChartComponent implements OnDestroy {
   // 預先計算各 MA 序列（顯示區間的完整陣列）
   readonly maData = computed<(number | null)[][]>(() => {
     const display = this.filteredData();
-    const all = this.chartInterval() === 'W' ? this.weeklyData() : this.rawData();
-    if (!display.length || !all.length) return MA_DEFS.map(() => []);
+    const all = this.chartInterval() === 'W' ? this.weeklyData() : this.normalizedRawData();
+    const visibleMaDefs = this.visibleMaDefs();
+    if (!display.length || !all.length) return visibleMaDefs.map(() => []);
     const allCloses = all.map(d => d.closePrice);
     const offset = all.length - display.length;
-    return MA_DEFS.map(({ period }) => calcMa(period, allCloses).slice(offset));
+    return visibleMaDefs.map(({ period }) => calcMa(period, allCloses).slice(offset));
   });
 
   // 目前要顯示的 MA 值（hover 中的 bar 或最後一根）
   readonly displayMaValues = computed<(number | null)[]>(() => {
     const maData = this.maData();
     const len = this.filteredData().length;
-    if (!len) return MA_DEFS.map(() => null);
+    if (!len) return this.visibleMaDefs().map(() => null);
     const idx = this.hoveredIndex() ?? (len - 1);
     return maData.map(series => series[idx] ?? null);
   });
 
   readonly chartOption = computed<EChartsOption | null>(() => {
     const display = this.filteredData();
-    const all = this.chartInterval() === 'W' ? this.weeklyData() : this.rawData();
+    const all = this.chartInterval() === 'W' ? this.weeklyData() : this.normalizedRawData();
     if (!display.length) return null;
-    return buildKlineOption(display, all, (idx) => this.hoveredIndex.set(idx));
+    return buildKlineOption(display, all, this.visibleMaDefs(), (idx) => this.hoveredIndex.set(idx));
   });
 
   setLocalRange(range: TimeRange) {
@@ -266,13 +313,11 @@ export class KlineChartComponent implements OnDestroy {
   constructor() {
     combineLatest([
       toObservable(this.state.endDate),
-      toObservable(this.chartInterval),
       toObservable(this.symbol),
     ])
       .pipe(
-        switchMap(([end, interval, sym]) => {
-          const months = interval === 'W' ? 24 : 12;
-          const start = DateTime.fromISO(end).minus({ months }).toISODate() ?? '';
+        switchMap(([end, sym]) => {
+          const start = getFetchStartDate(end);
           return this.tickerService.getTicker(sym, start, end).pipe(
             catchError(() => of([] as TickerOhlc[]))
           );
