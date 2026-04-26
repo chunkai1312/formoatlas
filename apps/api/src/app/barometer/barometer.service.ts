@@ -1,16 +1,18 @@
 import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
-import { ChatOpenAI } from '@langchain/openai';
-import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { CopilotClient, CopilotSession, type CopilotClientOptions, type PermissionHandler } from '@github/copilot-sdk';
 import { MarketStatsRepository } from '../marketdata/repositories/market-stats.repository';
 import { BAROMETER_LABEL, BAROMETER_WEATHER, BarometerLevel, BarometerResult } from './barometer.types';
-import { BarometerOutputSchema } from './barometer.schema';
+import { BarometerOutput, BarometerOutputSchema } from './barometer.schema';
 import { SYSTEM_PROMPT, buildUserMessage, TechContext } from './barometer.prompt';
 
 @Injectable()
 export class BarometerService {
   private readonly logger = new Logger(BarometerService.name);
+  private readonly copilotModel = process.env.COPILOT_MODEL || 'gpt-5-mini';
+  private readonly copilotCliUrl = process.env.COPILOT_CLI_URL;
+  private readonly denyCopilotToolPermission: PermissionHandler = () => ({ kind: 'reject' });
 
   constructor(
     private readonly marketStatsRepository: MarketStatsRepository,
@@ -51,15 +53,7 @@ export class BarometerService {
 
     // 4. 呼叫 LLM
     try {
-      const model = new ChatOpenAI({
-        model: 'gpt-4o-mini',
-        temperature: 0,
-      }).withStructuredOutput(BarometerOutputSchema);
-
-      const result = await model.invoke([
-        new SystemMessage(SYSTEM_PROMPT),
-        new HumanMessage(buildUserMessage(todayStats, prevStats, techContext)),
-      ]);
+      const result = await this.generateCopilotAnalysis(buildUserMessage(todayStats, prevStats, techContext));
 
       const level = result.level as BarometerLevel;
       const aiAnalysis = {
@@ -78,6 +72,130 @@ export class BarometerService {
       this.logger.error(`${date} 晴雨表：LLM 呼叫失敗`, error?.message);
       throw new ServiceUnavailableException('晴雨表分析服務暫時無法使用，請稍後再試');
     }
+  }
+
+  private async generateCopilotAnalysis(userMessage: string): Promise<BarometerOutput> {
+    const client = new CopilotClient(this.buildCopilotClientOptions());
+    let session: CopilotSession | null = null;
+
+    try {
+      session = await client.createSession({
+        clientName: 'taibaro-barometer',
+        model: this.copilotModel,
+        availableTools: [],
+        tools: [],
+        systemMessage: {
+          mode: 'append',
+          content: `${SYSTEM_PROMPT}
+
+你只能回傳一個 JSON object，不要使用 markdown，不要加入解釋文字。JSON 必須符合：
+{"level":"STRONG_BULL|BULL|NEUTRAL|BEAR|STRONG_BEAR","summary":"繁體中文摘要"}`,
+        },
+        onPermissionRequest: this.denyCopilotToolPermission,
+      });
+
+      const firstResponse = await this.sendCopilotPrompt(session, this.buildCopilotPrompt(userMessage));
+      const firstResult = this.parseCopilotAnalysis(firstResponse);
+      if (firstResult) {
+        return firstResult;
+      }
+
+      const retryResponse = await this.sendCopilotPrompt(
+        session,
+        `前一次回覆不是合法 JSON 或不符合 schema。請根據原始資料重新輸出，只能回傳 JSON object，不要 markdown，不要說明。
+
+原始資料：
+${userMessage}
+
+前一次回覆：
+${firstResponse}`,
+      );
+      const retryResult = this.parseCopilotAnalysis(retryResponse);
+      if (retryResult) {
+        return retryResult;
+      }
+
+      throw new Error('Copilot returned invalid barometer JSON after retry');
+    } finally {
+      if (session) {
+        await session.disconnect().catch(error => {
+          this.logger.warn(`Copilot session cleanup failed: ${error?.message ?? error}`);
+        });
+      }
+
+      const stopErrors = await client.stop().catch(error => [error]);
+      for (const error of stopErrors) {
+        this.logger.warn(`Copilot client cleanup failed: ${error?.message ?? error}`);
+      }
+    }
+  }
+
+  private buildCopilotClientOptions(): CopilotClientOptions {
+    if (!this.copilotCliUrl) {
+      throw new Error('COPILOT_CLI_URL is not configured');
+    }
+
+    return {
+      cliUrl: this.copilotCliUrl,
+      logLevel: 'error',
+    };
+  }
+
+  private buildCopilotPrompt(userMessage: string): string {
+    return `${userMessage}
+
+再次提醒：請只輸出符合 schema 的 JSON object，禁止 markdown code fence，禁止額外文字。`;
+  }
+
+  private async sendCopilotPrompt(session: CopilotSession, prompt: string): Promise<string> {
+    const response = await session.sendAndWait({ prompt }, 120_000);
+    const content = response?.data.content?.trim();
+    if (!content) {
+      throw new Error('Copilot returned an empty response');
+    }
+
+    return content;
+  }
+
+  private parseCopilotAnalysis(content: string): BarometerOutput | null {
+    const json = this.parseJsonObject(content);
+    if (!json) {
+      return null;
+    }
+
+    const result = BarometerOutputSchema.safeParse(json);
+    if (!result.success) {
+      this.logger.warn(`Copilot response schema validation failed: ${result.error.message}`);
+      return null;
+    }
+
+    return result.data;
+  }
+
+  private parseJsonObject(content: string): unknown | null {
+    const trimmed = content.trim();
+    const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i)?.[1]?.trim();
+    const candidates = [fenced, trimmed, this.sliceJsonObject(trimmed)].filter((value): value is string => !!value);
+
+    for (const candidate of candidates) {
+      try {
+        return JSON.parse(candidate);
+      } catch {
+        // Try the next candidate.
+      }
+    }
+
+    return null;
+  }
+
+  private sliceJsonObject(content: string): string | null {
+    const start = content.indexOf('{');
+    const end = content.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) {
+      return null;
+    }
+
+    return content.slice(start, end + 1);
   }
 
   private computeTechContext(historicalStats: Record<string, any>[], todayStats: Record<string, any>): TechContext {

@@ -24,7 +24,7 @@
 
 - Node.js 20+
 - MongoDB
-- OpenAI API Key
+- Copilot CLI headless server（以具備 Copilot Requests 權限的 token 啟動）
 
 ### 安裝
 
@@ -37,8 +37,19 @@ npm install
 於專案根目錄建立 `.env`：
 
 ```env
-OPENAI_API_KEY=your_openai_api_key
 MONGODB_URI=mongodb://localhost:27017/taibaro
+
+# API 一律連到獨立常駐的 Copilot CLI headless server
+COPILOT_CLI_URL=localhost:4321
+
+# 選填，預設 gpt-5-mini
+COPILOT_MODEL=gpt-5-mini
+```
+
+請先將 Copilot CLI 以 headless mode 獨立啟動，並把 token 放在 CLI process：
+
+```sh
+COPILOT_GITHUB_TOKEN=your_copilot_github_token copilot --headless --port 4321
 ```
 
 ### 啟動開發伺服器
