@@ -1,0 +1,87 @@
+.rank-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+
+  mat-card-content {
+    padding: 12px 14px 14px !important;
+  }
+}
+
+.card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.rank-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  thead tr {
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  th,
+  td {
+    padding: 6px 8px;
+    white-space: nowrap;
+  }
+
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: right;
+  }
+
+  td {
+    color: var(--text-primary);
+    text-align: right;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+  }
+
+  .col-rank {
+    width: 34px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .col-symbol {
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col-name {
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .col-num,
+  .metric {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .positive {
+    color: var(--color-positive);
+  }
+
+  .negative {
+    color: var(--color-negative);
+  }
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 136px;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}

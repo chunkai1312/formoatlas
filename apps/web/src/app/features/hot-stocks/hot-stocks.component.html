@@ -1,0 +1,86 @@
+<div class="hot-stocks">
+  <div class="tab-bar">
+    <button class="tab-btn" [class.active]="activeMarket() === 'TSE'" (click)="setMarket('TSE')">上市</button>
+    <button class="tab-btn" [class.active]="activeMarket() === 'OTC'" (click)="setMarket('OTC')">上櫃</button>
+  </div>
+
+  <section class="section">
+    <div class="section-title">漲跌幅排行</div>
+    <div class="rank-grid">
+      <app-hot-stock-ranking-table
+        title="漲幅榜"
+        metricLabel="漲跌幅"
+        metricKey="changePercent"
+        metricKind="percent"
+        [rows]="data().movers.gainers"
+      ></app-hot-stock-ranking-table>
+      <app-hot-stock-ranking-table
+        title="跌幅榜"
+        metricLabel="漲跌幅"
+        metricKey="changePercent"
+        metricKind="percent"
+        [rows]="data().movers.losers"
+      ></app-hot-stock-ranking-table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">成交量值排行</div>
+    <div class="rank-grid">
+      <app-hot-stock-ranking-table
+        title="成交量"
+        metricLabel="成交量(張)"
+        metricKey="tradeVolume"
+        metricKind="volume"
+        [rows]="data().actives.byVolume"
+      ></app-hot-stock-ranking-table>
+      <app-hot-stock-ranking-table
+        title="成交值"
+        metricLabel="成交值(億)"
+        metricKey="tradeValue"
+        metricKind="value"
+        [rows]="data().actives.byValue"
+      ></app-hot-stock-ranking-table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">外資買賣超排行</div>
+    <div class="rank-grid">
+      <app-hot-stock-ranking-table
+        title="外資買超"
+        metricLabel="外資買賣超(張)"
+        metricKey="finiNet"
+        metricKind="net"
+        [rows]="data().institutional.finiBuy"
+      ></app-hot-stock-ranking-table>
+      <app-hot-stock-ranking-table
+        title="外資賣超"
+        metricLabel="外資買賣超(張)"
+        metricKey="finiNet"
+        metricKind="net"
+        [rows]="data().institutional.finiSell"
+      ></app-hot-stock-ranking-table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">投信買賣超排行</div>
+    <div class="rank-grid">
+      <app-hot-stock-ranking-table
+        title="投信買超"
+        metricLabel="投信買賣超(張)"
+        metricKey="sitcNet"
+        metricKind="net"
+        [rows]="data().institutional.sitcBuy"
+      ></app-hot-stock-ranking-table>
+      <app-hot-stock-ranking-table
+        title="投信賣超"
+        metricLabel="投信買賣超(張)"
+        metricKey="sitcNet"
+        metricKind="net"
+        [rows]="data().institutional.sitcSell"
+      ></app-hot-stock-ranking-table>
+    </div>
+  </section>
+</div>

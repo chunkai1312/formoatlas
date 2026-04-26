@@ -1,0 +1,46 @@
+<mat-card class="rank-card">
+  <mat-card-content>
+    <div class="card-title">{{ title() }}</div>
+
+    @if (rows().length) {
+      <div class="table-wrap">
+        <table class="rank-table">
+          <thead>
+            <tr>
+              <th class="col-rank">#</th>
+              <th class="col-symbol">代號</th>
+              <th class="col-name">名稱</th>
+              <th class="col-num">收盤</th>
+              <th class="col-num">漲跌</th>
+              <th class="col-num">漲跌幅</th>
+              <th class="col-num">{{ metricLabel() }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.symbol; let i = $index) {
+              <tr>
+                <td class="col-rank">{{ i + 1 }}</td>
+                <td class="col-symbol">{{ row.symbol }}</td>
+                <td class="col-name">{{ row.name }}</td>
+                <td class="col-num" [class.positive]="row.change > 0" [class.negative]="row.change < 0">
+                  {{ fmtPrice(row.closePrice) }}
+                </td>
+                <td class="col-num" [class.positive]="row.change > 0" [class.negative]="row.change < 0">
+                  {{ fmtChange(row.change) }}
+                </td>
+                <td class="col-num" [class.positive]="row.changePercent > 0" [class.negative]="row.changePercent < 0">
+                  {{ fmtChange(row.changePercent) }}%
+                </td>
+                <td class="col-num metric" [ngClass]="metricClass(row)">
+                  {{ fmtMetric(metricValue(row)) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="empty-state">暫無資料</div>
+    }
+  </mat-card-content>
+</mat-card>

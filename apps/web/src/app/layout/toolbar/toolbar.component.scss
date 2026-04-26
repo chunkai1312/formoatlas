@@ -26,11 +26,18 @@
     align-items: center;
     gap: 4px;
     margin-left: 16px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
 
     .nav-link {
       display: inline-flex;
       align-items: center;
-      padding: 4px 14px;
+      padding: 4px 12px;
       border-radius: 999px;
       font-size: 0.875rem;
       font-weight: 500;
@@ -116,4 +123,30 @@
     }
   }
 
+}
+
+@media (max-width: 760px) {
+  .app-toolbar {
+    padding: 0 8px;
+    gap: 4px;
+
+    .title {
+      display: none;
+    }
+
+    .nav-links {
+      margin-left: 4px;
+      gap: 2px;
+
+      .nav-link {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+      }
+    }
+
+    .date-nav .date-display {
+      padding: 4px 8px;
+      font-size: 0.82rem;
+    }
+  }
 }

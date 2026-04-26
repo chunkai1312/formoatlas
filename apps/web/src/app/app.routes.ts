@@ -15,5 +15,12 @@ export const appRoutes: Route[] = [
         (m) => m.SectorFlowComponent
       ),
   },
+  {
+    path: 'hot-stocks',
+    loadComponent: () =>
+      import('./features/hot-stocks/hot-stocks.component').then(
+        (m) => m.HotStocksComponent
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];
