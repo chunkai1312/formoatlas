@@ -17,7 +17,7 @@ import { TickerService } from './marketdata/services/ticker.service';
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, 'assets'),
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI),
+    MongooseModule.forRoot(process.env.MONGODB_URI as string),
     MarketDataModule,
     BarometerModule,
   ]
@@ -32,13 +32,18 @@ export class AppModule implements OnApplicationBootstrap {
     if (process.env.MARKETDATA_INIT_ENABLED === 'true') {
       Logger.log('正在初始化應用程式...', AppModule.name);
 
-      const days = parseInt(process.env.MARKETDATA_INIT_DAYS, 10) || 30;
+      const days = parseInt(process.env.MARKETDATA_INIT_DAYS as string, 10) || 30;
       const startDate = DateTime.local().minus({ days });
       const endDate = DateTime.local();
 
       for (let dt = startDate; dt <= endDate; dt = dt.plus({ day: 1 })) {
-        await this.marketStatsService.updateMarketStats(dt.toISODate());
-        await this.tickerService.updateTickers(dt.toISODate());
+        try {
+          await this.marketStatsService.updateMarketStats(dt.toISODate());
+          await this.tickerService.updateTickers(dt.toISODate());
+        } catch (error) {
+          dt = dt.minus({ day: 1 });
+          continue;
+        }
       }
 
       Logger.log('應用程式初始化完成', AppModule.name);
