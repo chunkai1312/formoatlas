@@ -19,7 +19,7 @@ Nx monorepo，包含兩個 apps：
 - **Framework**: NestJS 11
 - **Database**: MongoDB via Mongoose (`@nestjs/mongoose`)
 - **Data Source**: `node-twstock` / `nest-twstock`（台股 TWSE 資料抓取）
-- **AI**: LangChain (`@langchain/openai`) + OpenAI `gpt-4o-mini`，使用 structured output（Zod schema）
+- **AI**: GitHub Copilot SDK (`@github/copilot-sdk`)；API 一律透過 `COPILOT_CLI_URL` 連線至 Copilot CLI headless server；使用 JSON parse + Zod schema 驗證
 - **Scheduling**: `@nestjs/schedule`（Cron jobs 每日盤後自動更新）
 - **Config**: `@nestjs/config`（`.env` 環境變數）
 - **Date**: Luxon
@@ -98,8 +98,8 @@ Nx monorepo，包含兩個 apps：
 - **Repository pattern**: DB 操作封裝於 `*.repository.ts`；業務邏輯在 `*.service.ts`
 - **DTO validation**: 所有 controller input 透過 class-validator DTO 驗證
 - **Cron + endpoint 共用邏輯**: Cron job 與 HTTP endpoint 呼叫同一 service 方法，快取於 DB，不重複呼叫 LLM
-- **LLM structured output**: 使用 Zod schema（`BarometerOutputSchema`）強制 LLM 輸出格式，不手寫 JSON 解析
-- **環境變數**: 透過 `.env` 管理（`MONGODB_URI`、`OPENAI_API_KEY`、`MARKETDATA_INIT_ENABLED`、`MARKETDATA_INIT_DAYS`）
+- **LLM structured output**: 使用 Zod schema（`BarometerOutputSchema`）驗證 Copilot SDK 回傳 JSON，格式無效時不寫入快取
+- **環境變數**: 透過 `.env` 管理（`MONGODB_URI`、`COPILOT_CLI_URL`、`COPILOT_MODEL`、`MARKETDATA_INIT_ENABLED`、`MARKETDATA_INIT_DAYS`）
 
 ### Frontend
 - **Standalone components**: 所有 Angular component 使用 standalone 模式
@@ -124,7 +124,8 @@ Nx monorepo，包含兩個 apps：
 
 ```
 MONGODB_URI=                  # MongoDB 連線字串
-OPENAI_API_KEY=               # OpenAI API 金鑰
+COPILOT_CLI_URL=              # 必填，指向 Copilot CLI headless server
+COPILOT_MODEL=                # Copilot 模型，預設 gpt-5-mini
 MARKETDATA_INIT_ENABLED=      # true 時啟動時補算歷史資料
 MARKETDATA_INIT_DAYS=         # 補算天數（預設 30）
 ```
