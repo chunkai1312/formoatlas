@@ -6,6 +6,7 @@ import { DateTime } from 'luxon';
 import { Ticker, TickerDocument } from '../schemas/ticker.schema';
 import { TickerType, Market, Index } from '../enums';
 import { getSectorName } from '../utils';
+import { HotStockRankRow, HotStocksResponse } from '../types/hot-stocks.types';
 
 @Injectable()
 export class TickerRepository {
@@ -211,5 +212,117 @@ export class TickerRepository {
 
     const [ tickers ] = results.map(doc => doc.data);
     return tickers.slice(0, top);
+  }
+
+  async getHotStocks(options?: { date?: string; market?: 'TSE' | 'OTC' }): Promise<HotStocksResponse> {
+    const requestedDate = options?.date || DateTime.local().toISODate();
+    const market = options?.market === 'OTC' ? Market.OTC : Market.TSE;
+    const responseMarket: 'TSE' | 'OTC' = options?.market === 'OTC' ? 'OTC' : 'TSE';
+    const latestDate = await this.getLatestEquityDate(requestedDate, market);
+    const empty = this.emptyHotStocksResponse(latestDate ?? requestedDate, responseMarket);
+
+    if (!latestDate) return empty;
+
+    const [
+      gainers,
+      losers,
+      byVolume,
+      byValue,
+      finiBuy,
+      finiSell,
+      sitcBuy,
+      sitcSell,
+    ] = await Promise.all([
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'changePercent', sortDir: -1, filter: { changePercent: { $gt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'changePercent', sortDir: 1, filter: { changePercent: { $lt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'tradeVolume', sortDir: -1 }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'tradeValue', sortDir: -1 }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.fini.net', sortDir: -1, filter: { 'instInvestors.fini.net': { $gt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.fini.net', sortDir: 1, filter: { 'instInvestors.fini.net': { $lt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.sitc.net', sortDir: -1, filter: { 'instInvestors.sitc.net': { $gt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.sitc.net', sortDir: 1, filter: { 'instInvestors.sitc.net': { $lt: 0 } } }),
+    ]);
+
+    return {
+      date: latestDate,
+      market: responseMarket,
+      movers: { gainers, losers },
+      actives: { byVolume, byValue },
+      institutional: { finiBuy, finiSell, sitcBuy, sitcSell },
+    };
+  }
+
+  private async getLatestEquityDate(date: string, market: Market): Promise<string | null> {
+    const match = this.getEquityMatch({ date: { $lte: date }, market });
+    const doc = await this.model
+      .findOne(match)
+      .select({ _id: 0, date: 1 })
+      .sort({ date: -1 })
+      .lean()
+      .exec();
+
+    return doc?.date ?? null;
+  }
+
+  private async getEquityRanking(options: {
+    date: string;
+    market: Market;
+    sortKey: string;
+    sortDir: 1 | -1;
+    filter?: Record<string, any>;
+    top?: number;
+  }): Promise<HotStockRankRow[]> {
+    const top = options.top ?? 20;
+
+    return this.model.aggregate<HotStockRankRow>([
+      {
+        $match: this.getEquityMatch({
+          date: options.date,
+          market: options.market,
+          filter: options.filter,
+        }),
+      },
+      { $sort: { [options.sortKey]: options.sortDir, symbol: 1 } },
+      { $limit: top },
+      {
+        $project: {
+          _id: 0,
+          symbol: 1,
+          name: { $ifNull: ['$name', '$symbol'] },
+          date: 1,
+          market: 1,
+          closePrice: { $ifNull: ['$closePrice', 0] },
+          change: { $ifNull: ['$change', 0] },
+          changePercent: { $ifNull: ['$changePercent', 0] },
+          tradeVolume: { $ifNull: ['$tradeVolume', 0] },
+          tradeValue: { $ifNull: ['$tradeValue', 0] },
+          finiNet: { $ifNull: ['$instInvestors.fini.net', null] },
+          sitcNet: { $ifNull: ['$instInvestors.sitc.net', null] },
+        },
+      },
+    ]).exec();
+  }
+
+  private getEquityMatch(options: {
+    date: string | { $lte: string };
+    market: Market;
+    filter?: Record<string, any>;
+  }): Record<string, any> {
+    return {
+      date: options.date,
+      type: TickerType.Equity,
+      market: options.market,
+      ...(options.filter ?? {}),
+    };
+  }
+
+  private emptyHotStocksResponse(date: string, market: 'TSE' | 'OTC'): HotStocksResponse {
+    return {
+      date,
+      market,
+      movers: { gainers: [], losers: [] },
+      actives: { byVolume: [], byValue: [] },
+      institutional: { finiBuy: [], finiSell: [], sitcBuy: [], sitcSell: [] },
+    };
   }
 }
