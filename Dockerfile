@@ -5,13 +5,13 @@ ENV PORT=3000
 
 WORKDIR /app
 
-RUN addgroup --system barotw && \
-  adduser --system -G barotw barotw
+RUN addgroup --system formoatlas && \
+  adduser --system -G formoatlas formoatlas
 
-COPY dist/apps/api barotw/
-COPY dist/apps/web/browser barotw/assets/
-RUN chown -R barotw:barotw .
+COPY dist/apps/api formoatlas/
+COPY dist/apps/web/browser formoatlas/assets/
+RUN chown -R formoatlas:formoatlas .
 
-RUN npm --prefix barotw --omit=dev -f install
+RUN npm --prefix formoatlas --omit=dev -f install
 
-CMD [ "node", "barotw" ]
+CMD [ "node", "formoatlas" ]

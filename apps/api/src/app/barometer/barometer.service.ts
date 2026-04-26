@@ -80,7 +80,7 @@ export class BarometerService {
 
     try {
       session = await client.createSession({
-        clientName: 'taibaro-barometer',
+        clientName: 'formoatlas-barometer',
         model: this.copilotModel,
         availableTools: [],
         tools: [],

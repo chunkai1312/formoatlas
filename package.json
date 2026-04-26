@@ -1,11 +1,11 @@
 {
-  "name": "@taibaro/source",
+  "name": "@formoatlas/source",
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
     "serve": "nx run-many --target=serve --all",
     "build": "nx run-many --target=build --all",
-    "build:docker": "npm run build && docker build -t chunkai1312/taibaro --platform linux/amd64 .",
+    "build:docker": "npm run build && docker build -t chunkai1312/formoatlas --platform linux/amd64 .",
     "release": "release-it",
     "prepare": "husky"
   },

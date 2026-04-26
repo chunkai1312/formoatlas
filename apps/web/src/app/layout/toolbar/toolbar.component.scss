@@ -127,14 +127,25 @@
 
 @media (max-width: 760px) {
   .app-toolbar {
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    align-content: center;
     padding: 0 8px;
     gap: 4px;
+    row-gap: 6px;
 
     .title {
       display: none;
     }
 
+    .logo {
+      order: 0;
+    }
+
     .nav-links {
+      order: 1;
+      flex: 1;
       margin-left: 4px;
       gap: 2px;
 
@@ -142,6 +153,20 @@
         padding: 4px 8px;
         font-size: 0.8rem;
       }
+    }
+
+    .spacer {
+      display: none;
+    }
+
+    button[mat-icon-button] {
+      order: 2;
+    }
+
+    .date-nav {
+      order: 3;
+      width: 100%;
+      justify-content: center;
     }
 
     .date-nav .date-display {
