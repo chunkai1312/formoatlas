@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional } from 'class-validator';
+import { IsDateString, IsIn, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetSectorFlowDto {
@@ -9,4 +9,13 @@ export class GetSectorFlowDto {
   @IsOptional()
   @IsDateString()
   date?: string;
+
+  @ApiPropertyOptional({
+    description: '市場別（TSE 上市 / OTC 上櫃），預設 TSE',
+    enum: ['TSE', 'OTC'],
+    example: 'OTC',
+  })
+  @IsOptional()
+  @IsIn(['TSE', 'OTC'])
+  market?: 'TSE' | 'OTC';
 }

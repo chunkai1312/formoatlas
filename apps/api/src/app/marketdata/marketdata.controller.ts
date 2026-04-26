@@ -34,9 +34,9 @@ export class MarketDataController {
     });
   }
 
-  @ApiOperation({ summary: '取得 TSE 上市產業資金流向排行' })
+  @ApiOperation({ summary: '取得產業資金流向排行（TSE 上市 / OTC 上櫃）' })
   @Get('sector-flow')
   getSectorFlow(@Query() query: GetSectorFlowDto) {
-    return this.tickerRepository.getSectorFlow({ date: query.date });
+    return this.tickerRepository.getSectorFlow({ date: query.date, market: query.market });
   }
 }

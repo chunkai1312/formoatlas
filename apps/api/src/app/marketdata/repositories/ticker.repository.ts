@@ -72,27 +72,32 @@ export class TickerRepository {
     });
   }
 
-  async getSectorFlow(options?: { date?: string }) {
+  async getSectorFlow(options?: { date?: string; market?: 'TSE' | 'OTC' }) {
     const date = options?.date || DateTime.local().toISODate();
+    const isOTC = options?.market === 'OTC';
+    const marketFilter = isOTC ? Market.OTC : Market.TSE;
+    const benchmarkSymbol = isOTC ? Index.TPEX : Index.TAIEX;
 
-    // 取最近兩個交易日的 TSE 所有產業指數（含 TAIEX 用於 RS 計算）
-    // 排除：非產業複合指數 (IX0007/0008/0009) + 合併類複合指數 (IX0013/0014/0015/0019/0027)
-    const excludedSymbols = [
-      Index.NonFinance,                        // IX0007 未含金融指數
-      Index.NonElectronics,                    // IX0008 未含電子指數
-      Index.NonFinanceNonElectronics,          // IX0009 未含金融電子指數
-      Index.CementAndCeramic,                  // IX0013 水泥窯製類指數（水泥+玻璃陶瓷合併）
-      Index.PlasticAndChemical,                // IX0014 塑膠化工類指數（塑膠+化學合併）
-      Index.Electrical,                        // IX0015 機電類指數（電機機械+電器電纜合併）
-      Index.ChemicalBiotechnologyAndMedicalCare, // IX0019 化學生技醫療類指數（化學+生技合併）
-      Index.Electronics,                       // IX0027 電子工業類指數（所有電子子類合併）
-    ];
+    const excludedSymbols = isOTC
+      ? [
+          Index.TPExElectronic, // IX0047 電子子類聚合
+        ]
+      : [
+          Index.NonFinance,                          // IX0007 未含金融指數
+          Index.NonElectronics,                      // IX0008 未含電子指數
+          Index.NonFinanceNonElectronics,            // IX0009 未含金融電子指數
+          Index.CementAndCeramic,                    // IX0013 水泥窯製類指數
+          Index.PlasticAndChemical,                  // IX0014 塑膠化工類指數
+          Index.Electrical,                          // IX0015 機電類指數
+          Index.ChemicalBiotechnologyAndMedicalCare, // IX0019 化學生技醫療類指數
+          Index.Electronics,                         // IX0027 電子工業類指數
+        ];
 
     const results = await this.model.aggregate([
       { $match: {
           date: { $lte: date },
           type: TickerType.Index,
-          market: Market.TSE,
+          market: marketFilter,
           symbol: { $nin: excludedSymbols },
         },
       },
@@ -105,10 +110,10 @@ export class TickerRepository {
     if (!results.length) return [];
 
     const [tickers, tickersPrev] = results.map(doc => doc.data);
-    const taiex = tickers?.find((doc: any) => doc.symbol === Index.TAIEX);
+    const benchmark = tickers?.find((doc: any) => doc.symbol === benchmarkSymbol);
 
     return tickers
-      .filter((doc: any) => doc.symbol !== Index.TAIEX)
+      .filter((doc: any) => doc.symbol !== benchmarkSymbol)
       .map((doc: any) => {
         const prev = _.find(tickersPrev, { symbol: doc.symbol });
         const tradeValuePrev = prev?.tradeValue ?? 0;
@@ -126,7 +131,7 @@ export class TickerRepository {
           tradeWeight: doc.tradeWeight,
           tradeWeightPrev,
           tradeWeightChange: parseFloat((doc.tradeWeight - tradeWeightPrev).toPrecision(12)),
-          rs: taiex?.closePrice ? parseFloat((doc.closePrice / taiex.closePrice).toFixed(4)) : null,
+          rs: benchmark?.closePrice ? parseFloat((doc.closePrice / benchmark.closePrice).toFixed(4)) : null,
         };
       });
   }
