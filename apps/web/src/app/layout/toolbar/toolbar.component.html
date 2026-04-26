@@ -16,21 +16,24 @@
       <mat-icon>chevron_left</mat-icon>
     </button>
 
-    <!-- 日期顯示 + 點擊開啟 datepicker -->
-    <button class="date-display" (click)="picker.open()" mat-button>
-      <mat-icon class="cal-icon">calendar_today</mat-icon>
-      <span>{{ selectedDateStr() }}</span>
+    <div class="date-picker-trigger">
+      <button class="date-display" type="button" (click)="picker.open()" mat-button>
+        <mat-icon class="cal-icon">calendar_today</mat-icon>
+        <span>{{ selectedDateStr() }}</span>
+      </button>
 
-      <!-- 隱藏的 datepicker 輸入 -->
       <input
+        class="datepicker-anchor"
         [matDatepicker]="picker"
         [value]="selectedDateObj()"
         [max]="maxDate"
         (dateChange)="onDatePickerChange($event.value)"
-        style="display:none"
+        readonly
+        tabindex="-1"
+        aria-hidden="true"
       />
-      <mat-datepicker #picker></mat-datepicker>
-    </button>
+      <mat-datepicker #picker xPosition="end"></mat-datepicker>
+    </div>
 
     <button
       mat-icon-button
