@@ -1,8 +1,4 @@
-## Purpose
-
-定義應用程式 TopBar 導覽連結、active 狀態呈現，以及主要頁面 route 的功能需求，確保使用者能在大盤籌碼、資金流向與熱門個股頁面之間切換。
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: TopBar navigation links
 應用程式 TopBar SHALL 顯示 `FormoAtlas` 產品名稱，LOGO accessibility text SHALL 使用 FormoAtlas identity，並顯示「大盤籌碼」、「資金流向」與「熱門個股」三個導覽連結，以填色 pill 樣式呈現 active 狀態。
@@ -35,17 +31,3 @@
 #### Scenario: Logo accessibility text
 - **WHEN** a screen reader encounters the TopBar logo
 - **THEN** the logo image SHALL expose `FormoAtlas logo` as its alternative text
-
-### Requirement: Sector flow page route
-應用程式 SHALL 在 `/sector-flow` 路徑提供資金流向頁面，以 lazy-load 方式載入 `SectorFlowComponent`。
-
-#### Scenario: Navigate to sector-flow
-- **WHEN** user navigates to `/sector-flow`
-- **THEN** `SectorFlowComponent` 成功載入並渲染
-
-### Requirement: Hot stocks page route
-應用程式 SHALL 在 `/hot-stocks` 路徑提供熱門個股頁面，以 lazy-load 方式載入熱門個股頁面 component。
-
-#### Scenario: Navigate to hot-stocks
-- **WHEN** user navigates to `/hot-stocks`
-- **THEN** 熱門個股頁面 component 成功載入並渲染
