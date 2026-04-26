@@ -17,9 +17,9 @@ export class TickerService {
     });
   }
 
-  getSectorFlow(date: string): Observable<SectorFlowSnapshot[]> {
-    return this.http.get<SectorFlowSnapshot[]>(this.sectorFlowUrl, {
-      params: { date },
-    });
+  getSectorFlow(date: string, market?: 'TSE' | 'OTC'): Observable<SectorFlowSnapshot[]> {
+    const params: Record<string, string> = { date };
+    if (market) params['market'] = market;
+    return this.http.get<SectorFlowSnapshot[]>(this.sectorFlowUrl, { params });
   }
 }

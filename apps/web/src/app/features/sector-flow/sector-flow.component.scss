@@ -4,6 +4,35 @@
   gap: 24px;
 }
 
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  padding: 6px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--color-accent, #6366f1);
+  }
+}
+
 .section {
   .section-title {
     font-size: 1rem;

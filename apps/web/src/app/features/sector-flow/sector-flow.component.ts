@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, viewChild } from '@angular/core';
+import { Component, inject, OnInit, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { TickerService } from '../../core/services/ticker.service';
@@ -7,7 +7,7 @@ import { SectorRankingTableComponent } from './components/sector-ranking-table/s
 import { SectorFlowChartsComponent } from './components/sector-flow-charts/sector-flow-charts.component';
 import { KlineChartComponent } from '../dashboard/components/kline-chart/kline-chart.component';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, catchError, of } from 'rxjs';
+import { switchMap, catchError, of, combineLatest } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -33,14 +33,23 @@ export class SectorFlowComponent implements OnInit {
   readonly selectedSymbol = this.state.selectedSymbol;
   readonly klineSymbol = this.state.klineSymbol;
 
+  setMarket(market: 'TSE' | 'OTC') {
+    this.state.activeMarket.set(market);
+  }
+
   onKlineSymbolChange(value: string) {
     this.state.klineSymbol.set(value);
   }
 
   constructor() {
-    toObservable(this.dashState.endDate)
+    combineLatest([
+      toObservable(this.dashState.endDate),
+      toObservable(this.state.activeMarket),
+    ])
       .pipe(
-        switchMap(date => this.tickerService.getSectorFlow(date).pipe(catchError(() => of([])))),
+        switchMap(([date, market]) =>
+          this.tickerService.getSectorFlow(date, market).pipe(catchError(() => of([])))
+        ),
         takeUntilDestroyed(),
       )
       .subscribe(rows => {

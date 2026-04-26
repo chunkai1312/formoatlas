@@ -47,6 +47,7 @@ export class SectorFlowChartsComponent implements OnDestroy {
     const taiex = this.filteredTaiex();
     const sector = this.filteredSector();
     const sectorName = this.state.selectedName();
+    const benchmarkName = this.state.benchmarkName();
     if (!taiex.length || !sector.length) return null;
 
     const dates = taiex.map(d => d.date);
@@ -82,12 +83,12 @@ export class SectorFlowChartsComponent implements OnDestroy {
         { type: 'category', data: dates, gridIndex: 1, boundaryGap: false, axisLabel: { fontSize: 11, formatter: (v: string) => v.substring(5), rotate: 30 } },
       ],
       yAxis: [
-        { type: 'value', gridIndex: 0, name: '加權指數', scale: true, nameTextStyle: { fontSize: 11 }, axisLabel: { fontSize: 11, formatter: (v: number) => v.toLocaleString() }, splitLine: { lineStyle: { opacity: 0.3 } } },
+        { type: 'value', gridIndex: 0, name: benchmarkName, scale: true, nameTextStyle: { fontSize: 11 }, axisLabel: { fontSize: 11, formatter: (v: number) => v.toLocaleString() }, splitLine: { lineStyle: { opacity: 0.3 } } },
         { type: 'value', gridIndex: 0, name: sectorName, scale: true, nameTextStyle: { fontSize: 11 }, position: 'right', axisLabel: { fontSize: 11, formatter: (v: number) => v.toLocaleString() }, splitLine: { show: false } },
         { type: 'value', gridIndex: 1, scale: true, position: 'right', minInterval: 0.5, splitNumber: 3, axisLabel: { fontSize: 10, formatter: (v: number) => v.toFixed(2) + '%' }, splitLine: { lineStyle: { opacity: 0.3 } } },
       ],
       series: [
-        { name: '加權指數', type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: taiexPrices, smooth: false, symbol: 'none', lineStyle: { color: '#60A5FA', width: 1.5 }, itemStyle: { color: '#60A5FA' } },
+        { name: benchmarkName, type: 'line', xAxisIndex: 0, yAxisIndex: 0, data: taiexPrices, smooth: false, symbol: 'none', lineStyle: { color: '#60A5FA', width: 1.5 }, itemStyle: { color: '#60A5FA' } },
         { name: sectorName, type: 'line', xAxisIndex: 0, yAxisIndex: 1, data: sectorPrices, smooth: false, symbol: 'none', lineStyle: { color: '#F472B6', width: 1.5 }, itemStyle: { color: '#F472B6' } },
         { name: '成交比重%', type: 'line', xAxisIndex: 1, yAxisIndex: 2, data: sectorWeights, smooth: false, symbol: 'none', lineStyle: { color: '#34D399', width: 1.5 }, itemStyle: { color: '#34D399' }, areaStyle: { opacity: 0.1 } },
       ],
@@ -98,13 +99,14 @@ export class SectorFlowChartsComponent implements OnDestroy {
     combineLatest([
       toObservable(this.dashState.endDate),
       toObservable(this.state.selectedSymbol),
+      toObservable(this.state.benchmarkSymbol),
     ])
       .pipe(
-        switchMap(([end, sym]) => {
+        switchMap(([end, sym, benchmark]) => {
           if (!sym) return of([[], []] as [TickerOhlc[], TickerOhlc[]]);
           const start = DateTime.fromISO(end).minus({ months: 6 }).toISODate() ?? '';
           return combineLatest([
-            this.tickerService.getTicker('IX0001', start, end).pipe(catchError(() => of([] as TickerOhlc[]))),
+            this.tickerService.getTicker(benchmark, start, end).pipe(catchError(() => of([] as TickerOhlc[]))),
             this.tickerService.getTicker(sym, start, end).pipe(catchError(() => of([] as TickerOhlc[]))),
           ]);
         }),

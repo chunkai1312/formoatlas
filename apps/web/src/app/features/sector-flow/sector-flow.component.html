@@ -1,4 +1,10 @@
 <div class="sector-flow">
+  <!-- Market Tab -->
+  <div class="tab-bar">
+    <button class="tab-btn" [class.active]="state.activeMarket() === 'TSE'" (click)="setMarket('TSE')">上市</button>
+    <button class="tab-btn" [class.active]="state.activeMarket() === 'OTC'" (click)="setMarket('OTC')">上櫃</button>
+  </div>
+
   <!-- Section 1: 排行表 -->
   <section class="section">
     <div class="section-title">產業資金流向</div>
