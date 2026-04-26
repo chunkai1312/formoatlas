@@ -1,8 +1,4 @@
-## Purpose
-
-定義應用程式 TopBar 導覽連結、active 狀態呈現，以及主要頁面 route 的功能需求，確保使用者能在大盤籌碼、資金流向與熱門個股頁面之間切換。
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: TopBar navigation links
 應用程式 TopBar SHALL 顯示「大盤籌碼」、「資金流向」與「熱門個股」三個導覽連結，以填色 pill 樣式呈現 active 狀態。
@@ -36,6 +32,8 @@
 #### Scenario: Navigate to sector-flow
 - **WHEN** user navigates to `/sector-flow`
 - **THEN** `SectorFlowComponent` 成功載入並渲染
+
+## ADDED Requirements
 
 ### Requirement: Hot stocks page route
 應用程式 SHALL 在 `/hot-stocks` 路徑提供熱門個股頁面，以 lazy-load 方式載入熱門個股頁面 component。
