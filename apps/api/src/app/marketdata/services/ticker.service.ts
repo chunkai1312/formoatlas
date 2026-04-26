@@ -6,6 +6,7 @@ import { TwStock } from 'node-twstock';
 import { InjectTwStock } from 'nest-twstock';
 import { TickerType, Exchange, Market, Index } from '../enums';
 import { TickerRepository } from '../repositories/ticker.repository';
+import { isOtcWarrant } from '../utils';
 
 @Injectable()
 export class TickerService {
@@ -182,7 +183,9 @@ export class TickerService {
   @Cron('0 0 15-21/2 * * *')
   async updateTpexEquitiesQuotes(date: string = DateTime.local().toISODate()) {
     const updated = await this.twstock.stocks.historical({ date, exchange: 'TPEx' })
-      .then((data: any) => data && data.map(ticker => ({
+      .then((data: any) => data && data
+        .filter(ticker => !isOtcWarrant(ticker.symbol))
+        .map(ticker => ({
         date: ticker.date,
         type: TickerType.Equity,
         exchange: Exchange.TPEx,
@@ -234,7 +237,7 @@ export class TickerService {
   @Cron('0 30 16 * * *')
   async updateTpexEquitiesInstInvestorsTrades(date: string = DateTime.local().toISODate()) {
     const updated = await this.twstock.stocks.institutional({ date, exchange: 'TPEx' })
-      .then((data: any) => data && data.map(ticker => {
+      .then((data: any) => data && data.filter(ticker => !isOtcWarrant(ticker.symbol)).map(ticker => {
         const finiRows = ticker.institutional.filter(row => ['外資及陸資(不含外資自營商)', '外資自營商'].includes(row.investor));
         const sitcRows = ticker.institutional.filter(row => ['投信'].includes(row.investor));
         const dealersRows = ticker.institutional.filter(row => ['自營商(自行買賣)', '自營商(避險)'].includes(row.investor));
