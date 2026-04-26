@@ -3,7 +3,7 @@
 - [x] 1.1 `GetSectorFlowDto` 新增 `market?: 'TSE' | 'OTC'` 選填欄位（`@IsOptional()`、`@IsIn(['TSE','OTC'])`）
 - [x] 1.2 `ticker.repository.ts` `getSectorFlow()` 依 `market` 參數切換 `Market.TSE` / `Market.OTC` 查詢
 - [x] 1.3 OTC 模式排除 `Index.TPEX`（IX0043）及 `Index.TPExElectronic`（IX0047）
-- [ ] 1.4 手動驗證：`GET /marketdata/sector-flow?date=2026-03-13&market=OTC` 回傳 23 筆，名稱已清理
+- [x] 1.4 手動驗證：`GET /marketdata/sector-flow?date=2026-03-13&market=OTC` 回傳 23 筆，名稱已清理
 
 ## 2. 前端 State — 擴展 SectorFlowStateService
 

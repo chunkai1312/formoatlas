@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+定義產業資金流向頁在上市／上櫃市場切換、排行表、資金流向明細圖、產業 K 線圖與跨元件狀態共享上的功能需求。
+
+## Requirements
 
 ### Requirement: Sector ranking table
 產業資金流向頁面（Section 1：「產業資金流向」）SHALL 顯示 TSE 所有上市產業的資金流向排行表，欄位包含：產業 | 指數 | 漲跌 | 漲跌幅% | 漲跌幅圖 | 成交金額(億) | 昨日金額(億) | 金額差(億) | 比重% | 昨日比重% | 比重差。
@@ -30,6 +34,25 @@
 - **WHEN** a sector's `change < 0`
 - **THEN** 指數欄位顯示綠色
 
+### Requirement: Market switcher tab (上市 / 上櫃)
+資金流向頁面頂部 SHALL 顯示「上市」/ 「上櫃」兩個 Tab，切換後排行表、資金流向明細圖、K 線圖三個 section 聯動更新，顯示對應市場的資料。
+
+- 初始狀態：「上市（TSE）」Tab 為 active
+- Tab 切換後：重新載入對應市場資料，並自動選取 `changePercent` 最高的產業（重置 `selectedSymbol`、`selectedName`、`klineSymbol`）
+- Tab UI 採 CSS class `active` 切換，不依賴 Angular Material Tabs
+
+#### Scenario: Initial state
+- **WHEN** user navigates to `/sector-flow`
+- **THEN** 「上市」Tab 為 active，排行表顯示 TSE 產業
+
+#### Scenario: Switch to OTC tab
+- **WHEN** user clicks 「上櫃」Tab
+- **THEN** 排行表更新為 OTC 23 個產業，Section 2 資金流向圖及 Section 3 K 線圖更新為 `changePercent` 最高的 OTC 產業
+
+#### Scenario: Switch back to TSE tab
+- **WHEN** user clicks 「上市」Tab after viewing OTC
+- **THEN** 排行表恢復 TSE 產業，Section 2 與 Section 3 更新為 `changePercent` 最高的 TSE 產業
+
 ### Requirement: Sector money flow chart (上下雙子圖)
 Section 2「產業類股趨勢」SHALL 直接（無 tab）以 eCharts 上下雙子圖呈現選取產業的資金流向趨勢，卡片標頭含產業下拉選單與時間範圍按鈕（1M / 3M / 6M）：
 - 上半圖（雙 Y 軸折線圖）：左 Y 軸為加權指數（IX0001）收盤點數，右 Y 軸為選取產業指數收盤點數；兩條折線共用 X 軸與 tooltip 垂直指示線
@@ -51,6 +74,19 @@ Section 2「產業類股趨勢」SHALL 直接（無 tab）以 eCharts 上下雙�
 #### Scenario: Tooltip sync between sub-charts
 - **WHEN** user hovers over a date on upper chart
 - **THEN** lower chart 同步顯示同一日期的成交比重數值，且日期標頭只呈現一次
+
+### Requirement: Dynamic benchmark index in money flow chart
+Section 2 資金流向明細圖（上下雙子圖）SHALL 依當前 `activeMarket` 動態切換基準指數：
+- `activeMarket === 'TSE'`：基準指數為 `IX0001`（加權指數），左 Y 軸標籤顯示「加權指數」
+- `activeMarket === 'OTC'`：基準指數為 `IX0043`（櫃買指數），左 Y 軸標籤顯示「櫃買指數」
+
+#### Scenario: TSE mode benchmark
+- **WHEN** `activeMarket` is `TSE` and user views money flow chart
+- **THEN** upper chart left series uses `IX0001` data with label「加權指數」
+
+#### Scenario: OTC mode benchmark
+- **WHEN** `activeMarket` is `OTC` and user views money flow chart
+- **THEN** upper chart left series uses `IX0043` data with label「櫃買指數」
 
 ### Requirement: Sector K-line chart（產業類股走勢）
 Section 3「產業類股走勢」SHALL 以現有 `KlineChartComponent` 顯示選取產業的 K 線走勢，功能與大盤籌碼頁的 K 線圖相同：日K / 週K 切換、時間範圍選擇（1M / 3M / 6M / 1Y / 2Y）、MA 均線、成交量柱。
