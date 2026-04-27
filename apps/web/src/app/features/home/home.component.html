@@ -152,4 +152,39 @@
       <a class="panel-link" routerLink="/hot-stocks">查看熱門個股</a>
     </article>
   </section>
+
+  <section class="market-map-section" aria-label="市場熱力圖">
+    <div class="section-header">
+      <h2>市場熱力圖</h2>
+      <p>矩形大小＝市值，顏色＝漲跌幅。</p>
+      <div class="market-tabs" role="tablist">
+        <button
+          role="tab"
+          class="tab-btn"
+          [class.active]="marketMapMarket() === 'TSE'"
+          (click)="marketMapMarket.set('TSE')"
+        >上市</button>
+        <button
+          role="tab"
+          class="tab-btn"
+          [class.active]="marketMapMarket() === 'OTC'"
+          (click)="marketMapMarket.set('OTC')"
+        >上櫃</button>
+      </div>
+    </div>
+
+    @if (marketMapMarket() === 'TSE') {
+      <app-market-map
+        [data]="marketMap()"
+        [loading]="loading().marketMap"
+        [error]="errors().marketMap"
+      />
+    } @else {
+      <app-market-map
+        [data]="marketMapOtc()"
+        [loading]="loading().marketMapOtc"
+        [error]="errors().marketMapOtc"
+      />
+    }
+  </section>
 </div>

@@ -7,6 +7,7 @@ import { Subject, catchError, of, switchMap, takeUntil } from 'rxjs';
 
 import { BarometerResult } from '../../core/models/barometer.model';
 import { HotStockRankRow, HotStocksResponse } from '../../core/models/hot-stocks.model';
+import { MarketMapResponse } from '../../core/models/market-map.model';
 import { MarketStats } from '../../core/models/market-stats.model';
 import { SectorFlowSnapshot } from '../../core/models/sector-flow-snapshot.model';
 import { BarometerService } from '../../core/services/barometer.service';
@@ -14,13 +15,14 @@ import { DashboardStateService } from '../../core/services/dashboard-state.servi
 import { MarketStatsService } from '../../core/services/market-stats.service';
 import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
 import { TickerService } from '../../core/services/ticker.service';
+import { MarketMapComponent } from './market-map/market-map.component';
 
-type PanelKey = 'barometer' | 'marketStats' | 'sectorFlow' | 'hotStocks';
+type PanelKey = 'barometer' | 'marketStats' | 'sectorFlow' | 'hotStocks' | 'marketMap' | 'marketMapOtc';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, MarketMapComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -38,18 +40,25 @@ export class HomeComponent implements OnDestroy {
   readonly marketStats = signal<MarketStats | null>(null);
   readonly sectorFlow = signal<SectorFlowSnapshot[]>([]);
   readonly hotStocks = signal<HotStocksResponse | null>(null);
+  readonly marketMap = signal<MarketMapResponse | null>(null);
+  readonly marketMapOtc = signal<MarketMapResponse | null>(null);
+  readonly marketMapMarket = signal<'TSE' | 'OTC'>('TSE');
 
   readonly loading = signal<Record<PanelKey, boolean>>({
     barometer: false,
     marketStats: false,
     sectorFlow: false,
     hotStocks: false,
+    marketMap: false,
+    marketMapOtc: false,
   });
   readonly errors = signal<Record<PanelKey, string | null>>({
     barometer: null,
     marketStats: null,
     sectorFlow: null,
     hotStocks: null,
+    marketMap: null,
+    marketMapOtc: null,
   });
 
   readonly topSectors = computed(() =>
@@ -104,6 +113,8 @@ export class HomeComponent implements OnDestroy {
     this.loadMarketStats();
     this.loadSectorFlow();
     this.loadHotStocks();
+    this.loadMarketMap('TSE');
+    this.loadMarketMap('OTC');
   }
 
   ngOnDestroy() {
@@ -145,7 +156,7 @@ export class HomeComponent implements OnDestroy {
 
   private anyLoading(): boolean {
     const loading = this.loading();
-    return loading.barometer || loading.marketStats || loading.sectorFlow || loading.hotStocks;
+    return loading.barometer || loading.marketStats || loading.sectorFlow || loading.hotStocks || loading.marketMap;
   }
 
   private loadBarometer() {
@@ -237,6 +248,32 @@ export class HomeComponent implements OnDestroy {
       .subscribe((result) => {
         this.hotStocks.set(result);
         this.setLoading('hotStocks', false);
+      });
+  }
+
+  private loadMarketMap(market: 'TSE' | 'OTC') {
+    const key: PanelKey = market === 'OTC' ? 'marketMapOtc' : 'marketMap';
+    const dataSignal = market === 'OTC' ? this.marketMapOtc : this.marketMap;
+
+    toObservable(this.selectedDate)
+      .pipe(
+        switchMap((date) => {
+          this.setLoading(key, true);
+          this.setError(key, null);
+          dataSignal.set(null);
+
+          return this.tickerService.getMarketMap(date, market).pipe(
+            catchError((err: HttpErrorResponse) => {
+              this.setError(key, this.errorMessage(err));
+              return of(null);
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((result) => {
+        dataSignal.set(result);
+        this.setLoading(key, false);
       });
   }
 
