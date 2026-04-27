@@ -21,7 +21,15 @@
               <tr>
                 <td class="col-rank">{{ i + 1 }}</td>
                 <td class="col-symbol">{{ row.symbol }}</td>
-                <td class="col-name">{{ row.name }}</td>
+                <td class="col-name">
+                  {{ row.name }}
+                  @if (badgeText(row); as badge) {
+                    <span [class]="badgeClass(row)">{{ badge }}</span>
+                  }
+                  @if (secondaryBadgeText(row); as secBadge) {
+                    <span [class]="secondaryBadgeClass(row)">{{ secBadge }}</span>
+                  }
+                </td>
                 <td class="col-num" [class.positive]="row.change > 0" [class.negative]="row.change < 0">
                   {{ fmtPrice(row.closePrice) }}
                 </td>

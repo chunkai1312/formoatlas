@@ -49,16 +49,22 @@
     <div class="rank-grid">
       <app-hot-stock-ranking-table
         title="外資買超"
-        metricLabel="外資買賣超(張)"
+        metricLabel="買賣超(張)"
         metricKey="finiNet"
         metricKind="net"
+        consecutiveDaysKey="finiConsecutiveDays"
+        secondaryNetKey="sitcNet"
+        secondaryLabel="投信"
         [rows]="data().institutional.finiBuy"
       ></app-hot-stock-ranking-table>
       <app-hot-stock-ranking-table
         title="外資賣超"
-        metricLabel="外資買賣超(張)"
+        metricLabel="買賣超(張)"
         metricKey="finiNet"
         metricKind="net"
+        consecutiveDaysKey="finiConsecutiveDays"
+        secondaryNetKey="sitcNet"
+        secondaryLabel="投信"
         [rows]="data().institutional.finiSell"
       ></app-hot-stock-ranking-table>
     </div>
@@ -69,16 +75,22 @@
     <div class="rank-grid">
       <app-hot-stock-ranking-table
         title="投信買超"
-        metricLabel="投信買賣超(張)"
+        metricLabel="買賣超(張)"
         metricKey="sitcNet"
         metricKind="net"
+        consecutiveDaysKey="sitcConsecutiveDays"
+        secondaryNetKey="finiNet"
+        secondaryLabel="外資"
         [rows]="data().institutional.sitcBuy"
       ></app-hot-stock-ranking-table>
       <app-hot-stock-ranking-table
         title="投信賣超"
-        metricLabel="投信買賣超(張)"
+        metricLabel="買賣超(張)"
         metricKey="sitcNet"
         metricKind="net"
+        consecutiveDaysKey="sitcConsecutiveDays"
+        secondaryNetKey="finiNet"
+        secondaryLabel="外資"
         [rows]="data().institutional.sitcSell"
       ></app-hot-stock-ranking-table>
     </div>

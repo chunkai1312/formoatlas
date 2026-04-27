@@ -5,6 +5,8 @@ import { HotStockRankRow } from '../../../../core/models/hot-stocks.model';
 
 type MetricKey = 'tradeVolume' | 'tradeValue' | 'finiNet' | 'sitcNet' | 'changePercent';
 type MetricKind = 'volume' | 'value' | 'net' | 'percent';
+type ConsecutiveDaysKey = 'finiConsecutiveDays' | 'sitcConsecutiveDays';
+type SecondaryNetKey = 'finiNet' | 'sitcNet';
 
 @Component({
   selector: 'app-hot-stock-ranking-table',
@@ -19,6 +21,9 @@ export class HotStockRankingTableComponent {
   readonly metricLabel = input.required<string>();
   readonly metricKey = input.required<MetricKey>();
   readonly metricKind = input<MetricKind>('net');
+  readonly consecutiveDaysKey = input<ConsecutiveDaysKey | null>(null);
+  readonly secondaryNetKey = input<SecondaryNetKey | null>(null);
+  readonly secondaryLabel = input<string | null>(null);
 
   metricValue(row: HotStockRankRow): number | null {
     return row[this.metricKey()] ?? null;
@@ -30,6 +35,42 @@ export class HotStockRankingTableComponent {
       positive: value !== null && value > 0,
       negative: value !== null && value < 0,
     };
+  }
+
+  badgeText(row: HotStockRankRow): string | null {
+    const key = this.consecutiveDaysKey();
+    if (!key) return null;
+    const days = row[key];
+    if (days === null || days === undefined || days === 0) return null;
+    if (days >= 2) return `連${days}買`;
+    if (days <= -2) return `連${Math.abs(days)}賣`;
+    return null;
+  }
+
+  badgeClass(row: HotStockRankRow): string | null {
+    const key = this.consecutiveDaysKey();
+    if (!key) return null;
+    const days = row[key];
+    if (days === null || days === undefined || days === 0) return null;
+    if (days >= 2) return 'badge badge--buy';
+    if (days <= -2) return 'badge badge--sell';
+    return null;
+  }
+
+  secondaryBadgeText(row: HotStockRankRow): string | null {
+    const key = this.secondaryNetKey();
+    const label = this.secondaryLabel();
+    if (!key || !label) return null;
+    const primaryVal = row[this.metricKey() as SecondaryNetKey] ?? 0;
+    const secondaryVal = row[key] ?? 0;
+    if (primaryVal > 0 && secondaryVal > 0) return `${label}買`;
+    if (primaryVal < 0 && secondaryVal < 0) return `${label}賣`;
+    return null;
+  }
+
+  secondaryBadgeClass(row: HotStockRankRow): string {
+    const primaryVal = row[this.metricKey() as SecondaryNetKey] ?? 0;
+    return primaryVal > 0 ? 'badge badge--buy-secondary' : 'badge badge--sell-secondary';
   }
 
   fmtPrice(value: number) {

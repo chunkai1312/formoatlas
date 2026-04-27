@@ -76,6 +76,43 @@
   }
 }
 
+.badge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+  line-height: 1.4;
+
+  &--buy {
+    border: 1px solid var(--color-positive);
+    color: var(--color-positive);
+    background-color: transparent;
+  }
+
+  &--buy-secondary {
+    border: 1px solid color-mix(in srgb, var(--color-positive) 60%, transparent);
+    color: color-mix(in srgb, var(--color-positive) 70%, transparent);
+    background-color: transparent;
+    font-size: 0.65rem;
+  }
+
+  &--sell {
+    border: 1px solid var(--color-negative);
+    color: var(--color-negative);
+    background-color: transparent;
+  }
+
+  &--sell-secondary {
+    border: 1px solid color-mix(in srgb, var(--color-negative) 60%, transparent);
+    color: color-mix(in srgb, var(--color-negative) 70%, transparent);
+    background-color: transparent;
+    font-size: 0.65rem;
+  }
+}
+
 .empty-state {
   display: grid;
   place-items: center;
