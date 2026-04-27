@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { DateTime } from 'luxon';
 import { MarketDataModule } from './marketdata/marketdata.module';
 import { BarometerModule } from './barometer/barometer.module';
+import { MarketResearchAgentModule } from './agent/market-research-agent.module';
 import { MarketStatsService } from './marketdata/services/market-stats.service';
 import { TickerService } from './marketdata/services/ticker.service';
 
@@ -20,6 +21,7 @@ import { TickerService } from './marketdata/services/ticker.service';
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
     MarketDataModule,
     BarometerModule,
+    MarketResearchAgentModule,
   ]
 })
 export class AppModule implements OnApplicationBootstrap {
