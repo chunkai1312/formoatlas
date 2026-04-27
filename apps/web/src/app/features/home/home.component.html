@@ -1,0 +1,155 @@
+<div class="home-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">每日市場地圖</p>
+      <h1>{{ selectedDate() }} 市場快照</h1>
+      <p class="summary">彙整大盤溫度、資金移動與個股焦點。</p>
+    </div>
+  </section>
+
+  <section class="snapshot-summary" aria-label="今日市場摘要">
+    <span class="summary-label">今日市場摘要</span>
+    <div>
+      <strong>{{ marketTone() }}</strong>
+      <p>{{ marketSummary() }}</p>
+    </div>
+  </section>
+
+  <section class="snapshot-grid" aria-label="每日市場快照">
+    <article class="snapshot-panel">
+      <div class="panel-header">
+        <div>
+          <h2>大盤氣候</h2>
+          <p>市場溫度與整體狀態。</p>
+        </div>
+      </div>
+
+      @if (loading().barometer || loading().marketStats) {
+        <div class="state">載入大盤氣候中...</div>
+      } @else if (barometer() || marketStats()) {
+        <div class="market-climate">
+          @if (barometer(); as data) {
+            <div class="weather-metric">
+              <span class="weather">{{ data.weather }}</span>
+              <strong>{{ data.label }}</strong>
+            </div>
+          }
+
+          @if (marketStats(); as stats) {
+            <div class="market-stats">
+              <div class="stat-block">
+                <span class="metric-caption">加權指數</span>
+                <div class="taiex-row">
+                  <strong
+                    class="taiex-price"
+                    [class.negative]="stats.taiexChange < 0"
+                  >
+                    {{ formatIndex(stats.taiexPrice) }}
+                  </strong>
+                  <span
+                    class="metric-change"
+                    [class.negative]="stats.taiexChange < 0"
+                  >
+                    {{ formatIndexChange(stats.taiexChange) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="stat-block">
+                <span class="metric-caption">成交金額</span>
+                <strong class="trade-value">
+                  {{ formatTradeValue(stats.taiexTradeValue) }} 億
+                </strong>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (errors().barometer || errors().marketStats) {
+        <div class="state warning">
+          {{ errors().barometer || errors().marketStats }}
+        </div>
+      } @else {
+        <div class="state">此日期尚無大盤氣候資料。</div>
+      }
+      <a class="panel-link" routerLink="/market-overview">查看大盤總覽</a>
+    </article>
+
+    <article class="snapshot-panel">
+      <div class="panel-header">
+        <div>
+          <h2>資金移動</h2>
+          <p>產業成交比重與變化。</p>
+        </div>
+      </div>
+
+      @if (loading().sectorFlow) {
+        <div class="state">載入資金流向中...</div>
+      } @else if (errors().sectorFlow) {
+        <div class="state warning">{{ errors().sectorFlow }}</div>
+      } @else if (topSectors().length) {
+        <div class="snapshot-table">
+          <div class="snapshot-table-head" aria-hidden="true">
+            <span>產業</span>
+            <span>成交比重</span>
+            <span>變化</span>
+          </div>
+          @for (sector of topSectors(); track sector.symbol) {
+            <div class="snapshot-table-row">
+              <span>{{ sector.name }}</span>
+              <strong>{{ formatUnsignedPercent(sector.tradeWeight) }}</strong>
+              <strong
+                class="table-change"
+                [class.negative]="sector.tradeWeightChange < 0"
+              >
+                {{ formatSignedPercent(sector.tradeWeightChange) }}
+              </strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="state">此日期尚無類股資金流資料。</div>
+      }
+
+      <a class="panel-link" routerLink="/sector-flow">查看資金流向</a>
+    </article>
+
+    <article class="snapshot-panel">
+      <div class="panel-header">
+        <div>
+          <h2>個股焦點</h2>
+          <p>成交值排行與漲跌幅。</p>
+        </div>
+      </div>
+
+      @if (loading().hotStocks) {
+        <div class="state">載入熱門個股中...</div>
+      } @else if (errors().hotStocks) {
+        <div class="state warning">{{ errors().hotStocks }}</div>
+      } @else if (focusStocks().length) {
+        <div class="snapshot-table">
+          <div class="snapshot-table-head" aria-hidden="true">
+            <span>個股</span>
+            <span>成交值</span>
+            <span>漲跌幅</span>
+          </div>
+          @for (stock of focusStocks(); track stock.symbol) {
+            <div class="snapshot-table-row">
+              <span>{{ stock.name }} <small>{{ stock.symbol }}</small></span>
+              <strong>{{ formatTradeValue(stock.tradeValue) }} 億</strong>
+              <strong
+                class="table-change"
+                [class.negative]="stock.changePercent < 0"
+              >
+                {{ formatPercent(stock.changePercent) }}
+              </strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="state">此日期尚無熱門個股資料。</div>
+      }
+
+      <a class="panel-link" routerLink="/hot-stocks">查看熱門個股</a>
+    </article>
+  </section>
+</div>

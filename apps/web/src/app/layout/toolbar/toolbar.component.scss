@@ -8,17 +8,30 @@
   gap: 8px;
   padding: 0 16px;
 
-  .logo {
-    width: 24px;
-    height: 24px;
+  .brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
     flex-shrink: 0;
-  }
 
-  .title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
+    .logo {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 
   .nav-links {
@@ -135,11 +148,11 @@
     gap: 4px;
     row-gap: 6px;
 
-    .title {
+    .brand-link .title {
       display: none;
     }
 
-    .logo {
+    .brand-link {
       order: 0;
     }
 

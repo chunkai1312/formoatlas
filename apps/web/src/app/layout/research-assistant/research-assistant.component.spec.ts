@@ -48,7 +48,7 @@ describe('ResearchAssistantComponent', () => {
     }).compileComponents();
 
     contextService = TestBed.inject(ResearchAssistantContextService);
-    contextService.setContext({ route: 'dashboard', market: 'TSE' });
+    contextService.setContext({ route: 'market-overview', market: 'TSE' });
     fixture = TestBed.createComponent(ResearchAssistantComponent);
     fixture.detectChanges();
   });
@@ -62,7 +62,7 @@ describe('ResearchAssistantComponent', () => {
     expect(agentService.queryStream).toHaveBeenCalledWith({
       question: '今天偏多的證據？',
       date: '2026-04-24',
-      context: { route: 'dashboard', market: 'TSE' },
+      context: { route: 'market-overview', market: 'TSE' },
     });
     expect(component.answer()?.summary).toBe('今日偏多。');
     expect(component.progressEvents()[0]).toMatchObject({ type: 'status' });

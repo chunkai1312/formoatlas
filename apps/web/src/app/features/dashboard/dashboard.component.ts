@@ -52,7 +52,7 @@ export class DashboardComponent implements OnDestroy {
   private dateInitialized = false;
 
   constructor() {
-    this.researchContext.setContext({ route: 'dashboard' });
+    this.researchContext.setContext({ route: 'market-overview' });
 
     // 監聽日期變化 → 重新載入晴雨表（toObservable 必須在 injection context 內）
     toObservable(this.state.selectedDate)
