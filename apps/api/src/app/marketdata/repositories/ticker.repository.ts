@@ -214,6 +214,44 @@ export class TickerRepository {
     return tickers.slice(0, top);
   }
 
+  async getPrevInstConsecutiveDaysBatch(
+    symbols: string[],
+    beforeDate: string,
+    market: Market,
+  ): Promise<Map<string, { fini: number; sitc: number }>> {
+    const results = await this.model.aggregate<{
+      _id: string;
+      finiConsecutiveDays: number | null;
+      sitcConsecutiveDays: number | null;
+    }>([
+      {
+        $match: {
+          date: { $lt: beforeDate },
+          market,
+          symbol: { $in: symbols },
+          instInvestors: { $exists: true },
+        },
+      },
+      { $sort: { date: -1 } },
+      {
+        $group: {
+          _id: '$symbol',
+          finiConsecutiveDays: { $first: '$instInvestors.fini.consecutiveDays' },
+          sitcConsecutiveDays: { $first: '$instInvestors.sitc.consecutiveDays' },
+        },
+      },
+    ]).exec();
+
+    const map = new Map<string, { fini: number; sitc: number }>();
+    for (const r of results) {
+      map.set(r._id, {
+        fini: r.finiConsecutiveDays ?? 0,
+        sitc: r.sitcConsecutiveDays ?? 0,
+      });
+    }
+    return map;
+  }
+
   async getHotStocks(options?: { date?: string; market?: 'TSE' | 'OTC' }): Promise<HotStocksResponse> {
     const requestedDate = options?.date || DateTime.local().toISODate();
     const market = options?.market === 'OTC' ? Market.OTC : Market.TSE;
@@ -298,6 +336,8 @@ export class TickerRepository {
           tradeValue: { $ifNull: ['$tradeValue', 0] },
           finiNet: { $ifNull: ['$instInvestors.fini.net', null] },
           sitcNet: { $ifNull: ['$instInvestors.sitc.net', null] },
+          finiConsecutiveDays: { $ifNull: ['$instInvestors.fini.consecutiveDays', null] },
+          sitcConsecutiveDays: { $ifNull: ['$instInvestors.sitc.consecutiveDays', null] },
         },
       },
     ]).exec();
