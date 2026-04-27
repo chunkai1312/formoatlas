@@ -1,0 +1,13 @@
+@if (loading()) {
+  <div class="map-state">載入市場熱力圖中...</div>
+} @else if (error()) {
+  <div class="map-state warning">{{ error() }}</div>
+} @else if (chartOption()) {
+  <div
+    echarts
+    [options]="chartOption()!"
+    class="map-chart"
+  ></div>
+} @else {
+  <div class="map-state">此日期尚無市場熱力圖資料。</div>
+}
