@@ -1,0 +1,255 @@
+.assistant-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 120;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: var(--section-accent);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.assistant-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.assistant-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 140;
+  width: min(440px, 100vw);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-color);
+  box-shadow: -18px 0 36px rgba(0, 0, 0, 0.24);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+
+  .eyebrow {
+    color: var(--section-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  h2 {
+    margin: 2px 0 4px;
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  background: var(--bg-surface-elevated);
+  cursor: pointer;
+}
+
+.question-box {
+  display: grid;
+  gap: 10px;
+
+  textarea {
+    width: 100%;
+    min-height: 112px;
+    resize: vertical;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text-primary);
+    background: var(--bg-surface-elevated);
+    font: inherit;
+    line-height: 1.5;
+  }
+}
+
+.submit-btn {
+  justify-self: end;
+  min-width: 88px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: white;
+  background: var(--section-accent);
+  font-weight: 700;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.error-state,
+.loading-state {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--text-secondary);
+  background: var(--bg-surface-elevated);
+}
+
+.progress-section {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--bg-surface-elevated);
+}
+
+.progress-item {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--section-accent);
+  }
+
+  &.error .dot {
+    background: var(--color-positive);
+  }
+}
+
+.error-state {
+  color: var(--color-positive);
+}
+
+.answer-section {
+  display: grid;
+  gap: 10px;
+
+  h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+}
+
+.finding,
+.evidence-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--bg-surface-elevated);
+}
+
+.finding {
+  h4 {
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+  }
+}
+
+.finding-evidence,
+.follow-ups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+
+  span,
+  button {
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 5px 9px;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    font-size: 0.78rem;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+.evidence-list {
+  display: grid;
+  gap: 8px;
+}
+
+.evidence-item {
+  display: grid;
+  gap: 4px;
+
+  strong {
+    font-size: 0.88rem;
+  }
+
+  span {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+}
+
+.warning-section {
+  border-left: 3px solid var(--color-strong-bull);
+  padding-left: 10px;
+}
+
+@media (max-width: 600px) {
+  .assistant-fab {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .assistant-panel {
+    width: 100vw;
+    padding: 16px;
+  }
+}

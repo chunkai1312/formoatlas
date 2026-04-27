@@ -1,0 +1,121 @@
+<button class="assistant-fab" type="button" (click)="open()" aria-label="開啟市場研究助理">
+  <mat-icon>psychology</mat-icon>
+</button>
+
+@if (isOpen()) {
+  <div class="assistant-backdrop" (click)="close()"></div>
+  <aside class="assistant-panel" aria-label="市場研究助理">
+    <header class="panel-header">
+      <div>
+        <div class="eyebrow">{{ selectedDate() }}</div>
+        <h2>市場研究助理</h2>
+        <p>{{ contextLabel() }}</p>
+      </div>
+      <button class="icon-btn" type="button" (click)="close()" aria-label="關閉市場研究助理">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <form class="question-box" (ngSubmit)="submit()">
+      <textarea
+        name="question"
+        rows="4"
+        maxlength="1000"
+        [ngModel]="question()"
+        (ngModelChange)="setQuestion($event)"
+        placeholder="問一個盤後研究問題，例如：今天偏多的主要證據是什麼？"
+      ></textarea>
+      <button class="submit-btn" type="submit" [disabled]="loading() || !question().trim()">
+        @if (loading()) {
+          分析中
+        } @else {
+          送出
+        }
+      </button>
+    </form>
+
+    @if (error()) {
+      <div class="error-state">{{ error() }}</div>
+    }
+
+    @if (loading()) {
+      <div class="loading-state">正在查詢市場資料並整理證據...</div>
+    }
+
+    @if (progressEvents().length) {
+      <section class="progress-section" aria-label="研究助理進度">
+        @for (event of progressEvents(); track $index) {
+          <div class="progress-item" [class.error]="event.type === 'error'">
+            <span class="dot"></span>
+            <span>{{ progressLabel(event) }}</span>
+          </div>
+        }
+      </section>
+    }
+
+    @if (answer(); as result) {
+      <section class="answer-section">
+        <h3>摘要</h3>
+        <p>{{ result.summary }}</p>
+      </section>
+
+      <section class="answer-section">
+        <h3>重點</h3>
+        @for (finding of result.keyFindings; track finding.title) {
+          <article class="finding">
+            <h4>{{ finding.title }}</h4>
+            <p>{{ finding.detail }}</p>
+            @if (finding.evidenceIndexes.length) {
+              <div class="finding-evidence">
+                @for (index of finding.evidenceIndexes; track index) {
+                  <span>{{ evidenceLabel(index) }}</span>
+                }
+              </div>
+            }
+          </article>
+        }
+      </section>
+
+      @if (result.evidence.length) {
+        <section class="answer-section">
+          <h3>證據</h3>
+          <div class="evidence-list">
+            @for (item of result.evidence; track item.label) {
+              <div class="evidence-item">
+                <strong>{{ item.label }}</strong>
+                <span>
+                  {{ item.sourceType }}
+                  @if (item.market) { / {{ item.market }} }
+                  @if (item.symbol) { / {{ item.symbol }} }
+                  @if (item.sector) { / {{ item.sector }} }
+                  @if (item.date) { / {{ item.date }} }
+                  @if (item.startDate && item.endDate) { / {{ item.startDate }} - {{ item.endDate }} }
+                </span>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (result.warnings.length) {
+        <section class="answer-section warning-section">
+          <h3>限制</h3>
+          @for (warning of result.warnings; track warning) {
+            <p>{{ warning }}</p>
+          }
+        </section>
+      }
+
+      @if (result.followUpQuestions.length) {
+        <section class="answer-section">
+          <h3>可追問</h3>
+          <div class="follow-ups">
+            @for (followUp of result.followUpQuestions; track followUp) {
+              <button type="button" (click)="useFollowUp(followUp)">{{ followUp }}</button>
+            }
+          </div>
+        </section>
+      }
+    }
+  </aside>
+}

@@ -13,6 +13,7 @@ import { DateTime } from 'luxon';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { BarometerService } from '../../core/services/barometer.service';
 import { MarketStatsService } from '../../core/services/market-stats.service';
+import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
 import { BarometerResult } from '../../core/models/barometer.model';
 import { MarketStats } from '../../core/models/market-stats.model';
 
@@ -38,6 +39,7 @@ export class DashboardComponent implements OnDestroy {
   private state = inject(DashboardStateService);
   private barometerService = inject(BarometerService);
   private marketStatsService = inject(MarketStatsService);
+  private researchContext = inject(ResearchAssistantContextService);
   private destroy$ = new Subject<void>();
 
   readonly barometerData = signal<BarometerResult | null>(null);
@@ -50,6 +52,8 @@ export class DashboardComponent implements OnDestroy {
   private dateInitialized = false;
 
   constructor() {
+    this.researchContext.setContext({ route: 'dashboard' });
+
     // 監聽日期變化 → 重新載入晴雨表（toObservable 必須在 injection context 內）
     toObservable(this.state.selectedDate)
       .pipe(

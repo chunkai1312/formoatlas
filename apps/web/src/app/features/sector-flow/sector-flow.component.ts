@@ -2,6 +2,7 @@ import { Component, inject, OnInit, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { TickerService } from '../../core/services/ticker.service';
+import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
 import { SectorFlowStateService } from './sector-flow-state.service';
 import { SectorRankingTableComponent } from './components/sector-ranking-table/sector-ranking-table.component';
 import { SectorFlowChartsComponent } from './components/sector-flow-charts/sector-flow-charts.component';
@@ -26,6 +27,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class SectorFlowComponent implements OnInit {
   private dashState = inject(DashboardStateService);
   private tickerService = inject(TickerService);
+  private researchContext = inject(ResearchAssistantContextService);
   readonly state = inject(SectorFlowStateService);
 
   readonly rankingTable = viewChild(SectorRankingTableComponent);
@@ -35,10 +37,12 @@ export class SectorFlowComponent implements OnInit {
 
   setMarket(market: 'TSE' | 'OTC') {
     this.state.activeMarket.set(market);
+    this.updateResearchContext();
   }
 
   onKlineSymbolChange(value: string) {
     this.state.klineSymbol.set(value);
+    this.updateResearchContext();
   }
 
   constructor() {
@@ -61,8 +65,18 @@ export class SectorFlowComponent implements OnInit {
           this.state.selectedName.set(first.name);
           this.state.klineSymbol.set(first.symbol);
         }
+        this.updateResearchContext();
       });
   }
 
   ngOnInit() {}
+
+  private updateResearchContext() {
+    this.researchContext.setContext({
+      route: 'sector-flow',
+      market: this.state.activeMarket(),
+      symbol: this.state.klineSymbol(),
+      sector: this.state.selectedName(),
+    });
+  }
 }
