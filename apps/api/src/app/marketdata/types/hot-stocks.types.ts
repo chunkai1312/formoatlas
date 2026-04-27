@@ -10,6 +10,8 @@ export interface HotStockRankRow {
   tradeValue: number;
   finiNet: number | null;
   sitcNet: number | null;
+  finiConsecutiveDays: number | null;
+  sitcConsecutiveDays: number | null;
 }
 
 export interface HotStocksResponse {

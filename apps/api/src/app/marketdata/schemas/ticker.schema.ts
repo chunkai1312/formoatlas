@@ -13,6 +13,9 @@ export class InstitutionalTrade {
 
   @Prop()
   net: number;
+
+  @Prop()
+  consecutiveDays?: number;
 }
 
 @Schema({ _id: false })
