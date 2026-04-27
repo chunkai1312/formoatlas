@@ -132,11 +132,6 @@ mat-card,
   color: var(--text-primary) !important;
 }
 
-/* 深色模式：天氣 emoji 轉為灰白以提高可見度 */
-html.dark-mode .weather-emoji {
-  filter: grayscale(1) brightness(2.5);
-}
-
 /* 深色模式：確保 hero-card 的 mat-card 文字顏色正確繼承 token */
 html.dark-mode .hero-card {
   color: var(--text-primary) !important;
