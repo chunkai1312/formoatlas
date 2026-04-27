@@ -1,3 +1,8 @@
+## Purpose
+定義晴雨分析服務在產生 LLM prompt 前所需的技術面輔助指標，以及這些指標如何影響晴雨摘要判斷。
+
+## Requirements
+
 ### Requirement: 計算技術面輔助指標
 服務層 SHALL 在呼叫 LLM 之前，從歷史 `MarketStats` 資料計算技術面輔助指標，包含 5 日加權指數均價（5MA）、20 日加權指數均價（20MA）、5 日均量（tradeValue5MA）、今日量能比（volumeRatio = 今日成交金額 / 5MA 成交金額），並以 `TechContext` 介面傳遞。volumeRatio 僅在出現顯著放量（> 1.2）或顯著縮量（< 0.8）時才揭示於 prompt，量能平穩時不輸出。
 

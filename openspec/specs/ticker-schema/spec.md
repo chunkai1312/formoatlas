@@ -1,3 +1,8 @@
+## Purpose
+定義 `Ticker` 文件中三大法人籌碼 sub-document 的資料結構、optional 欄位語意與依法人淨買賣超排名查詢的 dotted path 使用方式，避免指數與個股資料結構混淆。
+
+## Requirements
+
 ### Requirement: Ticker schema 定義 instInvestors sub-document
 `Ticker` document 中的三大法人籌碼資料 SHALL 以 `instInvestors` sub-document 組織，結構為三個機構（`fini`、`sitc`、`dealers`）各自含 `buy`（買超量）、`sell`（賣超量）、`net`（淨買賣超）三個欄位。`instInvestors` 欄位 SHALL 為 optional，以反映指數類 Ticker 不含籌碼資料的事實。
 

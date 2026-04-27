@@ -1,4 +1,7 @@
-## ADDED Requirements
+## Purpose
+定義應用程式的淺色與深色主題切換能力，包含偏好持久化、全站視覺 token 與圖表/Material 元件的主題同步。
+
+## Requirements
 
 ### Requirement: 主題切換
 系統 SHALL 提供手動切換淺色/深色模式的能力，並將用戶偏好持久化至 `localStorage`。

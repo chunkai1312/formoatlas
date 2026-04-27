@@ -1,3 +1,8 @@
+## Purpose
+定義個股與指數 OHLC 查詢 API 的參數、預設日期範圍、錯誤處理與回傳資料排序，讓前端圖表能以一致格式取得指定商品的歷史行情資料。
+
+## Requirements
+
 ### Requirement: OHLC 查詢端點
 系統 SHALL 提供 `GET /marketdata/tickers` 端點，依 symbol 與日期區間回傳收盤行情資料。
 
