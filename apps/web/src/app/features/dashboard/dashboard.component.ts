@@ -49,8 +49,6 @@ export class DashboardComponent implements OnDestroy {
   readonly marketStatsData = signal<MarketStats[]>([]);
   readonly todayStats = signal<MarketStats | null>(null);
 
-  private dateInitialized = false;
-
   constructor() {
     this.researchContext.setContext({ route: 'market-overview' });
 
@@ -93,12 +91,6 @@ export class DashboardComponent implements OnDestroy {
         this.marketStatsData.set(data);
         const last = data.length > 0 ? data[data.length - 1] : null;
         this.todayStats.set(last);
-
-        // 首次載入時，將選取日期設為最後一筆資料的日期
-        if (!this.dateInitialized && last) {
-          this.dateInitialized = true;
-          this.state.setDate(last.date);
-        }
       });
   }
 
