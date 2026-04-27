@@ -5,6 +5,7 @@ import { sumBy } from 'lodash';
 import { TwStock } from 'node-twstock';
 import { InjectTwStock } from 'nest-twstock';
 import { TickerType, Exchange, Market, Index } from '../enums';
+import { EquityRepository } from '../repositories/equity.repository';
 import { TickerRepository } from '../repositories/ticker.repository';
 import { isOtcWarrant } from '../utils';
 
@@ -19,15 +20,17 @@ export class TickerService {
   constructor(
     @InjectTwStock() private readonly twstock: TwStock,
     private readonly tickerRepository: TickerRepository,
+    private readonly equityRepository: EquityRepository,
   ) {}
 
   async updateTickers(date: string = DateTime.local().toISODate()) {
     const updates = [
-      [this.updateTwseIndicesQuotes, this.updateTpexIndicesQuotes],
-      [this.updateTwseMarketTrades, this.updateTpexMarketTrades],
-      [this.updateTwseIndicesTrades, this.updateTpexIndicesTrades],
-      [this.updateTwseEquitiesQuotes, this.updateTpexEquitiesQuotes],
-      [this.updateTwseEquitiesInstInvestorsTrades, this.updateTpexEquitiesInstInvestorsTrades],
+      // [this.updateTwseIndicesQuotes, this.updateTpexIndicesQuotes],
+      // [this.updateTwseMarketTrades, this.updateTpexMarketTrades],
+      // [this.updateTwseIndicesTrades, this.updateTpexIndicesTrades],
+      // [this.updateTwseEquitiesQuotes, this.updateTpexEquitiesQuotes],
+      // [this.updateTwseEquitiesInstInvestorsTrades, this.updateTpexEquitiesInstInvestorsTrades],
+      [this.updateTwseEquityProfiles, this.updateTpexEquityProfiles],
     ];
 
     for (const group of updates) {
@@ -296,5 +299,87 @@ export class TickerService {
 
     await Promise.all(tickersWithDays.map(ticker => this.tickerRepository.updateTicker(ticker)));
     Logger.log(`${date} 上櫃個股法人進出: 已更新`, TickerService.name);
+  }
+
+  @Cron('0 0 17 * * *')
+  async updateTwseEquityProfiles(date: string = DateTime.local().toISODate()) {
+    // 1. 取得上市股票清單，過濾普通股，upsert industryCode
+    const stockList = await this.twstock.stocks.list({ exchange: 'TWSE' }) as any[];
+    if (!stockList) {
+      Logger.warn(`${date} 上市個股基本資料: stocks.list() 無回傳`, TickerService.name);
+      return;
+    }
+
+    const commonStocks = stockList.filter((s: any) => s.type === '股票');
+
+    await Promise.all(
+      commonStocks.map((s: any) =>
+        this.equityRepository.upsertEquity({
+          symbol: s.symbol,
+          exchange: Exchange.TWSE,
+          industryCode: s.industry ?? '00',
+        }),
+      ),
+    );
+
+    // 2. 取得發行股數，假日/非交易日回 null 時僅略過，保留既有值
+    const holdings = await this.twstock.stocks.finiHoldings({ date, exchange: 'TWSE' }) as any[] | null;
+    if (!holdings) {
+      Logger.warn(`${date} 上市個股發行股數: 非交易日，僅更新產業代碼`, TickerService.name);
+      return;
+    }
+
+    await Promise.all(
+      holdings.map((h: any) =>
+        this.equityRepository.upsertEquity({
+          symbol: h.symbol,
+          exchange: Exchange.TWSE,
+          issuedShares: h.issuedShares,
+        }),
+      ),
+    );
+
+    Logger.log(`${date} 上市個股基本資料（產業/發行股數）: 已更新`, TickerService.name);
+  }
+
+  @Cron('0 5 17 * * *')
+  async updateTpexEquityProfiles(date: string = DateTime.local().toISODate()) {
+    // 1. 取得上櫃股票清單，過濾普通股，upsert industryCode
+    const stockList = await this.twstock.stocks.list({ exchange: 'TPEx' }) as any[];
+    if (!stockList) {
+      Logger.warn(`${date} 上櫃個股基本資料: stocks.list() 無回傳`, TickerService.name);
+      return;
+    }
+
+    const commonStocks = stockList.filter((s: any) => s.type === '股票');
+
+    await Promise.all(
+      commonStocks.map((s: any) =>
+        this.equityRepository.upsertEquity({
+          symbol: s.symbol,
+          exchange: Exchange.TPEx,
+          industryCode: s.industry ?? '00',
+        }),
+      ),
+    );
+
+    // 2. 取得發行股數，假日/非交易日回 null 時僅略過，保留既有值
+    const holdings = await this.twstock.stocks.finiHoldings({ date, exchange: 'TPEx' }) as any[] | null;
+    if (!holdings) {
+      Logger.warn(`${date} 上櫃個股發行股數: 非交易日，僅更新產業代碼`, TickerService.name);
+      return;
+    }
+
+    await Promise.all(
+      holdings.map((h: any) =>
+        this.equityRepository.upsertEquity({
+          symbol: h.symbol,
+          exchange: Exchange.TPEx,
+          issuedShares: h.issuedShares,
+        }),
+      ),
+    );
+
+    Logger.log(`${date} 上櫃個股基本資料（產業/發行股數）: 已更新`, TickerService.name);
   }
 }
