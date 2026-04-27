@@ -1,7 +1,5 @@
-## Purpose
+## MODIFIED Requirements
 
-定義應用程式 TopBar 導覽連結、active 狀態呈現，以及主要頁面 route 的功能需求，確保使用者能在大盤籌碼、資金流向與熱門個股頁面之間切換。
-## Requirements
 ### Requirement: TopBar navigation links
 應用程式 TopBar SHALL 顯示 `FormoAtlas` 產品名稱，LOGO accessibility text SHALL 使用 FormoAtlas identity，且 logo 與產品名稱 SHALL 作為回首頁 `/` 的連結。TopBar SHALL 顯示「大盤總覽」、「資金流向」與「熱門個股」三個功能導覽連結，以填色 pill 樣式呈現 active 狀態。
 
@@ -57,10 +55,11 @@
 - **WHEN** user navigates to `/hot-stocks`
 - **THEN** 熱門個股頁面 component 成功載入並渲染
 
+## ADDED Requirements
+
 ### Requirement: Market overview page route
 應用程式 SHALL 在 `/market-overview` 路徑提供大盤總覽頁面，以 lazy-load 方式載入既有大盤總覽內容。
 
 #### Scenario: Navigate to market-overview
 - **WHEN** user navigates to `/market-overview`
 - **THEN** 大盤總覽頁面 SHALL 成功載入並渲染晴雨表、大盤走勢、今日籌碼速覽與籌碼指標趨勢
-

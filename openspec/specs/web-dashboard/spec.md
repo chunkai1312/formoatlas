@@ -1,11 +1,14 @@
-## ADDED Requirements
+## Purpose
+定義大盤總覽頁的路由、日期導航、晴雨表 Hero Card、K 線圖、今日籌碼速覽、趨勢圖表與 Footer 行為。
 
-### Requirement: 儀表板頁面路由
-系統 SHALL 將應用程式根路徑 `/` 對應至 `DashboardComponent`，並以 Lazy Loading 方式載入。
+## Requirements
 
-#### Scenario: 進入根路徑
-- **WHEN** 用戶瀏覽 `/`
-- **THEN** 系統 SHALL 顯示儀表板頁面，包含 Toolbar、Hero Card、K 線圖、Stat Cards、趨勢圖表區塊及 Footer
+### Requirement: 大盤總覽頁面路由
+系統 SHALL 將 `/market-overview` 對應至大盤總覽內容，並以 Lazy Loading 方式載入既有大盤總覽 component。
+
+#### Scenario: 進入大盤總覽路徑
+- **WHEN** 用戶瀏覽 `/market-overview`
+- **THEN** 系統 SHALL 顯示大盤總覽頁面，包含 Toolbar、Hero Card、K 線圖、Stat Cards、趨勢圖表區塊及 Footer
 
 ---
 

@@ -1,18 +1,16 @@
 ## Purpose
 
 定義 FormoAtlas 互動式市場研究 agent 的 API、Copilot SDK provider、read-only market tools、結構化證據答案、streaming 進度事件、執行限制與 web assistant panel 行為。
-
 ## Requirements
-
 ### Requirement: 互動式市場研究 Query API
-系統 SHALL 提供單輪市場研究問題 API，使用選取交易日與選填頁面脈絡回答問題。
+系統 SHALL 提供單輪市場研究問題 API，使用選取交易日與選填頁面脈絡回答問題。支援的頁面 route context SHALL 包含 `home`、`market-overview`、`sector-flow` 與 `hot-stocks`。
 
 #### Scenario: 送出有效市場研究問題
 - **WHEN** client 送出非空白問題與選取的 `date`
 - **THEN** 系統 SHALL 呼叫市場研究 agent，並回傳該問題的結構化答案
 
 #### Scenario: 送出頁面脈絡
-- **WHEN** client 在問題中包含 route、market、symbol 或其他支援的頁面脈絡
+- **WHEN** client 在問題中包含 `home`、`market-overview`、`sector-flow`、`hot-stocks` 或其他支援的頁面脈絡
 - **THEN** 系統 SHALL 將該脈絡提供給 agent 作為預設分析脈絡
 
 #### Scenario: 缺少選取日期
@@ -123,11 +121,15 @@ agent SHALL 回傳可 parse、可驗證，且可被呈現為具證據引用市�
 - **THEN** 系統 SHALL 回傳 service unavailable response
 
 ### Requirement: Web 研究助理 Panel
-web app SHALL 在既有市場頁面提供 research assistant panel 或 drawer。
+web app SHALL 在既有市場頁面與首頁提供 research assistant panel 或 drawer。
+
+#### Scenario: 從首頁開啟助理
+- **WHEN** user 從 `/` 首頁開啟助理
+- **THEN** panel SHALL 在不離開首頁的情況下開啟，且 SHALL 使用 `home` route context
 
 #### Scenario: 從市場頁面開啟助理
-- **WHEN** user 從 dashboard、sector flow 或 hot stocks pages 開啟助理
-- **THEN** panel SHALL 在不離開目前頁面的情況下開啟
+- **WHEN** user 從 `/market-overview`、`/sector-flow` 或 `/hot-stocks` pages 開啟助理
+- **THEN** panel SHALL 在不離開目前頁面的情況下開啟，且 SHALL 使用對應的 route context
 
 #### Scenario: 從助理 Panel 送出問題
 - **WHEN** user 從 assistant panel 送出問題
@@ -139,4 +141,5 @@ web app SHALL 在既有市場頁面提供 research assistant panel 或 drawer。
 
 #### Scenario: Agent Request 失敗
 - **WHEN** agent API 回傳 validation、unavailable、timeout errors 或 streaming error event
-- **THEN** panel SHALL 顯示可恢復的 error state，且不干擾目前市場頁面
+- **THEN** panel SHALL 顯示可恢復的 error state，且不干擾目前頁面
+
