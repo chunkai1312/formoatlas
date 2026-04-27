@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DateTime } from 'luxon';
 import { MarketStatsRepository } from './repositories/market-stats.repository';
@@ -8,6 +8,7 @@ import { GetTickerOhlcDto } from './dto/get-ticker-ohlc.dto';
 import { GetSectorFlowDto } from './dto/get-sector-flow.dto';
 import { GetHotStocksDto } from './dto/get-hot-stocks.dto';
 import { GetMarketMapDto } from './dto/get-market-map.dto';
+import { GetTradingDateDto } from './dto/get-trading-date.dto';
 
 @ApiTags('marketdata')
 @Controller('marketdata')
@@ -16,6 +17,15 @@ export class MarketDataController {
     private readonly marketStatsRepository: MarketStatsRepository,
     private readonly tickerRepository: TickerRepository,
   ) {}
+
+  @ApiOperation({ summary: '取得指定日期當天或之前最近的交易日' })
+  @Get('trading-date')
+  async getLatestTradingDate(@Query() query: GetTradingDateDto) {
+    const before = query.before ?? DateTime.local().toISODate();
+    const result = await this.marketStatsRepository.getLatestTradingDate(before);
+    if (!result) throw new NotFoundException('No trading date found before ' + before);
+    return result;
+  }
 
   @ApiOperation({ summary: '取得大盤籌碼資料' })
   @Get('market-stats')

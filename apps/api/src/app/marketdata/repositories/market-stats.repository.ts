@@ -16,6 +16,15 @@ export class MarketStatsRepository {
     return this.model.updateOne({ date }, marketStats, { upsert: true });
   }
 
+  async getLatestTradingDate(before: string): Promise<{ date: string } | null> {
+    const result = await this.model
+      .findOne({ date: { $lte: before } })
+      .sort({ date: -1 })
+      .select({ date: 1, _id: 0 })
+      .lean();
+    return result ? { date: result.date } : null;
+  }
+
   async getMarketStats(options?: { startDate?: string; endDate?: string }) {
     const { startDate, endDate } = options ?? {};
 
