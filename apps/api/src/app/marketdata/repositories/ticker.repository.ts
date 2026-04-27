@@ -4,9 +4,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DateTime } from 'luxon';
 import { Ticker, TickerDocument } from '../schemas/ticker.schema';
-import { TickerType, Market, Index } from '../enums';
-import { getSectorName } from '../utils';
+import { TickerType, Market, Index, Exchange } from '../enums';
+import { getSectorName, getIndustryName } from '../utils';
 import { HotStockRankRow, HotStocksResponse } from '../types/hot-stocks.types';
+import { MarketMapItem, MarketMapSector, MarketMapResponse } from '../types/market-map.types';
 
 @Injectable()
 export class TickerRepository {
@@ -63,7 +64,7 @@ export class TickerRepository {
 
     const [ tickers, tickersPrev ] = results.map(doc => doc.data);
 
-    return tickers.map(doc => {
+    return tickers.map((doc: any) => {
       const data = doc as Record<string, any>;
       data.tradeValuePrev = _.find(tickersPrev, { symbol: doc.symbol }).tradeValue;
       data.tradeWeightPrev = _.find(tickersPrev, { symbol: doc.symbol }).tradeWeight;
@@ -364,5 +365,99 @@ export class TickerRepository {
       actives: { byVolume: [], byValue: [] },
       institutional: { finiBuy: [], finiSell: [], sitcBuy: [], sitcSell: [] },
     };
+  }
+
+  async getMarketMap(options?: { date?: string; market?: 'TSE' | 'OTC' }): Promise<MarketMapResponse> {
+    const requestedDate = options?.date ?? DateTime.local().toISODate();
+    const market = options?.market === 'OTC' ? Market.OTC : Market.TSE;
+    const responseMarket: 'TSE' | 'OTC' = options?.market === 'OTC' ? 'OTC' : 'TSE';
+    const exchange = options?.market === 'OTC' ? Exchange.TPEx : Exchange.TWSE;
+
+    const latestDate = await this.getLatestEquityDate(requestedDate, market);
+    if (!latestDate) {
+      return { date: requestedDate, market: responseMarket, sectors: [] };
+    }
+
+    const results = await this.model.aggregate([
+      {
+        $match: {
+          date: latestDate,
+          type: TickerType.Equity,
+          market,
+        },
+      },
+      {
+        $lookup: {
+          from: 'equities',
+          let: { sym: '$symbol' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$symbol', '$$sym'] },
+                    { $eq: ['$exchange', exchange] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'equityInfo',
+        },
+      },
+      {
+        $unwind: { path: '$equityInfo', preserveNullAndEmptyArrays: true },
+      },
+      {
+        // 排除未有 industryCode 的 ticker（ETF、ETN、權證等非普通股）
+        $match: { 'equityInfo.industryCode': { $exists: true } },
+      },
+      {
+        $addFields: {
+          industryCode: { $ifNull: ['$equityInfo.industryCode', '00'] },
+          marketCap: {
+            $cond: {
+              if: {
+                $and: [
+                  { $gt: [{ $ifNull: ['$equityInfo.issuedShares', 0] }, 0] },
+                  { $gt: [{ $ifNull: ['$closePrice', 0] }, 0] },
+                ],
+              },
+              then: { $multiply: ['$equityInfo.issuedShares', '$closePrice'] },
+              else: { $ifNull: ['$tradeValue', 0] },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$industryCode',
+          totalMarketCap: { $sum: '$marketCap' },
+          stocks: {
+            $push: {
+              symbol: '$symbol',
+              name: { $ifNull: ['$name', '$symbol'] },
+              marketCap: '$marketCap',
+              changePercent: { $ifNull: ['$changePercent', 0] },
+              openPrice: { $ifNull: ['$openPrice', 0] },
+              highPrice: { $ifNull: ['$highPrice', 0] },
+              lowPrice: { $ifNull: ['$lowPrice', 0] },
+              closePrice: { $ifNull: ['$closePrice', 0] },
+              tradeVolume: { $ifNull: ['$tradeVolume', 0] },
+            },
+          },
+        },
+      },
+      { $sort: { totalMarketCap: -1 } },
+    ]).exec();
+
+    const sectors: MarketMapSector[] = results.map((doc: any) => ({
+      industryCode: doc._id as string,
+      name: getIndustryName(doc._id as string),
+      totalMarketCap: doc.totalMarketCap as number,
+      stocks: doc.stocks as MarketMapItem[],
+    }));
+
+    return { date: latestDate, market: responseMarket, sectors };
   }
 }

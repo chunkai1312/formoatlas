@@ -7,6 +7,7 @@ import { GetMarketStatsDto } from './dto/get-market-stats.dto';
 import { GetTickerOhlcDto } from './dto/get-ticker-ohlc.dto';
 import { GetSectorFlowDto } from './dto/get-sector-flow.dto';
 import { GetHotStocksDto } from './dto/get-hot-stocks.dto';
+import { GetMarketMapDto } from './dto/get-market-map.dto';
 
 @ApiTags('marketdata')
 @Controller('marketdata')
@@ -45,5 +46,11 @@ export class MarketDataController {
   @Get('hot-stocks')
   getHotStocks(@Query() query: GetHotStocksDto) {
     return this.tickerRepository.getHotStocks({ date: query.date, market: query.market });
+  }
+
+  @ApiOperation({ summary: '取得市場熱力圖（TSE 上市 / OTC 上櫃全市場個股，依產業分組）' })
+  @Get('market-map')
+  getMarketMap(@Query() query: GetMarketMapDto) {
+    return this.tickerRepository.getMarketMap({ date: query.date, market: query.market });
   }
 }
