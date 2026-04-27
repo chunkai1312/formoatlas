@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, viewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { TickerService } from '../../core/services/ticker.service';
@@ -6,7 +6,9 @@ import { ResearchAssistantContextService } from '../../core/services/research-as
 import { SectorFlowStateService } from './sector-flow-state.service';
 import { SectorRankingTableComponent } from './components/sector-ranking-table/sector-ranking-table.component';
 import { SectorFlowChartsComponent } from './components/sector-flow-charts/sector-flow-charts.component';
+import { SectorTradeWeightDistributionComponent } from './components/sector-trade-weight-distribution/sector-trade-weight-distribution.component';
 import { KlineChartComponent } from '../dashboard/components/kline-chart/kline-chart.component';
+import { SectorFlowSnapshot } from '../../core/models/sector-flow-snapshot.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { switchMap, catchError, of, combineLatest } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -16,6 +18,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [
     CommonModule,
+    SectorTradeWeightDistributionComponent,
     SectorRankingTableComponent,
     SectorFlowChartsComponent,
     KlineChartComponent,
@@ -34,6 +37,7 @@ export class SectorFlowComponent implements OnInit {
 
   readonly selectedSymbol = this.state.selectedSymbol;
   readonly klineSymbol = this.state.klineSymbol;
+  readonly rows = signal<SectorFlowSnapshot[]>([]);
 
   setMarket(market: 'TSE' | 'OTC') {
     this.state.activeMarket.set(market);
@@ -42,6 +46,13 @@ export class SectorFlowComponent implements OnInit {
 
   onKlineSymbolChange(value: string) {
     this.state.klineSymbol.set(value);
+    this.updateResearchContext();
+  }
+
+  selectSector(row: SectorFlowSnapshot) {
+    this.state.selectedSymbol.set(row.symbol);
+    this.state.selectedName.set(row.name);
+    this.state.klineSymbol.set(row.symbol);
     this.updateResearchContext();
   }
 
@@ -57,6 +68,7 @@ export class SectorFlowComponent implements OnInit {
         takeUntilDestroyed(),
       )
       .subscribe(rows => {
+        this.rows.set(rows);
         this.rankingTable()?.setRows(rows);
         this.state.sectors.set(rows.map(r => ({ symbol: r.symbol, name: r.name })));
         if (rows.length) {

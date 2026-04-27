@@ -8,6 +8,10 @@
   <!-- Section 1: 排行表 -->
   <section class="section">
     <div class="section-title">產業資金流向</div>
+    <app-sector-trade-weight-distribution
+      [rows]="rows()"
+      (sectorSelected)="selectSector($event)"
+    ></app-sector-trade-weight-distribution>
     <app-sector-ranking-table></app-sector-ranking-table>
   </section>
 

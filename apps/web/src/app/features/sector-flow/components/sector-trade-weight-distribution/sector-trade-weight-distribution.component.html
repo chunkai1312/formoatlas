@@ -1,0 +1,38 @@
+<mat-card class="distribution-card">
+  <mat-card-content>
+    <div class="distribution-header">
+      <div>
+        <h3>成交比重分佈</h3>
+        <p>依今日成交比重排序，點選產業可更新下方明細。</p>
+      </div>
+      <span>Top 10</span>
+    </div>
+
+    @if (topRows().length) {
+      <div class="distribution-list">
+        @for (row of topRows(); track row.symbol) {
+          <button
+            type="button"
+            class="distribution-row"
+            (click)="select(row)"
+          >
+            <span class="sector-name">{{ row.name }}</span>
+            <span class="bar-track" aria-hidden="true">
+              <span class="bar-fill" [style.width.%]="barWidth(row)"></span>
+            </span>
+            <strong>{{ formatWeight(row.tradeWeight) }}%</strong>
+            <span
+              class="weight-change"
+              [class.positive]="row.tradeWeightChange > 0"
+              [class.negative]="row.tradeWeightChange < 0"
+            >
+              {{ formatWeightChange(row.tradeWeightChange) }}%
+            </span>
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">此日期尚無產業成交比重資料。</div>
+    }
+  </mat-card-content>
+</mat-card>

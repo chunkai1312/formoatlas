@@ -34,6 +34,9 @@
 }
 
 .section {
+  display: grid;
+  gap: 12px;
+
   .section-title {
     font-size: 1rem;
     font-weight: 600;
