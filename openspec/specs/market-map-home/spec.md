@@ -56,6 +56,11 @@ TBD - created by archiving change add-home-page-and-market-overview-route. Updat
 - **THEN** 系統 SHALL 顯示個股焦點區塊，包含成交值排行、漲跌幅或缺資料狀態，以及低調前往 `/hot-stocks` 的入口
 - **AND** 首頁快照 SHALL 顯示最多 5 筆個股資料
 
+#### Scenario: 顯示市場熱力圖區塊
+- **WHEN** 首頁載入選取日期
+- **THEN** 系統 SHALL 在三張快照卡片下方顯示市場熱力圖區塊
+- **AND** 熱力圖 SHALL 依 `market-heatmap` spec 的規格呈現
+
 ### Requirement: 首頁資料狀態
 首頁 SHALL 讓各市場快照區塊獨立處理 loading、empty 與 error 狀態。
 
