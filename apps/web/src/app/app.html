@@ -1,17 +1,12 @@
 <app-toolbar></app-toolbar>
 
-@if (bannerLatestDate()) {
-  <div class="non-trading-day-banner">
-    <span class="banner-message">今日行情尚未更新</span>
-    <button class="banner-action" (click)="navigateToLatestTradingDay()">
-      查看最近交易日 →
-    </button>
-  </div>
+@if (dateReady()) {
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
+} @else {
+  <div class="app-loading-skeleton"></div>
 }
-
-<main class="app-content">
-  <router-outlet></router-outlet>
-</main>
 
 <app-research-assistant></app-research-assistant>
 

@@ -50,6 +50,8 @@ const hotStocks: HotStocksResponse = {
         tradeValue: 9000000,
         finiNet: 2000,
         sitcNet: 120,
+        finiConsecutiveDays: 3,
+        sitcConsecutiveDays: 1,
       },
       {
         symbol: '2454',
@@ -63,6 +65,8 @@ const hotStocks: HotStocksResponse = {
         tradeValue: 8000000,
         finiNet: 1200,
         sitcNet: 80,
+        finiConsecutiveDays: null,
+        sitcConsecutiveDays: null,
       },
       {
         symbol: '2303',
@@ -76,6 +80,8 @@ const hotStocks: HotStocksResponse = {
         tradeValue: 7000000,
         finiNet: -900,
         sitcNet: 30,
+        finiConsecutiveDays: null,
+        sitcConsecutiveDays: null,
       },
       {
         symbol: '2317',
@@ -89,6 +95,8 @@ const hotStocks: HotStocksResponse = {
         tradeValue: 6000000,
         finiNet: 600,
         sitcNet: 40,
+        finiConsecutiveDays: null,
+        sitcConsecutiveDays: null,
       },
       {
         symbol: '2881',
@@ -102,6 +110,8 @@ const hotStocks: HotStocksResponse = {
         tradeValue: 5000000,
         finiNet: 500,
         sitcNet: 20,
+        finiConsecutiveDays: null,
+        sitcConsecutiveDays: null,
       },
     ],
   },

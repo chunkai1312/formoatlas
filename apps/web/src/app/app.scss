@@ -6,30 +6,6 @@
   width: 100%;
 }
 
-.non-trading-day-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 24px;
-  background-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--mat-sys-primary) 24%, transparent);
-  font-size: 13px;
-}
-
-.banner-message {
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.banner-action {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: var(--mat-sys-primary);
-  font-size: 13px;
-  font-weight: 500;
-
-  &:hover {
-    text-decoration: underline;
-  }
+.app-loading-skeleton {
+  flex: 1;
 }

@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
 import { DateTime } from 'luxon';
 import { catchError, of } from 'rxjs';
 import { ToolbarComponent } from './layout/toolbar/toolbar.component';
@@ -16,34 +16,28 @@ import { TradingDateService } from './core/services/trading-date.service';
   styleUrl: './app.scss',
 })
 export class App implements OnInit {
-  private readonly route = inject(ActivatedRoute);
+  private readonly doc = inject(DOCUMENT);
   private readonly state = inject(DashboardStateService);
   private readonly tradingDateService = inject(TradingDateService);
 
-  readonly bannerLatestDate = signal<string | null>(null);
+  readonly dateReady = this.state.dateReady;
 
   ngOnInit() {
-    const rawDate = this.route.snapshot.queryParams['date'] as string | undefined;
+    const params = new URLSearchParams(this.doc.defaultView?.location.search ?? '');
+    const rawDate = params.get('date') ?? undefined;
     const parsed = rawDate ? DateTime.fromISO(rawDate) : null;
+
     if (parsed?.isValid) {
       this.state.setDate(parsed.toISODate()!);
-    }
-
-    const today = DateTime.local().toISODate() ?? '';
-    this.tradingDateService.getLatestTradingDate(today).pipe(
-      catchError(() => of(null))
-    ).subscribe((result) => {
-      if (result && result.date < today) {
-        this.bannerLatestDate.set(result.date);
-      }
-    });
-  }
-
-  navigateToLatestTradingDay() {
-    const date = this.bannerLatestDate();
-    if (date) {
-      this.state.setDate(date);
-      this.bannerLatestDate.set(null);
+      this.state.setDateReady();
+    } else {
+      const today = DateTime.local().toISODate() ?? '';
+      this.tradingDateService.getLatestTradingDate(today).pipe(
+        catchError(() => of(null))
+      ).subscribe((result) => {
+        this.state.setDate(result?.date ?? today);
+        this.state.setDateReady();
+      });
     }
   }
 }
