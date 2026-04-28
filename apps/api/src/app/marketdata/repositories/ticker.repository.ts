@@ -115,7 +115,7 @@ export class TickerRepository {
     const benchmark = tickers?.find((doc: any) => doc.symbol === benchmarkSymbol);
 
     return tickers
-      .filter((doc: any) => doc.symbol !== benchmarkSymbol)
+      .filter((doc: any) => doc.symbol !== benchmarkSymbol && doc.name)
       .map((doc: any) => {
         const prev = _.find(tickersPrev, { symbol: doc.symbol });
         const tradeValuePrev = prev?.tradeValue ?? 0;
