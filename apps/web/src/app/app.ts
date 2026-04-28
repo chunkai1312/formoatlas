@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { DateTime } from 'luxon';
@@ -20,18 +20,30 @@ export class App implements OnInit {
   private readonly state = inject(DashboardStateService);
   private readonly tradingDateService = inject(TradingDateService);
 
-  readonly dateReady = this.state.dateReady;
+  readonly bannerLatestDate = signal<string | null>(null);
 
   ngOnInit() {
     const rawDate = this.route.snapshot.queryParams['date'] as string | undefined;
     const parsed = rawDate ? DateTime.fromISO(rawDate) : null;
-    const before = parsed?.isValid ? parsed.toISODate()! : (DateTime.local().toISODate() ?? '');
+    if (parsed?.isValid) {
+      this.state.setDate(parsed.toISODate()!);
+    }
 
-    this.tradingDateService.getLatestTradingDate(before).pipe(
-      catchError(() => of({ date: before }))
-    ).subscribe(({ date }) => {
-      this.state.setDate(date);
-      this.state.setDateReady();
+    const today = DateTime.local().toISODate() ?? '';
+    this.tradingDateService.getLatestTradingDate(today).pipe(
+      catchError(() => of(null))
+    ).subscribe((result) => {
+      if (result && result.date < today) {
+        this.bannerLatestDate.set(result.date);
+      }
     });
+  }
+
+  navigateToLatestTradingDay() {
+    const date = this.bannerLatestDate();
+    if (date) {
+      this.state.setDate(date);
+      this.bannerLatestDate.set(null);
+    }
   }
 }

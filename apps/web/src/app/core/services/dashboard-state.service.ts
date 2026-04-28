@@ -18,7 +18,6 @@ export class DashboardStateService {
 
   readonly selectedDate = signal<string>(DateTime.local().toISODate() ?? '');
   readonly endDate = computed(() => this.selectedDate());
-  readonly dateReady = signal<boolean>(false);
 
   setDate(date: string) {
     this.selectedDate.set(date);
@@ -27,9 +26,5 @@ export class DashboardStateService {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
-  }
-
-  setDateReady() {
-    this.dateReady.set(true);
   }
 }
