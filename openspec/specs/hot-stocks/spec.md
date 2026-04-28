@@ -11,7 +11,7 @@
 
 若 `market` 未指定，系統 SHALL 使用 `TSE`。
 
-若指定日期沒有交易資料，系統 SHALL 使用最近一個小於等於指定日期且有個股資料的交易日。
+若指定日期沒有交易資料，API SHALL 仍使用最近一個小於等於指定日期且有個股資料的交易日回傳資料，但前端（`TickerService`）SHALL 比對回傳的 `date` 欄位是否與請求日期相符；若不符，前端 SHALL 以空資料回傳給元件，顯示空狀態而非前一交易日的資料。
 
 系統 SHALL 在每日更新上櫃個股收盤行情與法人進出資料時排除上櫃權證，避免權證資料寫入 `Ticker` collection。權證代號判斷規則 SHALL 覆蓋 `7[0-3]` 開頭的六碼純數字權證，以及 `7[0-3]` 開頭、後綴為 `P`、`F`、`Q`、`C`、`B`、`X`、`Y`、`U` 的六碼權證。
 
@@ -35,11 +35,13 @@ Response SHALL 包含：
 
 #### Scenario: Query TSE hot stocks
 - **WHEN** client sends `GET /marketdata/hot-stocks?date=2026-03-13&market=TSE`
-- **THEN** system returns HTTP 200 with TSE hot stock rankings for the latest available trading date on or before `2026-03-13`
+- **THEN** API returns HTTP 200 with TSE hot stock rankings for the latest available trading date on or before `2026-03-13`
+- **AND** frontend compares returned `date` with requested date; if matching, data is displayed; if not (non-trading day), empty state is shown
 
 #### Scenario: Query OTC hot stocks
 - **WHEN** client sends `GET /marketdata/hot-stocks?date=2026-03-13&market=OTC`
-- **THEN** system returns HTTP 200 with OTC hot stock rankings for the latest available trading date on or before `2026-03-13`
+- **THEN** API returns HTTP 200 with OTC hot stock rankings for the latest available trading date on or before `2026-03-13`
+- **AND** frontend applies the same date-match filter as TSE
 
 #### Scenario: OTC warrant quote update is skipped
 - **WHEN** daily TPEx equity quote update receives a warrant symbol matching the OTC warrant pattern

@@ -57,11 +57,13 @@
 
 #### Scenario: Non-trading day query
 - **WHEN** client sends a date that has no trading data (e.g., weekend)
-- **THEN** system returns the most recent available trading day's data (using `$lte date` semantics)
+- **THEN** API returns the most recent available trading day's data (using `$lte date` semantics)
+- **AND** the frontend (`TickerService`) filters out records whose `date` field differs from the requested date, resulting in an empty array displayed to the user
 
 #### Scenario: OTC non-trading day query
 - **WHEN** client sends OTC query for a non-trading day
-- **THEN** system returns most recent available OTC trading day data using `$lte date` semantics
+- **THEN** API returns most recent available OTC trading day data using `$lte date` semantics
+- **AND** the frontend filters out the response, displaying empty state to the user
 
 #### Scenario: OTC name cleaning
 - **WHEN** OTC sector data returns name `"櫃買半導體類指數"`

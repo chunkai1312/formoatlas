@@ -10,7 +10,7 @@
 
 若 `date` 未指定，系統 SHALL 使用當日日期。
 若 `market` 未指定，系統 SHALL 預設使用 `TSE`。
-若指定日期無 Ticker 資料，系統 SHALL 使用最近一個小於等於指定日期且有個股資料的交易日。
+若指定日期無 Ticker 資料，API SHALL 使用最近一個小於等於指定日期且有個股資料的交易日，但前端（`TickerService`）SHALL 比對回傳的 `date` 欄位與請求日期是否相符；若不符，前端 SHALL 以 `sectors: []` 呈現空狀態，而非顯示前一交易日的資料。
 
 #### Scenario: 查詢 TSE 熱力圖資料
 - **WHEN** client 送出 `GET /marketdata/market-map?date=2026-04-24&market=TSE`
