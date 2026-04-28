@@ -1,14 +1,14 @@
 <mat-toolbar class="app-toolbar">
-  <a routerLink="/" class="brand-link" aria-label="回到 FormoAtlas 首頁">
+  <a routerLink="/" queryParamsHandling="preserve" class="brand-link" aria-label="回到 FormoAtlas 首頁">
     <img src="favicon.svg" class="logo" alt="FormoAtlas logo" />
     <span class="title">FormoAtlas</span>
   </a>
 
   <!-- 頁面導覽 -->
   <nav class="nav-links">
-    <a routerLink="/market-overview" routerLinkActive="active" class="nav-link">大盤總覽</a>
-    <a routerLink="/sector-flow" routerLinkActive="active" class="nav-link">資金流向</a>
-    <a routerLink="/hot-stocks" routerLinkActive="active" class="nav-link">熱門個股</a>
+    <a routerLink="/market-overview" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">大盤總覽</a>
+    <a routerLink="/sector-flow" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">資金流向</a>
+    <a routerLink="/hot-stocks" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">熱門個股</a>
   </nav>
 
   <span class="spacer"></span>
