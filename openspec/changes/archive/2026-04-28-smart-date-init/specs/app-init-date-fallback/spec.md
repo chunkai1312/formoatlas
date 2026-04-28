@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: App initializes to selected date immediately
 系統 SHALL 在 App 啟動時，依 URL 是否含有 `?date=` 參數選擇初始化路徑：
