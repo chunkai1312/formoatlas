@@ -12,4 +12,5 @@ import { StatCardComponent } from './stat-card/stat-card.component';
 })
 export class StatsOverviewComponent {
   stats = input<MarketStats | null>(null);
+  loading = input<boolean>(false);
 }

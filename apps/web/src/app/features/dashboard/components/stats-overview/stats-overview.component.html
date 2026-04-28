@@ -46,6 +46,8 @@
       unit="口"
     ></app-stat-card>
   </div>
-} @else {
+} @else if (loading()) {
   <div class="stats-empty">載入中...</div>
+} @else {
+  <div class="stats-empty">此日期無資料</div>
 }

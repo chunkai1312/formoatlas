@@ -278,6 +278,7 @@ export class KlineChartComponent implements OnDestroy {
 
   // 目前要顯示的 MA 值（hover 中的 bar 或最後一根）
   readonly displayMaValues = computed<(number | null)[]>(() => {
+    if (this.isNonTradingDay()) return this.visibleMaDefs().map(() => null);
     const maData = this.maData();
     const len = this.filteredData().length;
     if (!len) return this.visibleMaDefs().map(() => null);
@@ -285,7 +286,14 @@ export class KlineChartComponent implements OnDestroy {
     return maData.map(series => series[idx] ?? null);
   });
 
+  readonly isNonTradingDay = computed(() => {
+    const data = this.normalizedRawData();
+    const end = this.state.endDate();
+    return data.length > 0 && data[data.length - 1].date !== end;
+  });
+
   readonly chartOption = computed<EChartsOption | null>(() => {
+    if (this.isNonTradingDay()) return null;
     const display = this.filteredData();
     const all = this.chartInterval() === 'W' ? this.weeklyData() : this.normalizedRawData();
     if (!display.length) return null;

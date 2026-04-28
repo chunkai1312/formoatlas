@@ -18,7 +18,7 @@
   <!-- 今日籌碼速覽 -->
   <section class="section">
     <h2 class="section-title">今日籌碼速覽</h2>
-    <app-stats-overview [stats]="todayStats()"></app-stats-overview>
+    <app-stats-overview [stats]="todayStats()" [loading]="marketStatsLoading()"></app-stats-overview>
   </section>
 
   <!-- 趨勢圖表 -->

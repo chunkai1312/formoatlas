@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subject, switchMap, catchError, of, takeUntil } from 'rxjs';
+import { Subject, switchMap, catchError, of, takeUntil, map } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { DateTime } from 'luxon';
 
@@ -48,6 +48,7 @@ export class DashboardComponent implements OnDestroy {
 
   readonly marketStatsData = signal<MarketStats[]>([]);
   readonly todayStats = signal<MarketStats | null>(null);
+  readonly marketStatsLoading = signal<boolean>(false);
 
   constructor() {
     this.researchContext.setContext({ route: 'market-overview' });
@@ -80,17 +81,21 @@ export class DashboardComponent implements OnDestroy {
     toObservable(this.state.selectedDate)
       .pipe(
         switchMap((date) => {
+          this.marketStatsLoading.set(true);
           const start = DateTime.fromISO(date).minus({ months: 12 }).toISODate() ?? '';
           return this.marketStatsService.getMarketStats(start, date).pipe(
-            catchError(() => of([] as MarketStats[]))
+            map(data => ({ date, data })),
+            catchError(() => of({ date, data: [] as MarketStats[] }))
           );
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe((data) => {
-        this.marketStatsData.set(data);
+      .subscribe(({ date, data }) => {
+        this.marketStatsLoading.set(false);
         const last = data.length > 0 ? data[data.length - 1] : null;
-        this.todayStats.set(last);
+        const hasToday = last?.date === date;
+        this.marketStatsData.set(hasToday ? data : []);
+        this.todayStats.set(hasToday ? last : null);
       });
   }
 
