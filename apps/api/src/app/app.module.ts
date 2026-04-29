@@ -42,7 +42,7 @@ export class AppModule implements OnApplicationBootstrap {
 
       for (let dt = startDate; dt <= endDate; dt = dt.plus({ day: 1 })) {
         try {
-          // await this.marketStatsService.updateMarketStats(dt.toISODate());
+          await this.marketStatsService.updateMarketStats(dt.toISODate());
           await this.tickerService.updateTickers(dt.toISODate());
         } catch (error) {
           dt = dt.minus({ day: 1 });
