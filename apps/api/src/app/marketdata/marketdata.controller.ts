@@ -3,12 +3,14 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DateTime } from 'luxon';
 import { MarketStatsRepository } from './repositories/market-stats.repository';
 import { TickerRepository } from './repositories/ticker.repository';
+import { EquityRepository } from './repositories/equity.repository';
 import { GetMarketStatsDto } from './dto/get-market-stats.dto';
 import { GetTickerOhlcDto } from './dto/get-ticker-ohlc.dto';
 import { GetSectorFlowDto } from './dto/get-sector-flow.dto';
 import { GetHotStocksDto } from './dto/get-hot-stocks.dto';
 import { GetMarketMapDto } from './dto/get-market-map.dto';
 import { GetTradingDateDto } from './dto/get-trading-date.dto';
+import { GetTickerMetadataDto } from './dto/get-ticker-metadata.dto';
 
 @ApiTags('marketdata')
 @Controller('marketdata')
@@ -16,6 +18,7 @@ export class MarketDataController {
   constructor(
     private readonly marketStatsRepository: MarketStatsRepository,
     private readonly tickerRepository: TickerRepository,
+    private readonly equityRepository: EquityRepository,
   ) {}
 
   @ApiOperation({ summary: '取得指定日期當天或之前最近的交易日' })
@@ -44,6 +47,22 @@ export class MarketDataController {
       startDate: query.startDate,
       endDate: query.endDate,
     });
+  }
+
+  @ApiOperation({ summary: '取得股票代號 metadata（名稱與市場別）' })
+  @Get('ticker-metadata')
+  async getTickerMetadata(@Query() query: GetTickerMetadataDto) {
+    const symbols = query.symbols.split(',').map(symbol => symbol.trim().toUpperCase()).filter(Boolean);
+    const equityMetadata = await this.equityRepository.getMetadataBySymbols(symbols);
+    const found = new Set(equityMetadata.map(item => item.symbol));
+    const missing = symbols.filter(symbol => !found.has(symbol));
+
+    if (!missing.length) {
+      return equityMetadata;
+    }
+
+    const fallbackMetadata = await this.tickerRepository.getMetadataBySymbols(missing);
+    return [...equityMetadata, ...fallbackMetadata];
   }
 
   @ApiOperation({ summary: '取得產業資金流向排行（TSE 上市 / OTC 上櫃）' })

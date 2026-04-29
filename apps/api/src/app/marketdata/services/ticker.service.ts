@@ -317,6 +317,7 @@ export class TickerService {
         this.equityRepository.upsertEquity({
           symbol: s.symbol,
           exchange: Exchange.TWSE,
+          name: s.name,
           industryCode: s.industry ?? '00',
         }),
       ),
@@ -358,6 +359,7 @@ export class TickerService {
         this.equityRepository.upsertEquity({
           symbol: s.symbol,
           exchange: Exchange.TPEx,
+          name: s.name,
           industryCode: s.industry ?? '00',
         }),
       ),

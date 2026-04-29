@@ -12,6 +12,9 @@ export class Equity {
   exchange: string;
 
   @Prop()
+  name?: string;
+
+  @Prop()
   industryCode: string;
 
   @Prop()

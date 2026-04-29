@@ -8,6 +8,7 @@ import { TickerType, Market, Index, Exchange } from '../enums';
 import { getSectorName, getIndustryName } from '../utils';
 import { HotStockRankRow, HotStocksResponse } from '../types/hot-stocks.types';
 import { MarketMapItem, MarketMapSector, MarketMapResponse } from '../types/market-map.types';
+import { TickerMetadata } from '../types/ticker-metadata.types';
 
 @Injectable()
 export class TickerRepository {
@@ -42,6 +43,38 @@ export class TickerRepository {
       .sort({ date: 1 })
       .lean()
       .exec();
+  }
+
+  async getMetadataBySymbols(symbols: string[]): Promise<TickerMetadata[]> {
+    const uniqueSymbols = [...new Set(symbols.map(symbol => symbol.trim().toUpperCase()).filter(Boolean))];
+    if (!uniqueSymbols.length) return [];
+
+    return this.model.aggregate<TickerMetadata>([
+      {
+        $match: {
+          symbol: { $in: uniqueSymbols },
+          type: TickerType.Equity,
+          name: { $exists: true, $ne: '' },
+        },
+      },
+      { $sort: { date: -1 } },
+      {
+        $group: {
+          _id: '$symbol',
+          symbol: { $first: '$symbol' },
+          name: { $first: '$name' },
+          market: { $first: '$market' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          symbol: 1,
+          name: 1,
+          market: 1,
+        },
+      },
+    ]).exec();
   }
 
   async getMoneyFlow(options?: { date?: string, market?: Market }) {
