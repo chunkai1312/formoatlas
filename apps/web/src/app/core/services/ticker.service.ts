@@ -1,11 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { TickerOhlc } from '../models/ticker-ohlc.model';
 import { SectorFlowSnapshot } from '../models/sector-flow-snapshot.model';
 import { HotStocksResponse } from '../models/hot-stocks.model';
 import { MarketMapResponse } from '../models/market-map.model';
+import { TickerMetadata } from '../models/ticker-metadata.model';
 
 @Injectable({ providedIn: 'root' })
 export class TickerService {
@@ -14,6 +15,9 @@ export class TickerService {
   private readonly sectorFlowUrl = '/api/marketdata/sector-flow';
   private readonly hotStocksUrl = '/api/marketdata/hot-stocks';
   private readonly marketMapUrl = '/api/marketdata/market-map';
+  private readonly tickerMetadataUrl = '/api/marketdata/ticker-metadata';
+  private readonly tickerMetadataCache = new Map<string, TickerMetadata>();
+  private readonly tickerMetadataQueried = new Set<string>();
 
   getTicker(symbol: string, startDate: string, endDate: string): Observable<TickerOhlc[]> {
     return this.http.get<TickerOhlc[]>(this.baseUrl, {
@@ -48,6 +52,36 @@ export class TickerService {
     if (market) params['market'] = market;
     return this.http.get<MarketMapResponse>(this.marketMapUrl, { params }).pipe(
       map(result => result.date === date ? result : { date, market: market ?? 'TSE', sectors: [] })
+    );
+  }
+
+  getTickerMetadata(symbols: string[]): Observable<TickerMetadata[]> {
+    const normalized = [...new Set(symbols.map(symbol => symbol.trim().toUpperCase()).filter(Boolean))];
+    const cached = normalized
+      .map(symbol => this.tickerMetadataCache.get(symbol))
+      .filter((item): item is TickerMetadata => !!item);
+    const missing = normalized.filter(symbol => !this.tickerMetadataQueried.has(symbol));
+
+    if (!missing.length) {
+      return of(cached);
+    }
+
+    return this.http.get<TickerMetadata[]>(this.tickerMetadataUrl, {
+      params: { symbols: missing.join(',') },
+    }).pipe(
+      tap(items => {
+        for (const symbol of missing) {
+          this.tickerMetadataQueried.add(symbol);
+        }
+        for (const item of items) {
+          this.tickerMetadataCache.set(item.symbol, item);
+        }
+      }),
+      map(() => {
+        return normalized
+          .map(symbol => this.tickerMetadataCache.get(symbol))
+          .filter((item): item is TickerMetadata => !!item);
+      }),
     );
   }
 }
