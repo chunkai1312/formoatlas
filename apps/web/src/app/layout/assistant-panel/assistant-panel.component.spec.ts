@@ -7,6 +7,7 @@ import { DashboardStateService } from '../../core/services/dashboard-state.servi
 import { AgentConversationService } from '../../core/services/agent-conversation.service';
 import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LoginRequiredService } from '../../core/services/login-required.service';
 import {
   AgentConversationDetail,
   AgentConversationSummary,
@@ -40,6 +41,7 @@ describe('AssistantPanelComponent', () => {
           },
         },
         ResearchAssistantContextService,
+        LoginRequiredService,
       ],
     }).compileComponents();
 
@@ -195,12 +197,46 @@ describe('AssistantPanelComponent', () => {
           },
         },
         ResearchAssistantContextService,
+        LoginRequiredService,
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AssistantPanelComponent);
     fixture.detectChanges();
 
+    expect(conversationService.loadConversations).not.toHaveBeenCalled();
+  });
+
+  it('opens the shared login dialog from the FAB when logged out without opening the panel', async () => {
+    TestBed.resetTestingModule();
+    loggedIn = signal(false);
+    conversationService = createConversationService();
+
+    await TestBed.configureTestingModule({
+      imports: [AssistantPanelComponent],
+      providers: [
+        { provide: DashboardStateService, useClass: MockDashboardStateService },
+        { provide: AgentConversationService, useValue: conversationService },
+        {
+          provide: AuthService,
+          useValue: {
+            isLoggedIn: computed(() => loggedIn()),
+            login: vi.fn(),
+          },
+        },
+        ResearchAssistantContextService,
+        LoginRequiredService,
+      ],
+    }).compileComponents();
+
+    const loginRequired = TestBed.inject(LoginRequiredService);
+    fixture = TestBed.createComponent(AssistantPanelComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.open();
+
+    expect(loginRequired.isOpen()).toBe(true);
+    expect(fixture.componentInstance.isOpen()).toBe(false);
     expect(conversationService.loadConversations).not.toHaveBeenCalled();
   });
 });

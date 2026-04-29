@@ -12,10 +12,12 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription, finalize, map, of, switchMap } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
+import { LoginRequiredSurfaceComponent } from '../login-required-surface/login-required-surface.component';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { AgentConversationService } from '../../core/services/agent-conversation.service';
 import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LoginRequiredService } from '../../core/services/login-required.service';
 import {
   AgentConversationMessage,
   AgentConversationSummary,
@@ -31,7 +33,7 @@ type AssistantView = 'list' | 'session';
 @Component({
   selector: 'app-assistant-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, LoginRequiredSurfaceComponent],
   templateUrl: './assistant-panel.component.html',
   styleUrl: './assistant-panel.component.scss',
 })
@@ -40,6 +42,7 @@ export class AssistantPanelComponent implements OnInit {
   private readonly conversationService = inject(AgentConversationService);
   private readonly contextService = inject(ResearchAssistantContextService);
   private readonly authService = inject(AuthService);
+  private readonly loginRequired = inject(LoginRequiredService);
 
   readonly isLoggedIn = this.authService.isLoggedIn;
   readonly conversations = this.conversationService.conversations;
@@ -75,9 +78,14 @@ export class AssistantPanelComponent implements OnInit {
   }
 
   open() {
+    if (!this.isLoggedIn()) {
+      this.loginRequired.open();
+      return;
+    }
+
     this.isOpen.set(true);
     this.assistantView.set('list');
-    if (this.isLoggedIn() && !this.conversationService.loaded()) {
+    if (!this.conversationService.loaded()) {
       this.loadConversationList();
     }
   }
