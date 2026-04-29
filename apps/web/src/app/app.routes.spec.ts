@@ -6,5 +6,6 @@ describe('appRoutes', () => {
     expect(appRoutes.find((route) => route.path === 'market-overview')).toBeTruthy();
     expect(appRoutes.find((route) => route.path === 'sector-flow')).toBeTruthy();
     expect(appRoutes.find((route) => route.path === 'hot-stocks')).toBeTruthy();
+    expect(appRoutes.find((route) => route.path === 'watchlist')).toBeTruthy();
   });
 });

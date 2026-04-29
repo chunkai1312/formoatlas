@@ -29,5 +29,12 @@ export const appRoutes: Route[] = [
         (m) => m.HotStocksComponent
       ),
   },
+  {
+    path: 'watchlist',
+    loadComponent: () =>
+      import('./features/watchlist/watchlist.component').then(
+        (m) => m.WatchlistComponent
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

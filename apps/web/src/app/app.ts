@@ -6,11 +6,12 @@ import { catchError, of } from 'rxjs';
 import { ToolbarComponent } from './layout/toolbar/toolbar.component';
 import { FooterComponent } from './layout/footer/footer.component';
 import { AssistantPanelComponent } from './layout/assistant-panel/assistant-panel.component';
+import { LoginRequiredDialogComponent } from './layout/login-required-dialog/login-required-dialog.component';
 import { DashboardStateService } from './core/services/dashboard-state.service';
 import { TradingDateService } from './core/services/trading-date.service';
 
 @Component({
-  imports: [RouterModule, ToolbarComponent, FooterComponent, AssistantPanelComponent],
+  imports: [RouterModule, ToolbarComponent, FooterComponent, AssistantPanelComponent, LoginRequiredDialogComponent],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

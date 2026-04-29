@@ -1,0 +1,84 @@
+@if (!isLoggedIn()) {
+  <section class="watchlist-auth">
+    <app-login-required-surface
+      title="需要登入才能使用自選股"
+      description="登入後可以建立追蹤清單，並在市場頁快速加入或移除關注股票。"
+    ></app-login-required-surface>
+  </section>
+} @else {
+  <section class="watchlist-page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Watch List</p>
+        <h1>自選股</h1>
+        <p>追蹤你關注的股票，作為盤後研究與未來市場助理個人化觀察的基礎。</p>
+      </div>
+      <div class="count-pill">{{ watchList().length }} 檔追蹤中</div>
+    </header>
+
+    <form class="symbol-form" (ngSubmit)="addSymbol()">
+      <label for="watchlist-symbol">新增股票代號</label>
+      <div class="input-row">
+        <input
+          id="watchlist-symbol"
+          type="text"
+          autocomplete="off"
+          inputmode="text"
+          [ngModel]="symbolInput()"
+          name="symbol"
+          placeholder="例如 2330"
+          (ngModelChange)="setSymbolInput($event)"
+        />
+        <button type="submit" [disabled]="!normalizedInput() || !!savingSymbol()">
+          <mat-icon>add</mat-icon>
+          新增
+        </button>
+      </div>
+    </form>
+
+    @if (error()) {
+      <div class="error-state">
+        <span>{{ error() }}</span>
+        <button type="button" (click)="load()">重新載入</button>
+      </div>
+    }
+
+    @if (loading()) {
+      <div class="loading-state">正在載入自選股...</div>
+    } @else if (watchList().length) {
+      <div class="watchlist-table" aria-label="自選股清單">
+        <div class="table-header">
+          <span>股票</span>
+          <span>狀態</span>
+          <span>操作</span>
+        </div>
+        @for (row of rows(); track row.symbol) {
+          <div class="table-row">
+            <div class="symbol-cell">
+              <strong>{{ row.name }}</strong>
+              <small>{{ row.symbol }}</small>
+            </div>
+            <span class="status-cell">已加入</span>
+            <button
+              class="remove-btn"
+              type="button"
+              [disabled]="savingSymbol() === row.symbol"
+              [attr.aria-label]="'移除 ' + row.symbol + ' 自選股'"
+              (click)="removeSymbol(row.symbol)"
+            >
+              <mat-icon>delete</mat-icon>
+              移除
+            </button>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <mat-icon>star</mat-icon>
+        <h2>尚未建立自選股</h2>
+        <p>從熱門股、類股資金流，或輸入股票代號開始追蹤。</p>
+        <a routerLink="/hot-stocks" queryParamsHandling="preserve">查看熱門股</a>
+      </div>
+    }
+  </section>
+}
