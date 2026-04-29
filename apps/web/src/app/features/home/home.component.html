@@ -156,20 +156,37 @@
   <section class="market-map-section" aria-label="市場熱力圖">
     <div class="section-header">
       <h2>市場熱力圖</h2>
-      <p>矩形大小＝市值，顏色＝漲跌幅。</p>
-      <div class="market-tabs" role="tablist">
-        <button
-          role="tab"
-          class="tab-btn"
-          [class.active]="marketMapMarket() === 'TSE'"
-          (click)="marketMapMarket.set('TSE')"
-        >上市</button>
-        <button
-          role="tab"
-          class="tab-btn"
-          [class.active]="marketMapMarket() === 'OTC'"
-          (click)="marketMapMarket.set('OTC')"
-        >上櫃</button>
+      <p>矩形大小＝{{ marketMapSizeLabel() }}，顏色＝漲跌幅。</p>
+      <div class="map-controls">
+        <div class="market-tabs" role="tablist" aria-label="市場別">
+          <button
+            role="tab"
+            class="tab-btn"
+            [class.active]="marketMapMarket() === 'TSE'"
+            (click)="marketMapMarket.set('TSE')"
+          >上市</button>
+          <button
+            role="tab"
+            class="tab-btn"
+            [class.active]="marketMapMarket() === 'OTC'"
+            (click)="marketMapMarket.set('OTC')"
+          >上櫃</button>
+        </div>
+
+        <div class="size-toggle" role="group" aria-label="矩形大小">
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="marketMapSizeMode() === 'marketCap'"
+            (click)="marketMapSizeMode.set('marketCap')"
+          >市值</button>
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="marketMapSizeMode() === 'tradeValue'"
+            (click)="marketMapSizeMode.set('tradeValue')"
+          >成交金額</button>
+        </div>
       </div>
     </div>
 
@@ -178,12 +195,14 @@
         [data]="marketMap()"
         [loading]="loading().marketMap"
         [error]="errors().marketMap"
+        [sizeMode]="marketMapSizeMode()"
       />
     } @else {
       <app-market-map
         [data]="marketMapOtc()"
         [loading]="loading().marketMapOtc"
         [error]="errors().marketMapOtc"
+        [sizeMode]="marketMapSizeMode()"
       />
     }
   </section>

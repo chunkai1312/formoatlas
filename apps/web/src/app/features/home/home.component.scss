@@ -280,6 +280,13 @@
 }
 
 .market-map-section {
+  --map-control-bg: color-mix(in srgb, var(--bg-surface-elevated) 74%, var(--border-color));
+  --map-control-border: color-mix(in srgb, var(--border-color) 82%, transparent);
+  --map-control-active-bg: var(--bg-surface);
+  --map-control-hover-bg: color-mix(in srgb, var(--section-accent) 10%, transparent);
+  --map-control-active-ring: color-mix(in srgb, var(--section-accent) 20%, var(--border-color));
+  --map-control-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+
   .section-header {
     display: flex;
     align-items: baseline;
@@ -300,32 +307,75 @@
       flex-grow: 1;
     }
 
-    .market-tabs {
+    .map-controls {
       display: flex;
-      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+    }
+
+    .market-tabs,
+    .size-toggle {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 3px;
+      border: 1px solid var(--map-control-border);
+      border-radius: 7px;
+      background: var(--map-control-bg);
 
       .tab-btn {
-        padding: 4px 14px;
-        border-radius: 6px;
-        border: 1px solid var(--border-subtle, #374151);
+        min-width: 58px;
+        min-height: 27px;
+        padding: 3px 12px;
+        border-radius: 5px;
+        border: 0;
         background: transparent;
         color: var(--text-secondary);
         font-size: 0.82rem;
+        font-weight: 500;
         cursor: pointer;
-        transition: background 0.15s, color 0.15s;
+        transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 
         &.active {
-          background: var(--accent, #3b82f6);
-          border-color: var(--accent, #3b82f6);
-          color: #fff;
-          font-weight: 600;
+          background: var(--map-control-active-bg);
+          color: var(--text-primary);
+          box-shadow: var(--map-control-shadow), inset 0 0 0 1px var(--map-control-active-ring);
         }
 
         &:not(.active):hover {
-          background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+          background: var(--map-control-hover-bg);
           color: var(--text-primary);
         }
       }
+    }
+
+    .size-toggle .tab-btn {
+      min-width: 78px;
+    }
+  }
+}
+
+:host-context(.dark-mode) .market-map-section {
+  --map-control-bg: color-mix(in srgb, var(--bg-surface-elevated) 72%, #111827);
+  --map-control-border: color-mix(in srgb, var(--border-color) 78%, #111827);
+  --map-control-active-bg: color-mix(in srgb, var(--bg-surface-elevated) 82%, var(--text-secondary));
+  --map-control-hover-bg: color-mix(in srgb, var(--section-accent) 14%, transparent);
+  --map-control-active-ring: color-mix(in srgb, var(--section-accent) 24%, var(--border-color));
+  --map-control-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 520px) {
+  .market-map-section .section-header {
+    align-items: flex-start;
+
+    .map-controls {
+      width: 100%;
+    }
+
+    .market-tabs,
+    .size-toggle {
+      flex-wrap: wrap;
     }
   }
 }

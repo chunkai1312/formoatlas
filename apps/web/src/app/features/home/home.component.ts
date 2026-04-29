@@ -15,7 +15,7 @@ import { DashboardStateService } from '../../core/services/dashboard-state.servi
 import { MarketStatsService } from '../../core/services/market-stats.service';
 import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
 import { TickerService } from '../../core/services/ticker.service';
-import { MarketMapComponent } from './market-map/market-map.component';
+import { MarketMapComponent, MarketMapSizeMode } from './market-map/market-map.component';
 
 type PanelKey = 'barometer' | 'marketStats' | 'sectorFlow' | 'hotStocks' | 'marketMap' | 'marketMapOtc';
 
@@ -43,6 +43,7 @@ export class HomeComponent implements OnDestroy {
   readonly marketMap = signal<MarketMapResponse | null>(null);
   readonly marketMapOtc = signal<MarketMapResponse | null>(null);
   readonly marketMapMarket = signal<'TSE' | 'OTC'>('TSE');
+  readonly marketMapSizeMode = signal<MarketMapSizeMode>('marketCap');
 
   readonly loading = signal<Record<PanelKey, boolean>>({
     barometer: false,
@@ -106,6 +107,10 @@ export class HomeComponent implements OnDestroy {
       ? '資料載入中，暫不產生市場結論。'
       : '此日期資料不足，暫不產生市場結論。';
   });
+
+  readonly marketMapSizeLabel = computed(() =>
+    this.marketMapSizeMode() === 'tradeValue' ? '成交金額' : '市值'
+  );
 
   constructor() {
     this.researchContext.setContext({ route: 'home' });

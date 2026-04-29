@@ -327,6 +327,27 @@ describe('HomeComponent', () => {
     expect(text).toContain('台積電');
   });
 
+  it('defaults the market map size mode to market cap and switches to trade value locally', async () => {
+    fixture = TestBed.createComponent(HomeComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    let text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('矩形大小＝市值，顏色＝漲跌幅。');
+    expect(fixture.nativeElement.querySelector('.size-toggle')?.textContent).not.toContain('大小');
+    expect(tickerService.getMarketMap).toHaveBeenCalledTimes(2);
+
+    const tradeValueButton = [...fixture.nativeElement.querySelectorAll('.size-toggle .tab-btn')]
+      .find((button: HTMLButtonElement) => button.textContent?.trim() === '成交金額') as HTMLButtonElement;
+    tradeValueButton.click();
+    fixture.detectChanges();
+
+    text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('矩形大小＝成交金額，顏色＝漲跌幅。');
+    expect(tickerService.getMarketMap).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps the market summary neutral when all data is unavailable', async () => {
     barometerService.getBarometer.mockReturnValueOnce(
       throwError(() => new HttpErrorResponse({ status: 404 }))
