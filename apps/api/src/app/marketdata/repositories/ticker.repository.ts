@@ -448,6 +448,7 @@ export class TickerRepository {
       {
         $addFields: {
           industryCode: { $ifNull: ['$equityInfo.industryCode', '00'] },
+          tradeValueForMap: { $ifNull: ['$tradeValue', 0] },
           marketCap: {
             $cond: {
               if: {
@@ -466,11 +467,13 @@ export class TickerRepository {
         $group: {
           _id: '$industryCode',
           totalMarketCap: { $sum: '$marketCap' },
+          totalTradeValue: { $sum: '$tradeValueForMap' },
           stocks: {
             $push: {
               symbol: '$symbol',
               name: { $ifNull: ['$name', '$symbol'] },
               marketCap: '$marketCap',
+              tradeValue: '$tradeValueForMap',
               changePercent: { $ifNull: ['$changePercent', 0] },
               openPrice: { $ifNull: ['$openPrice', 0] },
               highPrice: { $ifNull: ['$highPrice', 0] },
@@ -488,6 +491,7 @@ export class TickerRepository {
       industryCode: doc._id as string,
       name: getIndustryName(doc._id as string),
       totalMarketCap: doc.totalMarketCap as number,
+      totalTradeValue: doc.totalTradeValue as number,
       stocks: doc.stocks as MarketMapItem[],
     }));
 
