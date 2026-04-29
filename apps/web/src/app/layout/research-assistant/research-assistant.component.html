@@ -3,7 +3,15 @@
 </button>
 
 @if (isOpen()) {
-  <div class="assistant-backdrop" (click)="close()"></div>
+  <div
+    class="assistant-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="關閉市場研究助理"
+    (click)="close()"
+    (keydown.enter)="close()"
+    (keydown.space)="close()"
+  ></div>
   <aside class="assistant-panel" aria-label="市場研究助理">
     <header class="panel-header">
       <div>
@@ -16,32 +24,66 @@
       </button>
     </header>
 
+    @if (isLoggedIn()) {
+      <section class="conversation-toolbar" aria-label="對話工具列">
+        <button class="action-btn" type="button" (click)="newConversation()">
+          <mat-icon>add</mat-icon>
+          新對話
+        </button>
+        <button class="icon-btn" type="button" (click)="deleteCurrentConversation()" [disabled]="!currentConversation()" aria-label="刪除目前對話">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </section>
+
+      @if (conversations().length) {
+        <section class="conversation-history" aria-label="對話紀錄">
+          <header class="history-header">
+            <span>對話紀錄</span>
+            <small>{{ conversations().length }} 筆</small>
+          </header>
+          <div class="conversation-list">
+            @for (conversation of conversations(); track conversation.id) {
+              <button
+                class="conversation-item"
+                type="button"
+                [class.active]="conversation.id === currentConversation()?.id"
+                (click)="selectConversation(conversation)"
+              >
+                <span>{{ conversation.title }}</span>
+                <small>{{ conversation.messageCount }} 則 / {{ conversation.lastMessageAt | date:'MM/dd HH:mm' }}</small>
+              </button>
+            }
+          </div>
+        </section>
+      }
+    }
+
     <form class="question-box" (ngSubmit)="submit()">
       @if (isLoggedIn()) {
-      <textarea
-        name="question"
-        rows="4"
-        maxlength="1000"
-        [ngModel]="question()"
-        (ngModelChange)="setQuestion($event)"
-        placeholder="問一個盤後研究問題，例如：今天偏多的主要證據是什麼？"
-      ></textarea>
-      <button class="submit-btn" type="submit" [disabled]="loading() || !question().trim()">
-        @if (loading()) {
-          分析中
-        } @else {
-          送出
-        }
-      </button>
-      } @else {
-      <div class="auth-gate">
-        <mat-icon class="auth-gate-icon">lock</mat-icon>
-        <p>需要登入才能使用研究助理</p>
-        <button class="login-btn" type="button" (click)="login()">
-          <mat-icon>login</mat-icon>
-          使用 Google 帳戶登入
+        <textarea
+          name="question"
+          rows="4"
+          maxlength="1000"
+          [ngModel]="question()"
+          (ngModelChange)="setQuestion($event)"
+          placeholder="問一個盤後研究問題，例如：今天偏多的主要證據是什麼？"
+        ></textarea>
+        <button class="submit-btn" type="submit" [disabled]="loading() || !question().trim()">
+          @if (loading()) {
+            分析中
+          } @else {
+            送出
+          }
         </button>
-      </div>
+      } @else {
+        <div class="auth-gate">
+          <mat-icon class="auth-gate-icon">lock</mat-icon>
+          <p>需要登入才能使用研究助理</p>
+          <button class="login-btn" type="button" (click)="login()">
+            <mat-icon>login</mat-icon>
+            使用 Google 帳戶登入
+          </button>
+        </div>
       }
     </form>
 
@@ -64,69 +106,92 @@
       </section>
     }
 
-    @if (answer(); as result) {
-      <section class="answer-section">
-        <h3>摘要</h3>
-        <p>{{ result.summary }}</p>
-      </section>
+    <section class="thread-section" aria-label="對話內容">
+      @if (currentConversation(); as conversation) {
+        @for (message of conversation.messages; track message.id) {
+          @if (message.role === 'user') {
+            <article class="message user-message">
+              <div class="message-meta">{{ messageContextLabel(message) }}</div>
+              <p>{{ message.question }}</p>
+            </article>
+          } @else if (message.status === 'failed') {
+            <article class="message assistant-message failed-message">
+              <div class="message-meta">{{ messageContextLabel(message) }}</div>
+              <p>{{ message.error || '市場研究助理暫時無法使用，請稍後再試。' }}</p>
+            </article>
+          } @else if (message.answer; as result) {
+            <article class="message assistant-message">
+              <div class="message-meta">{{ messageContextLabel(message) }}</div>
+              <section class="answer-section">
+                <h3>摘要</h3>
+                <p>{{ result.summary }}</p>
+              </section>
 
-      <section class="answer-section">
-        <h3>重點</h3>
-        @for (finding of result.keyFindings; track finding.title) {
-          <article class="finding">
-            <h4>{{ finding.title }}</h4>
-            <p>{{ finding.detail }}</p>
-            @if (finding.evidenceIndexes.length) {
-              <div class="finding-evidence">
-                @for (index of finding.evidenceIndexes; track index) {
-                  <span>{{ evidenceLabel(index) }}</span>
+              <section class="answer-section">
+                <h3>重點</h3>
+                @for (finding of result.keyFindings; track finding.title) {
+                  <article class="finding">
+                    <h4>{{ finding.title }}</h4>
+                    <p>{{ finding.detail }}</p>
+                    @if (finding.evidenceIndexes.length) {
+                      <div class="finding-evidence">
+                        @for (index of finding.evidenceIndexes; track index) {
+                          <span>{{ evidenceLabel(result, index) }}</span>
+                        }
+                      </div>
+                    }
+                  </article>
                 }
-              </div>
-            }
-          </article>
-        }
-      </section>
+              </section>
 
-      @if (result.evidence.length) {
-        <section class="answer-section">
-          <h3>證據</h3>
-          <div class="evidence-list">
-            @for (item of result.evidence; track item.label) {
-              <div class="evidence-item">
-                <strong>{{ item.label }}</strong>
-                <span>
-                  {{ item.sourceType }}
-                  @if (item.market) { / {{ item.market }} }
-                  @if (item.symbol) { / {{ item.symbol }} }
-                  @if (item.sector) { / {{ item.sector }} }
-                  @if (item.date) { / {{ item.date }} }
-                  @if (item.startDate && item.endDate) { / {{ item.startDate }} - {{ item.endDate }} }
-                </span>
-              </div>
-            }
-          </div>
-        </section>
-      }
+              @if (result.evidence.length) {
+                <section class="answer-section">
+                  <h3>證據</h3>
+                  <div class="evidence-list">
+                    @for (item of result.evidence; track item.label) {
+                      <div class="evidence-item">
+                        <strong>{{ item.label }}</strong>
+                        <span>
+                          {{ item.sourceType }}
+                          @if (item.market) { / {{ item.market }} }
+                          @if (item.symbol) { / {{ item.symbol }} }
+                          @if (item.sector) { / {{ item.sector }} }
+                          @if (item.date) { / {{ item.date }} }
+                          @if (item.startDate && item.endDate) { / {{ item.startDate }} - {{ item.endDate }} }
+                        </span>
+                      </div>
+                    }
+                  </div>
+                </section>
+              }
 
-      @if (result.warnings.length) {
-        <section class="answer-section warning-section">
-          <h3>限制</h3>
-          @for (warning of result.warnings; track warning) {
-            <p>{{ warning }}</p>
+              @if (result.warnings.length) {
+                <section class="answer-section warning-section">
+                  <h3>限制</h3>
+                  @for (warning of result.warnings; track warning) {
+                    <p>{{ warning }}</p>
+                  }
+                </section>
+              }
+
+              @if (result.followUpQuestions.length) {
+                <section class="answer-section">
+                  <h3>可追問</h3>
+                  <div class="follow-ups">
+                    @for (followUp of result.followUpQuestions; track followUp) {
+                      <button type="button" (click)="useFollowUp(followUp)">{{ followUp }}</button>
+                    }
+                  </div>
+                </section>
+              }
+            </article>
           }
-        </section>
+        } @empty {
+          <div class="empty-thread">尚無對話紀錄</div>
+        }
+      } @else if (isLoggedIn()) {
+        <div class="empty-thread">尚無對話紀錄</div>
       }
-
-      @if (result.followUpQuestions.length) {
-        <section class="answer-section">
-          <h3>可追問</h3>
-          <div class="follow-ups">
-            @for (followUp of result.followUpQuestions; track followUp) {
-              <button type="button" (click)="useFollowUp(followUp)">{{ followUp }}</button>
-            }
-          </div>
-        </section>
-      }
-    }
+    </section>
   </aside>
 }
