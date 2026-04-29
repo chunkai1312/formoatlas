@@ -17,6 +17,7 @@
     </header>
 
     <form class="question-box" (ngSubmit)="submit()">
+      @if (isLoggedIn()) {
       <textarea
         name="question"
         rows="4"
@@ -32,6 +33,16 @@
           送出
         }
       </button>
+      } @else {
+      <div class="auth-gate">
+        <mat-icon class="auth-gate-icon">lock</mat-icon>
+        <p>需要登入才能使用研究助理</p>
+        <button class="login-btn" type="button" (click)="login()">
+          <mat-icon>login</mat-icon>
+          使用 Google 帳戶登入
+        </button>
+      </div>
+      }
     </form>
 
     @if (error()) {

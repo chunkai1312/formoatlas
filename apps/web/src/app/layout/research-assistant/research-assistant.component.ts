@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { MarketResearchAgentService } from '../../core/services/market-research-agent.service';
 import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
+import { AuthService } from '../../core/services/auth.service';
 import { MarketResearchResponse, MarketResearchStreamEvent } from '../../core/models/market-research-agent.model';
 
 @Component({
@@ -20,7 +21,9 @@ export class ResearchAssistantComponent {
   private readonly dashboardState = inject(DashboardStateService);
   private readonly agentService = inject(MarketResearchAgentService);
   private readonly contextService = inject(ResearchAssistantContextService);
+  private readonly authService = inject(AuthService);
 
+  readonly isLoggedIn = this.authService.isLoggedIn;
   readonly isOpen = signal(false);
   readonly question = signal('');
   readonly loading = signal(false);
@@ -48,6 +51,10 @@ export class ResearchAssistantComponent {
 
   close() {
     this.isOpen.set(false);
+  }
+
+  login() {
+    this.authService.login();
   }
 
   setQuestion(value: string) {
