@@ -52,6 +52,11 @@
     text-align: center;
   }
 
+  .col-watch {
+    width: 42px;
+    text-align: center;
+  }
+
   .col-symbol {
     text-align: left;
     font-variant-numeric: tabular-nums;
@@ -73,6 +78,38 @@
 
   .negative {
     color: var(--color-negative);
+  }
+}
+
+.watch-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:hover {
+    color: var(--section-accent);
+    background: color-mix(in srgb, var(--section-accent) 12%, transparent);
+  }
+
+  &.active {
+    color: var(--color-strong-bull);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 }
 

@@ -12,14 +12,20 @@
         metricLabel="漲跌幅"
         metricKey="changePercent"
         metricKind="percent"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().movers.gainers"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
       <app-hot-stock-ranking-table
         title="跌幅榜"
         metricLabel="漲跌幅"
         metricKey="changePercent"
         metricKind="percent"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().movers.losers"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
     </div>
   </section>
@@ -32,14 +38,20 @@
         metricLabel="成交量(張)"
         metricKey="tradeVolume"
         metricKind="volume"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().actives.byVolume"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
       <app-hot-stock-ranking-table
         title="成交值"
         metricLabel="成交值(億)"
         metricKey="tradeValue"
         metricKind="value"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().actives.byValue"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
     </div>
   </section>
@@ -55,7 +67,10 @@
         consecutiveDaysKey="finiConsecutiveDays"
         secondaryNetKey="sitcNet"
         secondaryLabel="投信"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().institutional.finiBuy"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
       <app-hot-stock-ranking-table
         title="外資賣超"
@@ -65,7 +80,10 @@
         consecutiveDaysKey="finiConsecutiveDays"
         secondaryNetKey="sitcNet"
         secondaryLabel="投信"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().institutional.finiSell"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
     </div>
   </section>
@@ -81,7 +99,10 @@
         consecutiveDaysKey="sitcConsecutiveDays"
         secondaryNetKey="finiNet"
         secondaryLabel="外資"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().institutional.sitcBuy"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
       <app-hot-stock-ranking-table
         title="投信賣超"
@@ -91,7 +112,10 @@
         consecutiveDaysKey="sitcConsecutiveDays"
         secondaryNetKey="finiNet"
         secondaryLabel="外資"
+        [watchList]="watchList()"
+        [pendingWatchSymbols]="pendingWatchSymbols()"
         [rows]="data().institutional.sitcSell"
+        (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
     </div>
   </section>

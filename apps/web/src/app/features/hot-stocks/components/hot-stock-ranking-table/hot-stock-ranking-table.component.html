@@ -8,6 +8,7 @@
           <thead>
             <tr>
               <th class="col-rank">#</th>
+              <th class="col-watch">自選</th>
               <th class="col-symbol">代號</th>
               <th class="col-name">名稱</th>
               <th class="col-num">收盤</th>
@@ -20,6 +21,18 @@
             @for (row of rows(); track row.symbol; let i = $index) {
               <tr>
                 <td class="col-rank">{{ i + 1 }}</td>
+                <td class="col-watch">
+                  <button
+                    class="watch-toggle"
+                    type="button"
+                    [class.active]="isWatched(row.symbol)"
+                    [disabled]="isWatchPending(row.symbol)"
+                    [attr.aria-label]="watchlistLabel(row)"
+                    (click)="toggleWatchlist(row)"
+                  >
+                    <mat-icon>{{ isWatched(row.symbol) ? 'star' : 'star_border' }}</mat-icon>
+                  </button>
+                </td>
                 <td class="col-symbol">{{ row.symbol }}</td>
                 <td class="col-name">
                   {{ row.name }}

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { HotStockRankRow } from '../../../../core/models/hot-stocks.model';
 
 type MetricKey = 'tradeVolume' | 'tradeValue' | 'finiNet' | 'sitcNet' | 'changePercent';
@@ -11,7 +12,7 @@ type SecondaryNetKey = 'finiNet' | 'sitcNet';
 @Component({
   selector: 'app-hot-stock-ranking-table',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule, MatCardModule, MatIconModule],
   templateUrl: './hot-stock-ranking-table.component.html',
   styleUrl: './hot-stock-ranking-table.component.scss',
 })
@@ -24,6 +25,9 @@ export class HotStockRankingTableComponent {
   readonly consecutiveDaysKey = input<ConsecutiveDaysKey | null>(null);
   readonly secondaryNetKey = input<SecondaryNetKey | null>(null);
   readonly secondaryLabel = input<string | null>(null);
+  readonly watchList = input<string[]>([]);
+  readonly pendingWatchSymbols = input<Set<string>>(new Set<string>());
+  readonly watchlistToggle = output<HotStockRankRow>();
 
   metricValue(row: HotStockRankRow): number | null {
     return row[this.metricKey()] ?? null;
@@ -71,6 +75,25 @@ export class HotStockRankingTableComponent {
   secondaryBadgeClass(row: HotStockRankRow): string {
     const primaryVal = row[this.metricKey() as SecondaryNetKey] ?? 0;
     return primaryVal > 0 ? 'badge badge--buy-secondary' : 'badge badge--sell-secondary';
+  }
+
+  isWatched(symbol: string): boolean {
+    return this.watchList().includes(symbol);
+  }
+
+  isWatchPending(symbol: string): boolean {
+    return this.pendingWatchSymbols().has(symbol);
+  }
+
+  watchlistLabel(row: HotStockRankRow): string {
+    return this.isWatched(row.symbol)
+      ? `移除 ${row.symbol} ${row.name} 自選股`
+      : `加入 ${row.symbol} ${row.name} 自選股`;
+  }
+
+  toggleWatchlist(row: HotStockRankRow) {
+    if (this.isWatchPending(row.symbol)) return;
+    this.watchlistToggle.emit(row);
   }
 
   fmtPrice(value: number) {
