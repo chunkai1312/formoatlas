@@ -5,6 +5,8 @@ import type { EChartsOption } from 'echarts';
 import { ThemeService } from '../../../core/services/theme.service';
 import { MarketMapResponse, MarketMapItem } from '../../../core/models/market-map.model';
 
+export type MarketMapSizeMode = 'marketCap' | 'tradeValue';
+
 @Component({
   selector: 'app-market-map',
   standalone: true,
@@ -16,6 +18,7 @@ export class MarketMapComponent {
   readonly data = input<MarketMapResponse | null>(null);
   readonly loading = input<boolean>(false);
   readonly error = input<string | null>(null);
+  readonly sizeMode = input<MarketMapSizeMode>('marketCap');
 
   private readonly themeService = inject(ThemeService);
   readonly isDark = this.themeService.isDark;
@@ -37,24 +40,28 @@ export class MarketMapComponent {
   readonly chartOption = computed<EChartsOption | null>(() => {
     const response = this.data();
     const dark = this.isDark();
+    const sizeMode = this.sizeMode();
     if (!response || !response.sectors.length) return null;
 
     const seriesData = response.sectors.map(sector => {
-      const totalCap = sector.totalMarketCap || 1;
+      const sectorSize = this.sizeValue(sector, sizeMode);
+      const totalWeight = sectorSize || 1;
       const weightedChange = sector.stocks.reduce(
-        (sum, s) => sum + s.changePercent * (s.marketCap / totalCap),
+        (sum, s) => sum + s.changePercent * (this.sizeValue(s, sizeMode) / totalWeight),
         0,
       );
       return {
         name: sector.name,
         // value[0] = size, value[1] = changePercent for visualMap
-        value: [sector.totalMarketCap, weightedChange],
+        value: [sectorSize, weightedChange],
         children: sector.stocks.map((stock: MarketMapItem) => ({
           name: stock.name,
-          value: [stock.marketCap, stock.changePercent],
+          value: [this.sizeValue(stock, sizeMode), stock.changePercent],
           // Extra fields carried for tooltip
           symbol: stock.symbol,
           changePercent: stock.changePercent,
+          marketCap: stock.marketCap,
+          tradeValue: stock.tradeValue,
           openPrice: stock.openPrice,
           highPrice: stock.highPrice,
           lowPrice: stock.lowPrice,
@@ -62,7 +69,9 @@ export class MarketMapComponent {
           tradeVolume: stock.tradeVolume,
         })),
       };
-    });
+    }).filter(sector => sector.value[0] > 0);
+
+    if (!seriesData.length) return null;
 
     return {
       animation: false,
@@ -208,4 +217,16 @@ export class MarketMapComponent {
       ],
     } as EChartsOption;
   });
+
+  private sizeValue(
+    item: MarketMapItem | { totalMarketCap: number; totalTradeValue: number },
+    sizeMode: MarketMapSizeMode,
+  ): number {
+    const raw = 'symbol' in item
+      ? (sizeMode === 'tradeValue' ? item.tradeValue : item.marketCap)
+      : (sizeMode === 'tradeValue' ? item.totalTradeValue : item.totalMarketCap);
+
+    return Number.isFinite(raw) && raw > 0 ? raw : 0;
+  }
+
 }

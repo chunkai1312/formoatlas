@@ -2,6 +2,7 @@ export interface MarketMapItem {
   symbol: string;
   name: string;
   marketCap: number;
+  tradeValue: number;
   changePercent: number;
   openPrice: number;
   highPrice: number;
@@ -14,6 +15,7 @@ export interface MarketMapSector {
   industryCode: string;
   name: string;
   totalMarketCap: number;
+  totalTradeValue: number;
   stocks: MarketMapItem[];
 }
 
