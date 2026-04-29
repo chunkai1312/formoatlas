@@ -32,9 +32,19 @@ function buildSampleData(totalDays: number, endDate: string): TickerOhlc[] {
 }
 
 class MockResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  private readonly targets = new Set<Element>();
+
+  observe(target: Element) {
+    this.targets.add(target);
+  }
+
+  unobserve(target: Element) {
+    this.targets.delete(target);
+  }
+
+  disconnect() {
+    this.targets.clear();
+  }
 }
 
 @Component({

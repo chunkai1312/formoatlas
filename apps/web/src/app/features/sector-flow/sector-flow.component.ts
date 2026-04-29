@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { TickerService } from '../../core/services/ticker.service';
@@ -27,7 +27,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   templateUrl: './sector-flow.component.html',
   styleUrl: './sector-flow.component.scss',
 })
-export class SectorFlowComponent implements OnInit {
+export class SectorFlowComponent {
   private dashState = inject(DashboardStateService);
   private tickerService = inject(TickerService);
   private researchContext = inject(ResearchAssistantContextService);
@@ -80,8 +80,6 @@ export class SectorFlowComponent implements OnInit {
         this.updateResearchContext();
       });
   }
-
-  ngOnInit() {}
 
   private updateResearchContext() {
     this.researchContext.setContext({

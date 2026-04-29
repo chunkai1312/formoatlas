@@ -153,6 +153,7 @@ describe('HomeComponent', () => {
   let tickerService: {
     getSectorFlow: ReturnType<typeof vi.fn>;
     getHotStocks: ReturnType<typeof vi.fn>;
+    getMarketMap: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -241,6 +242,11 @@ describe('HomeComponent', () => {
         },
       ])),
       getHotStocks: vi.fn().mockReturnValue(of(hotStocks)),
+      getMarketMap: vi.fn().mockReturnValue(of({
+        date: '2026-04-24',
+        market: 'TSE',
+        sectors: [],
+      })),
     };
 
     await TestBed.configureTestingModule({
