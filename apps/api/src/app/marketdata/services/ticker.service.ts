@@ -25,11 +25,11 @@ export class TickerService {
 
   async updateTickers(date: string = DateTime.local().toISODate()) {
     const updates = [
-      // [this.updateTwseIndicesQuotes, this.updateTpexIndicesQuotes],
-      // [this.updateTwseMarketTrades, this.updateTpexMarketTrades],
-      // [this.updateTwseIndicesTrades, this.updateTpexIndicesTrades],
-      // [this.updateTwseEquitiesQuotes, this.updateTpexEquitiesQuotes],
-      // [this.updateTwseEquitiesInstInvestorsTrades, this.updateTpexEquitiesInstInvestorsTrades],
+      [this.updateTwseIndicesQuotes, this.updateTpexIndicesQuotes],
+      [this.updateTwseMarketTrades, this.updateTpexMarketTrades],
+      [this.updateTwseIndicesTrades, this.updateTpexIndicesTrades],
+      [this.updateTwseEquitiesQuotes, this.updateTpexEquitiesQuotes],
+      [this.updateTwseEquitiesInstInvestorsTrades, this.updateTpexEquitiesInstInvestorsTrades],
       [this.updateTwseEquityProfiles, this.updateTpexEquityProfiles],
     ];
 
