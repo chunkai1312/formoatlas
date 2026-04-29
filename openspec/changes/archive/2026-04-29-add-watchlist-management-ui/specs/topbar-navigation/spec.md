@@ -1,8 +1,4 @@
-## Purpose
-
-定義應用程式 TopBar 導覽連結、active 狀態呈現，以及主要頁面 route 的功能需求，確保使用者能在大盤籌碼、資金流向、熱門個股與自選股頁面之間切換。
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: TopBar navigation links
 應用程式 TopBar SHALL 顯示 `FormoAtlas` 產品名稱，LOGO accessibility text SHALL 使用 FormoAtlas identity，且 logo 與產品名稱 SHALL 作為回首頁 `/` 的連結。TopBar SHALL 顯示「大盤總覽」、「資金流向」、「熱門個股」與「自選股」功能導覽入口，以填色 pill 樣式呈現 active 狀態；未登入使用者選擇「自選股」時 SHALL 顯示登入提示，而不是直接呼叫 watch list API。
@@ -69,26 +65,7 @@
 - **WHEN** 螢幕閱讀器讀取 TopBar logo
 - **THEN** logo image SHALL expose `FormoAtlas logo` as its alternative text
 
-### Requirement: Sector flow page route
-應用程式 SHALL 在 `/sector-flow` 路徑提供資金流向頁面，以 lazy-load 方式載入 `SectorFlowComponent`。
-
-#### Scenario: Navigate to sector-flow
-- **WHEN** 使用者導向 `/sector-flow`
-- **THEN** `SectorFlowComponent` SHALL 成功載入並渲染
-
-### Requirement: Hot stocks page route
-應用程式 SHALL 在 `/hot-stocks` 路徑提供熱門個股頁面，以 lazy-load 方式載入熱門個股頁面 component。
-
-#### Scenario: Navigate to hot-stocks
-- **WHEN** 使用者導向 `/hot-stocks`
-- **THEN** 熱門個股頁面 component SHALL 成功載入並渲染
-
-### Requirement: Market overview page route
-應用程式 SHALL 在 `/market-overview` 路徑提供大盤總覽頁面，以 lazy-load 方式載入既有大盤總覽內容。
-
-#### Scenario: Navigate to market-overview
-- **WHEN** 使用者導向 `/market-overview`
-- **THEN** 大盤總覽頁面 SHALL 成功載入並渲染晴雨表、大盤走勢、今日籌碼速覽與籌碼指標趨勢
+## ADDED Requirements
 
 ### Requirement: Watch List page route
 應用程式 SHALL 在 `/watchlist` 路徑提供自選股管理頁面，以 lazy-load 方式載入 watch list page component。
