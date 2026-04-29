@@ -1,0 +1,22 @@
+@if (loginRequired.isOpen()) {
+  <div
+    class="login-dialog-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="關閉登入提示"
+    (click)="loginRequired.close()"
+    (keydown.enter)="loginRequired.close()"
+    (keydown.space)="loginRequired.close()"
+  ></div>
+  <section class="login-dialog" role="dialog" aria-modal="true" aria-label="需要登入">
+    <button
+      class="icon-btn"
+      type="button"
+      aria-label="關閉登入提示"
+      (click)="loginRequired.close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <app-login-required-surface></app-login-required-surface>
+  </section>
+}

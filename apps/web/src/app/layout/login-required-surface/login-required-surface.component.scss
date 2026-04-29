@@ -1,0 +1,48 @@
+.login-required-surface {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 22px;
+  text-align: center;
+  color: var(--text-primary);
+
+  .surface-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 44px;
+    color: var(--section-accent);
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    max-width: 360px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+}
+
+.login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 14px;
+  color: white;
+  background: var(--toolbar-bg);
+  font-weight: 700;
+  cursor: pointer;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
