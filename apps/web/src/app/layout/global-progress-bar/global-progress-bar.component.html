@@ -1,0 +1,8 @@
+<div
+  class="global-progress"
+  aria-hidden="true"
+  [class.is-visible]="progress.visible()"
+  [class.is-completing]="progress.completing()"
+>
+  <div class="global-progress__bar" [style.transform]="'scaleX(' + progress.progress() / 100 + ')'"></div>
+</div>
