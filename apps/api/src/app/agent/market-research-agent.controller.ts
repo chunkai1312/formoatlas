@@ -1,9 +1,10 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { MarketResearchQueryDto } from './dto/market-research-query.dto';
 import { MarketResearchStreamEvent } from './market-research-agent.events';
 import { MarketResearchAgentService } from './market-research-agent.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('agent')
 @Controller('agent')
@@ -11,12 +12,14 @@ export class MarketResearchAgentController {
   constructor(private readonly agentService: MarketResearchAgentService) {}
 
   @ApiOperation({ summary: '互動式台股盤後研究助理' })
+  @UseGuards(JwtAuthGuard)
   @Post('market-research')
   query(@Body() body: MarketResearchQueryDto) {
     return this.agentService.query(body);
   }
 
   @ApiOperation({ summary: '互動式台股盤後研究助理 streaming' })
+  @UseGuards(JwtAuthGuard)
   @Post('market-research/stream')
   async queryStream(@Body() body: MarketResearchQueryDto, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
