@@ -29,13 +29,13 @@ import {
 type AssistantView = 'list' | 'session';
 
 @Component({
-  selector: 'app-research-assistant',
+  selector: 'app-assistant-panel',
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule],
-  templateUrl: './research-assistant.component.html',
-  styleUrl: './research-assistant.component.scss',
+  templateUrl: './assistant-panel.component.html',
+  styleUrl: './assistant-panel.component.scss',
 })
-export class ResearchAssistantComponent implements OnInit {
+export class AssistantPanelComponent implements OnInit {
   private readonly dashboardState = inject(DashboardStateService);
   private readonly conversationService = inject(AgentConversationService);
   private readonly contextService = inject(ResearchAssistantContextService);

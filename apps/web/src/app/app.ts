@@ -5,12 +5,12 @@ import { DateTime } from 'luxon';
 import { catchError, of } from 'rxjs';
 import { ToolbarComponent } from './layout/toolbar/toolbar.component';
 import { FooterComponent } from './layout/footer/footer.component';
-import { ResearchAssistantComponent } from './layout/research-assistant/research-assistant.component';
+import { AssistantPanelComponent } from './layout/assistant-panel/assistant-panel.component';
 import { DashboardStateService } from './core/services/dashboard-state.service';
 import { TradingDateService } from './core/services/trading-date.service';
 
 @Component({
-  imports: [RouterModule, ToolbarComponent, FooterComponent, ResearchAssistantComponent],
+  imports: [RouterModule, ToolbarComponent, FooterComponent, AssistantPanelComponent],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

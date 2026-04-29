@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { computed, signal } from '@angular/core';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
-import { ResearchAssistantComponent } from './research-assistant.component';
+import { AssistantPanelComponent } from './assistant-panel.component';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { AgentConversationService } from '../../core/services/agent-conversation.service';
 import { ResearchAssistantContextService } from '../../core/services/research-assistant-context.service';
@@ -17,8 +17,8 @@ class MockDashboardStateService {
   readonly endDate = computed(() => this.selectedDate());
 }
 
-describe('ResearchAssistantComponent', () => {
-  let fixture: ComponentFixture<ResearchAssistantComponent>;
+describe('AssistantPanelComponent', () => {
+  let fixture: ComponentFixture<AssistantPanelComponent>;
   let conversationService: ReturnType<typeof createConversationService>;
   let contextService: ResearchAssistantContextService;
   let loggedIn: ReturnType<typeof signal<boolean>>;
@@ -28,7 +28,7 @@ describe('ResearchAssistantComponent', () => {
     conversationService = createConversationService();
 
     await TestBed.configureTestingModule({
-      imports: [ResearchAssistantComponent],
+      imports: [AssistantPanelComponent],
       providers: [
         { provide: DashboardStateService, useClass: MockDashboardStateService },
         { provide: AgentConversationService, useValue: conversationService },
@@ -45,7 +45,7 @@ describe('ResearchAssistantComponent', () => {
 
     contextService = TestBed.inject(ResearchAssistantContextService);
     contextService.setContext({ route: 'market-overview', market: 'TSE' });
-    fixture = TestBed.createComponent(ResearchAssistantComponent);
+    fixture = TestBed.createComponent(AssistantPanelComponent);
     fixture.detectChanges();
   });
 
@@ -183,7 +183,7 @@ describe('ResearchAssistantComponent', () => {
     conversationService = createConversationService();
 
     await TestBed.configureTestingModule({
-      imports: [ResearchAssistantComponent],
+      imports: [AssistantPanelComponent],
       providers: [
         { provide: DashboardStateService, useClass: MockDashboardStateService },
         { provide: AgentConversationService, useValue: conversationService },
@@ -198,7 +198,7 @@ describe('ResearchAssistantComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ResearchAssistantComponent);
+    fixture = TestBed.createComponent(AssistantPanelComponent);
     fixture.detectChanges();
 
     expect(conversationService.loadConversations).not.toHaveBeenCalled();
