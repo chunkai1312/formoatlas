@@ -8,6 +8,7 @@ import { DateTime } from 'luxon';
 import { MarketDataModule } from './marketdata/marketdata.module';
 import { BarometerModule } from './barometer/barometer.module';
 import { MarketResearchAgentModule } from './agent/market-research-agent.module';
+import { AuthModule } from './auth/auth.module';
 import { MarketStatsService } from './marketdata/services/market-stats.service';
 import { TickerService } from './marketdata/services/ticker.service';
 
@@ -22,6 +23,7 @@ import { TickerService } from './marketdata/services/ticker.service';
     MarketDataModule,
     BarometerModule,
     MarketResearchAgentModule,
+    AuthModule,
   ]
 })
 export class AppModule implements OnApplicationBootstrap {
