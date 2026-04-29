@@ -136,6 +136,46 @@
     }
   }
 
+  .user-avatar-btn {
+    padding: 0;
+    width: 36px;
+    height: 36px;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .login-btn {
+    color: white !important;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+}
+
+::ng-deep .user-menu-header {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid var(--border-color);
+  pointer-events: none;
+
+  .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+  }
+
+  .user-email {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
 }
 
 @media (max-width: 760px) {

@@ -52,5 +52,28 @@
   <button mat-icon-button (click)="themeService.toggle()" [attr.aria-label]="isDark() ? '切換淺色模式' : '切換深色模式'">
     <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
   </button>
+
+
+  <!-- 登入狀態 -->
+  @if (isLoggedIn()) {
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar-btn" [attr.aria-label]="'使用者選單：' + currentUser()?.name">
+      <img [src]="currentUser()?.picture" [alt]="currentUser()?.name" class="user-avatar" referrerpolicy="no-referrer" />
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <div class="user-menu-header">
+        <span class="user-name">{{ currentUser()?.name }}</span>
+        <span class="user-email">{{ currentUser()?.email }}</span>
+      </div>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>登出</span>
+      </button>
+    </mat-menu>
+  } @else {
+    <button mat-button class="login-btn" (click)="login()" aria-label="使用 Google 帳戶登入">
+      <mat-icon>login</mat-icon>
+      <span>登入</span>
+    </button>
+  }
 </mat-toolbar>
 <!-- 提供 MatNativeDateModule 令 datepicker 正常運作 -->

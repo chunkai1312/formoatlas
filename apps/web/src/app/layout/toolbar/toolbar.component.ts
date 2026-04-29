@@ -10,9 +10,11 @@ import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatMenuModule } from '@angular/material/menu';
 import { DateTime } from 'luxon';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-toolbar',
@@ -27,6 +29,7 @@ import { ThemeService } from '../../core/services/theme.service';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatMenuModule,
   ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
@@ -34,7 +37,10 @@ import { ThemeService } from '../../core/services/theme.service';
 export class ToolbarComponent {
   private state = inject(DashboardStateService);
   readonly themeService = inject(ThemeService);
+  readonly authService = inject(AuthService);
   readonly isDark = this.themeService.isDark;
+  readonly currentUser = this.authService.currentUser;
+  readonly isLoggedIn = this.authService.isLoggedIn;
 
   readonly selectedDateObj = computed(() =>
     new Date(this.state.selectedDate() + 'T00:00:00')
@@ -65,6 +71,14 @@ export class ToolbarComponent {
   onDatePickerChange(date: Date | null) {
     if (!date) return;
     this.state.setDate(DateTime.fromJSDate(date).toISODate() ?? '');
+  }
+
+  login() {
+    this.authService.login();
+  }
+
+  logout() {
+    this.authService.logout().subscribe();
   }
 
 }
