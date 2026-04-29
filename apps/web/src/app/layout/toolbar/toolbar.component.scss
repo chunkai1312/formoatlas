@@ -52,12 +52,16 @@
       align-items: center;
       padding: 4px 12px;
       border-radius: 999px;
+      border: 0;
       font-size: 0.875rem;
       font-weight: 500;
       color: rgba(255, 255, 255, 0.7);
+      background: transparent;
       text-decoration: none;
       transition: background 0.2s, color 0.2s;
       white-space: nowrap;
+      cursor: pointer;
+      font-family: inherit;
 
       &:hover {
         color: white;

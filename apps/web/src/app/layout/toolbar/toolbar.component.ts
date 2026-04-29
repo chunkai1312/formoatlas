@@ -15,6 +15,7 @@ import { DateTime } from 'luxon';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
+import { LoginRequiredService } from '../../core/services/login-required.service';
 
 @Component({
   selector: 'app-toolbar',
@@ -38,6 +39,7 @@ export class ToolbarComponent {
   private state = inject(DashboardStateService);
   readonly themeService = inject(ThemeService);
   readonly authService = inject(AuthService);
+  private readonly loginRequired = inject(LoginRequiredService);
   readonly isDark = this.themeService.isDark;
   readonly currentUser = this.authService.currentUser;
   readonly isLoggedIn = this.authService.isLoggedIn;
@@ -75,6 +77,10 @@ export class ToolbarComponent {
 
   login() {
     this.authService.login();
+  }
+
+  openWatchlistLoginPrompt() {
+    this.loginRequired.open();
   }
 
   logout() {

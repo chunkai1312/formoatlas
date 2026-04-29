@@ -9,6 +9,11 @@
     <a routerLink="/market-overview" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">大盤總覽</a>
     <a routerLink="/sector-flow" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">資金流向</a>
     <a routerLink="/hot-stocks" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">熱門個股</a>
+    @if (isLoggedIn()) {
+      <a routerLink="/watchlist" queryParamsHandling="preserve" routerLinkActive="active" class="nav-link">自選股</a>
+    } @else {
+      <button class="nav-link nav-button" type="button" (click)="openWatchlistLoginPrompt()">自選股</button>
+    }
   </nav>
 
   <span class="spacer"></span>
