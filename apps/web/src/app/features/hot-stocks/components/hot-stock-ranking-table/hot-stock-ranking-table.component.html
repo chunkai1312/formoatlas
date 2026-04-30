@@ -33,9 +33,11 @@
                     <mat-icon>{{ isWatched(row.symbol) ? 'star' : 'star_border' }}</mat-icon>
                   </button>
                 </td>
-                <td class="col-symbol">{{ row.symbol }}</td>
+                <td class="col-symbol">
+                  <a [routerLink]="['/stocks', row.symbol]">{{ row.symbol }}</a>
+                </td>
                 <td class="col-name">
-                  {{ row.name }}
+                  <a [routerLink]="['/stocks', row.symbol]">{{ row.name }}</a>
                   @if (badgeText(row); as badge) {
                     <span [class]="badgeClass(row)">{{ badge }}</span>
                   }

@@ -1,5 +1,6 @@
 import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../core/services/auth.service';
@@ -80,6 +81,7 @@ describe('HotStocksComponent watch list toggles', () => {
     await TestBed.configureTestingModule({
       imports: [HotStocksComponent],
       providers: [
+        provideRouter([]),
         { provide: DashboardStateService, useClass: MockDashboardStateService },
         { provide: AuthService, useClass: MockAuthService },
         { provide: WatchlistService, useClass: MockWatchlistService },

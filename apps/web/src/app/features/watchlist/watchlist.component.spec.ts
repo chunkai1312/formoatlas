@@ -81,6 +81,8 @@ describe('WatchlistComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('鴻海');
     expect(fixture.nativeElement.textContent).toContain('2330');
     expect(fixture.nativeElement.textContent).toContain('2317');
+    const stockLinks = Array.from(fixture.nativeElement.querySelectorAll('.symbol-cell a')) as HTMLAnchorElement[];
+    expect(stockLinks.map(link => link.getAttribute('href'))).toEqual(['/stocks/2330', '/stocks/2317']);
   });
 
   it('falls back to symbol display when metadata lookup fails', () => {

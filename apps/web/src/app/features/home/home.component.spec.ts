@@ -290,8 +290,8 @@ describe('HomeComponent', () => {
     expect(text).toContain('成交比重');
     expect(text).toContain('35.00%');
     expect(text).toContain('+3.00%');
-    expect(text).toContain('成交值排行與漲跌幅');
-    expect(text).toContain('成交值');
+    expect(text).toContain('成交金額排行與漲跌幅');
+    expect(text).toContain('成交金額');
     expect(text).toContain('0.1 億');
     expect(text).toContain('半導體');
     expect(text).toContain('台積電');

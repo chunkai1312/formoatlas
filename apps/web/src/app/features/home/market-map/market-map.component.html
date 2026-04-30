@@ -7,6 +7,7 @@
     echarts
     [options]="chartOption()!"
     class="map-chart"
+    (chartClick)="handleChartClick($event)"
   ></div>
 } @else {
   <div class="map-state">此日期尚無市場熱力圖資料。</div>

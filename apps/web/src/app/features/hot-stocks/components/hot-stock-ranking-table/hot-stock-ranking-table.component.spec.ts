@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { HotStockRankRow } from '../../../../core/models/hot-stocks.model';
 import { HotStockRankingTableComponent } from './hot-stock-ranking-table.component';
 
@@ -24,6 +25,7 @@ describe('HotStockRankingTableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HotStockRankingTableComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HotStockRankingTableComponent);
@@ -53,6 +55,17 @@ describe('HotStockRankingTableComponent', () => {
     button.click();
 
     expect(emitted).toEqual([row]);
+  });
+
+  it('renders symbol and name links to stock detail without using the watch toggle', () => {
+    const emitted: HotStockRankRow[] = [];
+    fixture.componentInstance.watchlistToggle.subscribe((value) => emitted.push(value));
+    fixture.detectChanges();
+
+    const links = Array.from(fixture.nativeElement.querySelectorAll('a')) as HTMLAnchorElement[];
+
+    expect(links.map(link => link.getAttribute('href'))).toEqual(['/stocks/2330', '/stocks/2330']);
+    expect(emitted).toEqual([]);
   });
 
   it('disables duplicate toggle while a symbol is pending', () => {

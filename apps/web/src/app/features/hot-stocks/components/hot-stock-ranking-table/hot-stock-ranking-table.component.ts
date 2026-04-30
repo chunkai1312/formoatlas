@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { HotStockRankRow } from '../../../../core/models/hot-stocks.model';
@@ -12,7 +13,7 @@ type SecondaryNetKey = 'finiNet' | 'sitcNet';
 @Component({
   selector: 'app-hot-stock-ranking-table',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [CommonModule, RouterLink, MatCardModule, MatIconModule],
   templateUrl: './hot-stock-ranking-table.component.html',
   styleUrl: './hot-stock-ranking-table.component.scss',
 })

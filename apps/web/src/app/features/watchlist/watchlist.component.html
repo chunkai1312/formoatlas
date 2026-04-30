@@ -55,8 +55,10 @@
         @for (row of rows(); track row.symbol) {
           <div class="table-row">
             <div class="symbol-cell">
-              <strong>{{ row.name }}</strong>
-              <small>{{ row.symbol }}</small>
+              <a [routerLink]="['/stocks', row.symbol]">
+                <strong>{{ row.name }}</strong>
+                <small>{{ row.symbol }}</small>
+              </a>
             </div>
             <span class="status-cell">已加入</span>
             <button

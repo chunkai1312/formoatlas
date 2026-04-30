@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
@@ -19,6 +19,7 @@ export class MarketMapComponent {
   readonly loading = input<boolean>(false);
   readonly error = input<string | null>(null);
   readonly sizeMode = input<MarketMapSizeMode>('marketCap');
+  readonly stockSelected = output<string>();
 
   private readonly themeService = inject(ThemeService);
   readonly isDark = this.themeService.isDark;
@@ -217,6 +218,13 @@ export class MarketMapComponent {
       ],
     } as EChartsOption;
   });
+
+  handleChartClick(event: any) {
+    const symbol = event?.data?.symbol;
+    if (typeof symbol === 'string' && symbol) {
+      this.stockSelected.emit(symbol);
+    }
+  }
 
   private sizeValue(
     item: MarketMapItem | { totalMarketCap: number; totalTradeValue: number },

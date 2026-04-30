@@ -117,7 +117,7 @@
       <div class="panel-header">
         <div>
           <h2>個股焦點</h2>
-          <p>成交值排行與漲跌幅。</p>
+          <p>成交金額排行與漲跌幅。</p>
         </div>
       </div>
 
@@ -129,12 +129,16 @@
         <div class="snapshot-table">
           <div class="snapshot-table-head" aria-hidden="true">
             <span>個股</span>
-            <span>成交值</span>
+            <span>成交金額</span>
             <span>漲跌幅</span>
           </div>
           @for (stock of focusStocks(); track stock.symbol) {
             <div class="snapshot-table-row">
-              <span>{{ stock.name }} <small>{{ stock.symbol }}</small></span>
+              <span>
+                <a [routerLink]="['/stocks', stock.symbol]">
+                  {{ stock.name }} <small>{{ stock.symbol }}</small>
+                </a>
+              </span>
               <strong>{{ formatTradeValue(stock.tradeValue) }} 億</strong>
               <strong
                 class="table-change"
@@ -196,6 +200,7 @@
         [loading]="loading().marketMap"
         [error]="errors().marketMap"
         [sizeMode]="marketMapSizeMode()"
+        (stockSelected)="openStock($event)"
       />
     } @else {
       <app-market-map
@@ -203,6 +208,7 @@
         [loading]="loading().marketMapOtc"
         [error]="errors().marketMapOtc"
         [sizeMode]="marketMapSizeMode()"
+        (stockSelected)="openStock($event)"
       />
     }
   </section>

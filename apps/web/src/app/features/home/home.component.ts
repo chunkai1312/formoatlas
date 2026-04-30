@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Subject, catchError, of, switchMap, takeUntil } from 'rxjs';
 
@@ -32,6 +32,7 @@ export class HomeComponent implements OnDestroy {
   private readonly marketStatsService = inject(MarketStatsService);
   private readonly tickerService = inject(TickerService);
   private readonly researchContext = inject(ResearchAssistantContextService);
+  private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
   readonly selectedDate = this.state.selectedDate;
@@ -157,6 +158,10 @@ export class HomeComponent implements OnDestroy {
     return (value / 100_000_000).toLocaleString('zh-TW', {
       maximumFractionDigits: 1,
     });
+  }
+
+  openStock(symbol: string) {
+    this.router.navigate(['/stocks', symbol]);
   }
 
   private anyLoading(): boolean {
