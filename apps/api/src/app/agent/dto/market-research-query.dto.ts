@@ -32,6 +32,10 @@ export class MarketResearchQueryDto {
   date!: string;
 
   @IsOptional()
+  @IsIn(['research', 'scan', 'stock'])
+  mode?: 'research' | 'scan' | 'stock';
+
+  @IsOptional()
   @IsObject()
   @ValidateNested()
   @Type(() => MarketResearchContextDto)

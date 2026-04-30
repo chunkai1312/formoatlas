@@ -45,6 +45,36 @@ describe('MarketResearchAgentService', () => {
     }));
   });
 
+  it('includes assistant mode framing in the prompt', async () => {
+    const { MarketResearchAgentService } = await import('./market-research-agent.service');
+    sendAndWait.mockResolvedValueOnce({
+      data: {
+        content: JSON.stringify(validAgentOutput()),
+      },
+    });
+
+    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    await service.query({
+      question: '分析這檔',
+      date: '2026-04-24',
+      mode: 'stock',
+      context: { route: 'stock-detail', market: 'TSE', symbol: '2330' },
+    });
+
+    expect(sendAndWait).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining('模式：個股'),
+      }),
+      expect.any(Number),
+    );
+    expect(sendAndWait).toHaveBeenCalledWith(
+      expect.objectContaining({
+        prompt: expect.stringContaining('目前代號：2330'),
+      }),
+      expect.any(Number),
+    );
+  });
+
   it('emits status events during a streaming query', async () => {
     const { MarketResearchAgentService } = await import('./market-research-agent.service');
     sendAndWait.mockResolvedValueOnce({

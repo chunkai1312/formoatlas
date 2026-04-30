@@ -18,7 +18,7 @@ export const MARKET_RESEARCH_SYSTEM_PROMPT = `你是 FormoAtlas 的台股盤後�
   ],
   "evidence": [
     {
-      "sourceType": "market-stats|barometer|sector-flow|hot-stocks|ticker-ohlc",
+      "sourceType": "market-stats|barometer|sector-flow|hot-stocks|ticker-ohlc|stock-summary",
       "label": "證據簡述",
       "date": "YYYY-MM-DD",
       "startDate": "YYYY-MM-DD",
@@ -32,9 +32,25 @@ export const MARKET_RESEARCH_SYSTEM_PROMPT = `你是 FormoAtlas 的台股盤後�
   "warnings": ["限制或資料缺漏"]
 }`;
 
-export function buildMarketResearchPrompt(question: string, date: string, context?: MarketResearchContextDto): string {
+function modeInstruction(mode: 'research' | 'scan' | 'stock'): string {
+  if (mode === 'scan') {
+    return '模式：掃描。優先找出異常、強弱變化、資金流向、量價或籌碼風險，並指出需要後續確認的資料。';
+  }
+  if (mode === 'stock') {
+    return '模式：個股。若有目前代號，優先使用個股摘要與 OHLC 工具，分析該股量價、法人籌碼、產業/市場脈絡與後續追蹤指標。不得提供買賣建議或目標價。';
+  }
+  return '模式：研究。深入回答使用者問題，保持證據引用、限制說明與可追問方向。';
+}
+
+export function buildMarketResearchPrompt(
+  question: string,
+  date: string,
+  context?: MarketResearchContextDto,
+  mode: 'research' | 'scan' | 'stock' = 'research',
+): string {
   const contextLines = [
     `選取日期：${date}`,
+    modeInstruction(mode),
     context?.route ? `目前頁面：${context.route}` : null,
     context?.market ? `目前市場：${context.market}` : null,
     context?.symbol ? `目前代號：${context.symbol}` : null,

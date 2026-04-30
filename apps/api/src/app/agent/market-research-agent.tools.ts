@@ -172,6 +172,28 @@ export class MarketResearchAgentTools {
           return successResult(await this.tickerRepository.getOhlcBySymbol({ symbol, startDate, endDate }));
         }),
       }),
+      defineTool('get_stock_summary', {
+        description: 'Read FormoAtlas stock summary for one equity symbol on one date, including quote, recent OHLC, institutional flow, industry metadata, and lightweight market context.',
+        parameters: {
+          type: 'object',
+          properties: {
+            symbol: { type: 'string', description: 'Equity ticker symbol.' },
+            date: { type: 'string', description: 'Date in YYYY-MM-DD format.' },
+          },
+          required: ['symbol', 'date'],
+        },
+        skipPermission: true,
+        handler: async (args) => this.runTool('get_stock_summary', state, policy, emit, async () => {
+          const input = args as Record<string, unknown>;
+          const symbol = requireString(input['symbol'], 'symbol');
+          const date = requireDate(input['date'], 'date');
+          const result = await this.tickerRepository.getStockSummary({ symbol, date });
+          if (!result) {
+            return failureResult(`No stock summary found for ${symbol} on or before ${date}`);
+          }
+          return successResult(result);
+        }),
+      }),
     ];
   }
 

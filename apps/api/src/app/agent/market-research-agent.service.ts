@@ -50,7 +50,7 @@ export class MarketResearchAgentService {
       });
 
       emit?.({ type: 'status', message: '正在理解問題並查詢必要資料' });
-      const prompt = buildMarketResearchPrompt(input.question, input.date, input.context);
+      const prompt = buildMarketResearchPrompt(input.question, input.date, input.context, input.mode ?? 'research');
       const firstResponse = await this.sendPrompt(session, prompt);
       const firstResult = this.parseAgentOutput(firstResponse);
       if (firstResult) {

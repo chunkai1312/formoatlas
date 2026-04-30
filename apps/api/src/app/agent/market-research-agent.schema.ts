@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const AgentEvidenceSchema = z.object({
-  sourceType: z.enum(['market-stats', 'barometer', 'sector-flow', 'hot-stocks', 'ticker-ohlc']),
+  sourceType: z.enum(['market-stats', 'barometer', 'sector-flow', 'hot-stocks', 'ticker-ohlc', 'stock-summary']),
   label: z.string().min(1).max(160),
   date: z.string().optional(),
   startDate: z.string().optional(),

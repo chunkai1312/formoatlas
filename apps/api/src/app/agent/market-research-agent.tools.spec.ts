@@ -9,6 +9,7 @@ describe('MarketResearchAgentTools', () => {
     getSectorFlow: vi.fn(),
     getHotStocks: vi.fn(),
     getOhlcBySymbol: vi.fn(),
+    getStockSummary: vi.fn(),
   };
 
   it('validates date ranges before querying repositories', async () => {
@@ -77,5 +78,22 @@ describe('MarketResearchAgentTools', () => {
       ok: true,
       message: 'get_market_stats_range 查詢完成',
     });
+  });
+
+  it('exposes a read-only stock summary tool', async () => {
+    tickerRepository.getStockSummary.mockResolvedValue({
+      symbol: '2330',
+      date: '2026-04-24',
+      quote: { closePrice: 900 },
+    });
+    const tools = new MarketResearchAgentTools(marketStatsRepository as any, tickerRepository as any)
+      .createTools({ toolCalls: 0 }, { maxToolCalls: 8 });
+    const stockSummaryTool = tools.find(tool => tool.name === 'get_stock_summary')!;
+
+    const result = await stockSummaryTool.handler({ symbol: '2330', date: '2026-04-24' }, {} as any);
+
+    expect(result).toMatchObject({ resultType: 'success' });
+    expect(tickerRepository.getStockSummary).toHaveBeenCalledWith({ symbol: '2330', date: '2026-04-24' });
+    expect((result as any).textResultForLlm).toContain('"symbol":"2330"');
   });
 });
