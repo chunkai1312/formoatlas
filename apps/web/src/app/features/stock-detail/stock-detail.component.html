@@ -1,0 +1,177 @@
+<section class="stock-page">
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a routerLink="/hot-stocks" queryParamsHandling="preserve">熱門個股</a>
+    <span>/</span>
+    <span>{{ currentSymbol() }}</span>
+  </nav>
+
+  @if (loading()) {
+    <div class="state-surface">正在載入個股資料...</div>
+  } @else if (error()) {
+    <div class="state-surface error-state">
+      <mat-icon>error</mat-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (summary(); as stock) {
+    <header class="stock-header">
+      <div class="identity">
+        <p class="date-eyebrow">{{ stock.date }}</p>
+        <h1>{{ stock.name }}</h1>
+        <p class="meta-inline">
+          {{ stock.symbol }}<span class="dot">·</span>{{ marketLabel() }}@if (stock.industryName) {<span class="dot">·</span>{{ stock.industryName }}}
+        </p>
+        @if (isFallbackDate()) {
+          <p class="date-note">選取日期 {{ stock.requestedDate }} 無個股資料，顯示最近交易日 {{ stock.date }}。</p>
+        }
+      </div>
+
+      <div class="header-divider"></div>
+
+      <div class="quote-panel">
+        <strong [class]="priceClass()">{{ formatNumber(stock.quote.closePrice, 2) }}</strong>
+        <div class="change-line" [class]="priceClass()">
+          <span>{{ stock.quote.change >= 0 ? '+' : '' }}{{ formatNumber(stock.quote.change, 2) }}</span>
+          <span>{{ stock.quote.changePercent >= 0 ? '+' : '' }}{{ formatNumber(stock.quote.changePercent, 2) }}%</span>
+        </div>
+      </div>
+
+      <button
+        class="watch-btn"
+        type="button"
+        [class.active]="isInWatchlist()"
+        [disabled]="savingWatchlist()"
+        (click)="toggleWatchlist()"
+      >
+        <mat-icon>{{ isInWatchlist() ? 'star' : 'star_border' }}</mat-icon>
+        {{ isInWatchlist() ? '已追蹤' : '加入自選' }}
+      </button>
+    </header>
+
+    <div class="content-grid">
+      <section class="chart-section">
+        <div class="section-header chart-header">
+          <h2>量價走勢</h2>
+          <div class="chart-controls">
+            <div class="interval-buttons" aria-label="K 線週期">
+              <button type="button" class="range-btn" [class.active]="chartInterval() === 'D'" (click)="setChartInterval('D')">日K</button>
+              <button type="button" class="range-btn" [class.active]="chartInterval() === 'W'" (click)="setChartInterval('W')">週K</button>
+            </div>
+            <div class="range-buttons" aria-label="顯示區間">
+              @for (range of ranges(); track range) {
+                <button type="button" class="range-btn" [class.active]="localRange() === range" (click)="setLocalRange(range)">{{ range }}</button>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="ma-bar">
+          @for (def of visibleMaDefs(); track def.period; let i = $index) {
+            <span class="ma-item" [style.color]="def.color">
+              MA{{ def.period }}: {{ displayMaValues()[i] ?? '—' }}
+            </span>
+          }
+        </div>
+        <app-indicator-chart
+          [option]="chartOption()"
+          height="400px"
+          (chartGlobalout)="resetHover()"
+        ></app-indicator-chart>
+      </section>
+
+      <aside class="summary-panel">
+        <section>
+          <h2>今日摘要</h2>
+          <dl class="metric-list">
+            <div>
+              <dt>成交量</dt>
+              <dd>{{ formatShareLots(stock.quote.tradeVolume) }}</dd>
+            </div>
+            <div>
+              <dt>成交金額</dt>
+              <dd>{{ formatBillion(stock.quote.tradeValue) }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section>
+          <h2>法人進出</h2>
+          <dl class="metric-list">
+            <div>
+              <dt>外資</dt>
+              <dd [class]="valueClass(stock.institutional.finiNet)">{{ formatShareLots(stock.institutional.finiNet) }}</dd>
+            </div>
+            <div>
+              <dt>投信</dt>
+              <dd [class]="valueClass(stock.institutional.sitcNet)">{{ formatShareLots(stock.institutional.sitcNet) }}</dd>
+            </div>
+            <div>
+              <dt>自營商</dt>
+              <dd [class]="valueClass(stock.institutional.dealersNet)">{{ formatShareLots(stock.institutional.dealersNet) }}</dd>
+            </div>
+          </dl>
+          <div class="badge-row">
+            @if (consecutiveLabel('外資', stock.institutional.finiConsecutiveDays)) {
+              <span [class.positive]="(stock.institutional.finiConsecutiveDays ?? 0) > 0" [class.negative]="(stock.institutional.finiConsecutiveDays ?? 0) < 0">{{ consecutiveLabel('外資', stock.institutional.finiConsecutiveDays) }}</span>
+            }
+            @if (consecutiveLabel('投信', stock.institutional.sitcConsecutiveDays)) {
+              <span [class.positive]="(stock.institutional.sitcConsecutiveDays ?? 0) > 0" [class.negative]="(stock.institutional.sitcConsecutiveDays ?? 0) < 0">{{ consecutiveLabel('投信', stock.institutional.sitcConsecutiveDays) }}</span>
+            }
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <section class="context-section">
+      <div class="section-header">
+        <h2>市場脈絡</h2>
+        <span>{{ stock.market }}</span>
+      </div>
+      <div class="context-grid">
+        <div>
+          <span>熱門榜</span>
+          @if (visibleHotStockRanks().length) {
+            <div class="badge-row">
+              @for (rank of visibleHotStockRanks(); track rank.key) {
+                <span
+                  [class.positive]="rank.tone === 'positive'"
+                  [class.negative]="rank.tone === 'negative'"
+                >
+                  {{ rank.label }} #{{ rank.rank }}
+                </span>
+              }
+            </div>
+            @if (hiddenHotStockRankCount()) {
+              <small>另 {{ hiddenHotStockRankCount() }} 個榜單</small>
+            }
+          } @else {
+            <strong>未進入熱門榜 Top 20</strong>
+          }
+        </div>
+        <div>
+          <span>市值估算</span>
+          <strong>{{ formatBillion(stock.context.marketCap) }}</strong>
+          <small>由股本與收盤價估算</small>
+        </div>
+        <div>
+          <span>產業成交金額占比</span>
+          <strong>{{ stock.context.sectorWeightByTradeValue === null ? '-' : formatNumber(stock.context.sectorWeightByTradeValue * 100, 2) + '%' }}</strong>
+          <small>{{ formatBillion(stock.context.sectorTradeValue) }}</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="assistant-shortcuts">
+      <div class="section-header">
+        <h2>研究助理</h2>
+        <span>個股模式</span>
+      </div>
+      <div class="shortcut-row">
+        @for (shortcut of assistantShortcuts; track shortcut.label) {
+          <button type="button" (click)="useAssistantShortcut(shortcut.question)">
+            <mat-icon>travel_explore</mat-icon>
+            {{ shortcut.label }}
+          </button>
+        }
+      </div>
+    </section>
+  }
+</section>

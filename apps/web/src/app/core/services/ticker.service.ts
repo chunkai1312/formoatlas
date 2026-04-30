@@ -7,6 +7,7 @@ import { SectorFlowSnapshot } from '../models/sector-flow-snapshot.model';
 import { HotStocksResponse } from '../models/hot-stocks.model';
 import { MarketMapResponse } from '../models/market-map.model';
 import { TickerMetadata } from '../models/ticker-metadata.model';
+import { StockSummary } from '../models/stock-summary.model';
 
 @Injectable({ providedIn: 'root' })
 export class TickerService {
@@ -16,12 +17,19 @@ export class TickerService {
   private readonly hotStocksUrl = '/api/marketdata/hot-stocks';
   private readonly marketMapUrl = '/api/marketdata/market-map';
   private readonly tickerMetadataUrl = '/api/marketdata/ticker-metadata';
+  private readonly stockSummaryUrl = '/api/marketdata/stock-summary';
   private readonly tickerMetadataCache = new Map<string, TickerMetadata>();
   private readonly tickerMetadataQueried = new Set<string>();
 
   getTicker(symbol: string, startDate: string, endDate: string): Observable<TickerOhlc[]> {
     return this.http.get<TickerOhlc[]>(this.baseUrl, {
       params: { symbol, startDate, endDate },
+    });
+  }
+
+  getStockSummary(symbol: string, date: string): Observable<StockSummary> {
+    return this.http.get<StockSummary>(this.stockSummaryUrl, {
+      params: { symbol, date },
     });
   }
 

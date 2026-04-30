@@ -36,5 +36,12 @@ export const appRoutes: Route[] = [
         (m) => m.WatchlistComponent
       ),
   },
+  {
+    path: 'stocks/:symbol',
+    loadComponent: () =>
+      import('./features/stock-detail/stock-detail.component').then(
+        (m) => m.StockDetailComponent
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];
