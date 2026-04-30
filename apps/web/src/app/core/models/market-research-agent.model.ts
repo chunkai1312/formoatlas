@@ -3,7 +3,10 @@ export type MarketResearchSourceType =
   | 'barometer'
   | 'sector-flow'
   | 'hot-stocks'
-  | 'ticker-ohlc';
+  | 'ticker-ohlc'
+  | 'stock-summary';
+
+export type AssistantMode = 'research' | 'scan' | 'stock';
 
 export interface MarketResearchContext {
   route?: string;
@@ -15,6 +18,7 @@ export interface MarketResearchContext {
 export interface MarketResearchQuery {
   question: string;
   date: string;
+  mode?: AssistantMode;
   context?: MarketResearchContext;
 }
 

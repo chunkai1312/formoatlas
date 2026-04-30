@@ -75,6 +75,7 @@ describe('AssistantPanelComponent', () => {
     expect(conversationService.sendMessageStream).toHaveBeenCalledWith('c1', {
       question: '今天偏多的證據？',
       date: '2026-04-24',
+      mode: 'research',
       context: { route: 'market-overview', market: 'TSE' },
     });
     expect(component.progressEvents()[0]).toMatchObject({ type: 'status' });
@@ -82,7 +83,7 @@ describe('AssistantPanelComponent', () => {
     expect(component.assistantView()).toBe('session');
   });
 
-  it('renders a full-width session composer with a single research mode affordance', () => {
+  it('renders a full-width session composer with assistant mode controls', () => {
     const component = fixture.componentInstance;
     component.open();
     component.selectConversation(conversationService.conversations()[0]);
@@ -92,12 +93,41 @@ describe('AssistantPanelComponent', () => {
       '.question-box textarea',
     ) as HTMLTextAreaElement | null;
     const mode = fixture.nativeElement.querySelector(
-      '.composer-actions .composer-mode',
+      '.composer-actions .composer-modes',
     ) as HTMLElement | null;
 
     expect(textarea?.rows).toBe(3);
     expect(textarea?.placeholder).toBe('輸入盤後研究問題...');
     expect(mode?.textContent).toContain('研究');
+    expect(mode?.textContent).toContain('掃描');
+    expect(mode?.textContent).toContain('個股');
+  });
+
+  it('submits the selected assistant mode', () => {
+    const component = fixture.componentInstance;
+    component.selectConversation(conversationService.conversations()[0]);
+    component.setMode('scan');
+    component.setQuestion('掃描今天市場');
+
+    component.submit();
+
+    expect(conversationService.sendMessageStream).toHaveBeenCalledWith('c1', expect.objectContaining({
+      mode: 'scan',
+    }));
+  });
+
+  it('opens stock shortcut requests in stock mode with the requested question', async () => {
+    contextService.requestAssistant({
+      mode: 'stock',
+      question: '分析這檔今日量價。',
+      context: { route: 'stock-detail', market: 'TSE', symbol: '2330' },
+    });
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fixture.componentInstance.isOpen()).toBe(true);
+    expect(fixture.componentInstance.assistantView()).toBe('session');
+    expect(fixture.componentInstance.selectedMode()).toBe('stock');
+    expect(fixture.componentInstance.question()).toBe('分析這檔今日量價。');
   });
 
   it('fills follow-up questions into the composer without submitting', () => {

@@ -5,6 +5,7 @@ import {
   OnInit,
   ViewChild,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -23,6 +24,7 @@ import {
   AgentConversationSummary,
 } from '../../core/models/agent-conversation.model';
 import {
+  AssistantMode,
   MarketResearchContext,
   MarketResearchResponse,
   MarketResearchStreamEvent,
@@ -50,6 +52,7 @@ export class AssistantPanelComponent implements OnInit {
   readonly isOpen = signal(false);
   readonly assistantView = signal<AssistantView>('list');
   readonly question = signal('');
+  readonly selectedMode = signal<AssistantMode>('research');
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly progressEvents = signal<MarketResearchStreamEvent[]>([]);
@@ -57,8 +60,15 @@ export class AssistantPanelComponent implements OnInit {
   readonly selectedDate = this.dashboardState.selectedDate;
   private streamSubscription: Subscription | null = null;
   private loadSubscription: Subscription | null = null;
+  private handledOpenRequestId = 0;
   @ViewChild('questionInput')
   private questionInput?: ElementRef<HTMLTextAreaElement>;
+
+  readonly assistantModes: { value: AssistantMode; label: string; icon: string }[] = [
+    { value: 'research', label: '研究', icon: 'travel_explore' },
+    { value: 'scan', label: '掃描', icon: 'radar' },
+    { value: 'stock', label: '個股', icon: 'monitoring' },
+  ];
 
   readonly contextLabel = computed(() => {
     const context = this.context();
@@ -70,6 +80,13 @@ export class AssistantPanelComponent implements OnInit {
     ].filter(Boolean);
     return parts.length ? parts.join(' / ') : '全域市場';
   });
+
+  constructor() {
+    effect(() => {
+      this.contextService.openRequestId();
+      queueMicrotask(() => this.handleAssistantRequest());
+    });
+  }
 
   ngOnInit() {
     if (this.isLoggedIn()) {
@@ -109,6 +126,10 @@ export class AssistantPanelComponent implements OnInit {
     queueMicrotask(() => this.questionInput?.nativeElement.focus());
   }
 
+  setMode(mode: AssistantMode) {
+    this.selectedMode.set(mode);
+  }
+
   submit() {
     const question = this.question().trim();
     if (!question || this.loading()) {
@@ -126,6 +147,7 @@ export class AssistantPanelComponent implements OnInit {
           this.conversationService.sendMessageStream(conversationId, {
             question,
             date: this.selectedDate(),
+            mode: this.selectedMode(),
             context: this.context(),
           }),
         ),
@@ -240,6 +262,27 @@ export class AssistantPanelComponent implements OnInit {
 
     this.conversationService.loadDetail(conversation.id).subscribe();
     this.conversationService.loadConversations().subscribe();
+  }
+
+  private handleAssistantRequest() {
+    const requestId = this.contextService.openRequestId();
+    if (!requestId || requestId === this.handledOpenRequestId) {
+      return;
+    }
+
+    this.handledOpenRequestId = requestId;
+    this.selectedMode.set(this.contextService.requestedMode());
+    const question = this.contextService.requestedQuestion();
+    if (question) {
+      this.question.set(question);
+    }
+    this.error.set(null);
+    this.progressEvents.set([]);
+    this.open();
+    if (this.isLoggedIn()) {
+      this.assistantView.set('session');
+      queueMicrotask(() => this.questionInput?.nativeElement.focus());
+    }
   }
 
   private handleRequestError(error: HttpErrorResponse | Error) {

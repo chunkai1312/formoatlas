@@ -284,9 +284,17 @@
           placeholder="輸入盤後研究問題..."
         ></textarea>
         <div class="composer-actions">
-          <div class="composer-mode" aria-label="助理模式">
-            <mat-icon>travel_explore</mat-icon>
-            <span>研究</span>
+          <div class="composer-modes" aria-label="助理模式">
+            @for (mode of assistantModes; track mode.value) {
+              <button
+                type="button"
+                [class.active]="selectedMode() === mode.value"
+                (click)="setMode(mode.value)"
+              >
+                <mat-icon>{{ mode.icon }}</mat-icon>
+                <span>{{ mode.label }}</span>
+              </button>
+            }
           </div>
           <button
             class="submit-btn"
