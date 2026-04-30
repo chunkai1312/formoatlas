@@ -11,6 +11,7 @@ import { GetHotStocksDto } from './dto/get-hot-stocks.dto';
 import { GetMarketMapDto } from './dto/get-market-map.dto';
 import { GetTradingDateDto } from './dto/get-trading-date.dto';
 import { GetTickerMetadataDto } from './dto/get-ticker-metadata.dto';
+import { GetStockSummaryDto } from './dto/get-stock-summary.dto';
 
 @ApiTags('marketdata')
 @Controller('marketdata')
@@ -63,6 +64,18 @@ export class MarketDataController {
 
     const fallbackMetadata = await this.tickerRepository.getMetadataBySymbols(missing);
     return [...equityMetadata, ...fallbackMetadata];
+  }
+
+  @ApiOperation({ summary: '取得個股盤後摘要' })
+  @Get('stock-summary')
+  async getStockSummary(@Query() query: GetStockSummaryDto) {
+    const result = await this.tickerRepository.getStockSummary({
+      symbol: query.symbol,
+      date: query.date ?? DateTime.local().toISODate(),
+    });
+
+    if (!result) throw new NotFoundException('Stock summary not found for ' + query.symbol);
+    return result;
   }
 
   @ApiOperation({ summary: '取得產業資金流向排行（TSE 上市 / OTC 上櫃）' })

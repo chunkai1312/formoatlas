@@ -9,6 +9,23 @@ import { getSectorName, getIndustryName } from '../utils';
 import { HotStockRankRow, HotStocksResponse } from '../types/hot-stocks.types';
 import { MarketMapItem, MarketMapSector, MarketMapResponse } from '../types/market-map.types';
 import { TickerMetadata } from '../types/ticker-metadata.types';
+import { StockSummaryHotStockRank, StockSummaryResponse } from '../types/stock-summary.types';
+
+const HOT_STOCK_RANK_DEFS: Array<{
+  key: string;
+  label: string;
+  tone: StockSummaryHotStockRank['tone'];
+  getRows: (hotStocks: HotStocksResponse) => HotStockRankRow[];
+}> = [
+  { key: 'movers.gainers', label: '漲幅榜', tone: 'positive', getRows: hotStocks => hotStocks.movers.gainers },
+  { key: 'movers.losers', label: '跌幅榜', tone: 'negative', getRows: hotStocks => hotStocks.movers.losers },
+  { key: 'actives.byValue', label: '成交金額排行', tone: 'neutral', getRows: hotStocks => hotStocks.actives.byValue },
+  { key: 'actives.byVolume', label: '成交量排行', tone: 'neutral', getRows: hotStocks => hotStocks.actives.byVolume },
+  { key: 'institutional.finiBuy', label: '外資買超', tone: 'positive', getRows: hotStocks => hotStocks.institutional.finiBuy },
+  { key: 'institutional.finiSell', label: '外資賣超', tone: 'negative', getRows: hotStocks => hotStocks.institutional.finiSell },
+  { key: 'institutional.sitcBuy', label: '投信買超', tone: 'positive', getRows: hotStocks => hotStocks.institutional.sitcBuy },
+  { key: 'institutional.sitcSell', label: '投信賣超', tone: 'negative', getRows: hotStocks => hotStocks.institutional.sitcSell },
+];
 
 @Injectable()
 export class TickerRepository {
@@ -39,10 +56,121 @@ export class TickerRepository {
 
     return this.model
       .find({ symbol: options.symbol, date: { $gte: startDate, $lte: endDate } })
-      .select({ _id: 0, date: 1, openPrice: 1, highPrice: 1, lowPrice: 1, closePrice: 1, tradeValue: 1, tradeWeight: 1 })
+      .select({ _id: 0, date: 1, openPrice: 1, highPrice: 1, lowPrice: 1, closePrice: 1, tradeVolume: 1, tradeValue: 1, tradeWeight: 1 })
       .sort({ date: 1 })
       .lean()
       .exec();
+  }
+
+  async getStockSummary(options: { symbol: string; date?: string }): Promise<StockSummaryResponse | null> {
+    const requestedDate = options.date ?? DateTime.local().toISODate();
+    const symbol = options.symbol.trim().toUpperCase();
+    if (!symbol) return null;
+
+    const latest = await this.model.aggregate<any>([
+      {
+        $match: {
+          symbol,
+          date: { $lte: requestedDate },
+          type: TickerType.Equity,
+          market: { $in: [Market.TSE, Market.OTC] },
+        },
+      },
+      { $sort: { date: -1 } },
+      { $limit: 1 },
+      {
+        $lookup: {
+          from: 'equities',
+          let: { sym: '$symbol', exch: '$exchange' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$symbol', '$$sym'] },
+                    { $eq: ['$exchange', '$$exch'] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'equityInfo',
+        },
+      },
+      { $unwind: { path: '$equityInfo', preserveNullAndEmptyArrays: true } },
+      { $project: { _id: 0, __v: 0, createdAt: 0, updatedAt: 0 } },
+    ]).exec();
+
+    const ticker = latest[0];
+    if (!ticker) return null;
+
+    const exchange = ticker.exchange as Exchange;
+    const market = ticker.market === Market.OTC ? Market.OTC : Market.TSE;
+    const industryCode = ticker.equityInfo?.industryCode ?? null;
+    const industryName = industryCode ? getIndustryName(industryCode) : null;
+    const issuedShares = ticker.equityInfo?.issuedShares ?? null;
+    const closePrice = ticker.closePrice ?? 0;
+    const tradeValue = ticker.tradeValue ?? 0;
+    const marketCap = issuedShares && closePrice ? issuedShares * closePrice : null;
+    const ohlcStartDate = DateTime.fromISO(ticker.date).minus({ years: 5 }).toISODate();
+
+    const [ohlc, sectorTradeValue, hotStocks] = await Promise.all([
+      this.getOhlcBySymbol({ symbol, startDate: ohlcStartDate, endDate: ticker.date }),
+      industryCode ? this.getSectorTradeValue({ date: ticker.date, market, exchange, industryCode }) : Promise.resolve(null),
+      this.getHotStocks({ date: ticker.date, market: market === Market.OTC ? 'OTC' : 'TSE' }),
+    ]);
+
+    const hotStockRanks = this.getHotStockRanksForSymbol(hotStocks, symbol);
+    const hotStockLists = hotStockRanks.map(rank => rank.key);
+
+    return {
+      requestedDate,
+      date: ticker.date,
+      symbol: ticker.symbol,
+      name: ticker.name ?? ticker.equityInfo?.name ?? ticker.symbol,
+      market: market === Market.OTC ? 'OTC' : 'TSE',
+      exchange: ticker.exchange,
+      industryCode,
+      industryName,
+      quote: {
+        openPrice: ticker.openPrice ?? 0,
+        highPrice: ticker.highPrice ?? 0,
+        lowPrice: ticker.lowPrice ?? 0,
+        closePrice,
+        change: ticker.change ?? 0,
+        changePercent: ticker.changePercent ?? 0,
+        tradeVolume: ticker.tradeVolume ?? 0,
+        tradeValue,
+        transaction: ticker.transaction ?? 0,
+      },
+      institutional: {
+        finiNet: ticker.instInvestors?.fini?.net ?? null,
+        sitcNet: ticker.instInvestors?.sitc?.net ?? null,
+        dealersNet: ticker.instInvestors?.dealers?.net ?? null,
+        finiConsecutiveDays: ticker.instInvestors?.fini?.consecutiveDays ?? null,
+        sitcConsecutiveDays: ticker.instInvestors?.sitc?.consecutiveDays ?? null,
+      },
+      ohlc: ohlc.map(row => ({
+        date: row.date,
+        openPrice: row.openPrice ?? 0,
+        highPrice: row.highPrice ?? 0,
+        lowPrice: row.lowPrice ?? 0,
+        closePrice: row.closePrice ?? 0,
+        tradeVolume: row.tradeVolume ?? 0,
+        tradeValue: row.tradeValue ?? 0,
+      })),
+      context: {
+        appearsInHotStocks: hotStockRanks.length > 0,
+        hotStockLists,
+        hotStockRanks,
+        marketCap,
+        tradeValue,
+        sectorTradeValue,
+        sectorWeightByTradeValue: sectorTradeValue && sectorTradeValue > 0
+          ? parseFloat((tradeValue / sectorTradeValue).toFixed(4))
+          : null,
+      },
+    };
   }
 
   async getMetadataBySymbols(symbols: string[]): Promise<TickerMetadata[]> {
@@ -398,6 +526,61 @@ export class TickerRepository {
       actives: { byVolume: [], byValue: [] },
       institutional: { finiBuy: [], finiSell: [], sitcBuy: [], sitcSell: [] },
     };
+  }
+
+  private getHotStockRanksForSymbol(hotStocks: HotStocksResponse, symbol: string): StockSummaryHotStockRank[] {
+    return HOT_STOCK_RANK_DEFS.flatMap((def) => {
+      const index = def.getRows(hotStocks).findIndex(row => row.symbol === symbol);
+      if (index < 0) return [];
+      return [{
+        key: def.key,
+        label: def.label,
+        rank: index + 1,
+        tone: def.tone,
+      }];
+    });
+  }
+
+  private async getSectorTradeValue(options: {
+    date: string;
+    market: Market;
+    exchange: Exchange;
+    industryCode: string;
+  }): Promise<number | null> {
+    const [result] = await this.model.aggregate<{ totalTradeValue: number }>([
+      {
+        $match: {
+          date: options.date,
+          type: TickerType.Equity,
+          market: options.market,
+        },
+      },
+      {
+        $lookup: {
+          from: 'equities',
+          let: { sym: '$symbol' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$symbol', '$$sym'] },
+                    { $eq: ['$exchange', options.exchange] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'equityInfo',
+        },
+      },
+      { $unwind: '$equityInfo' },
+      { $match: { 'equityInfo.industryCode': options.industryCode } },
+      { $group: { _id: null, totalTradeValue: { $sum: { $ifNull: ['$tradeValue', 0] } } } },
+      { $project: { _id: 0, totalTradeValue: 1 } },
+    ]).exec();
+
+    return result?.totalTradeValue ?? null;
   }
 
   async getMarketMap(options?: { date?: string; market?: 'TSE' | 'OTC' }): Promise<MarketMapResponse> {
