@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { JwtPayload } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CopilotSessionLockService } from '../copilot/copilot-session-lock.service';
 import { AgentConversationService } from './agent-conversation.service';
 import { CreateAgentConversationDto } from './dto/create-agent-conversation.dto';
 import { MarketResearchQueryDto } from './dto/market-research-query.dto';
@@ -16,6 +17,7 @@ export class AgentConversationController {
   constructor(
     private readonly conversationService: AgentConversationService,
     private readonly agentService: MarketResearchAgentService,
+    private readonly sessionLock: CopilotSessionLockService,
   ) {}
 
   @ApiOperation({ summary: '取得使用者市場研究對話列表' })
@@ -52,7 +54,7 @@ export class AgentConversationController {
     @Res() res: Response,
   ) {
     const userId = this.userId(req);
-    await this.conversationService.ensureOwned(userId, id);
+    const copilotSessionId = await this.conversationService.getCopilotSessionId(userId, id);
 
     res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -67,7 +69,9 @@ export class AgentConversationController {
     try {
       writeEvent({ type: 'status', message: '市場研究助理已收到問題' });
       await this.conversationService.recordUserMessage(userId, id, body);
-      const answer = await this.agentService.query(body, writeEvent);
+      const answer = await this.sessionLock.withLock(copilotSessionId, () =>
+        this.agentService.query(body, writeEvent, copilotSessionId),
+      );
       await this.conversationService.recordAssistantSuccess(userId, id, body, answer);
       writeEvent({ type: 'final', answer });
     } catch (error) {

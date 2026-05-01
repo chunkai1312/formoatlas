@@ -1,7 +1,8 @@
 import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { DateTime } from 'luxon';
-import { CopilotClient, CopilotSession, type CopilotClientOptions, type PermissionHandler } from '@github/copilot-sdk';
+import { CopilotSession, type PermissionHandler } from '@github/copilot-sdk';
+import { CopilotRuntimeService } from '../copilot/copilot-runtime.service';
 import { MarketStatsRepository } from '../marketdata/repositories/market-stats.repository';
 import { BAROMETER_LABEL, BAROMETER_WEATHER, BarometerLevel, BarometerResult } from './barometer.types';
 import { BarometerOutput, BarometerOutputSchema } from './barometer.schema';
@@ -10,12 +11,11 @@ import { SYSTEM_PROMPT, buildUserMessage, TechContext } from './barometer.prompt
 @Injectable()
 export class BarometerService {
   private readonly logger = new Logger(BarometerService.name);
-  private readonly copilotModel = process.env.COPILOT_MODEL || 'gpt-5-mini';
-  private readonly copilotCliUrl = process.env.COPILOT_CLI_URL;
   private readonly denyCopilotToolPermission: PermissionHandler = () => ({ kind: 'reject' });
 
   constructor(
     private readonly marketStatsRepository: MarketStatsRepository,
+    private readonly copilotRuntime: CopilotRuntimeService,
   ) {}
 
   async generateAnalysis(date: string = DateTime.local().toISODate()): Promise<BarometerResult> {
@@ -75,13 +75,12 @@ export class BarometerService {
   }
 
   private async generateCopilotAnalysis(userMessage: string): Promise<BarometerOutput> {
-    const client = new CopilotClient(this.buildCopilotClientOptions());
     let session: CopilotSession | null = null;
 
     try {
-      session = await client.createSession({
+      session = await this.copilotRuntime.createEphemeralSession({
         clientName: 'formoatlas-barometer',
-        model: this.copilotModel,
+        model: this.copilotRuntime.getModel(),
         availableTools: [],
         tools: [],
         systemMessage: {
@@ -122,23 +121,7 @@ ${firstResponse}`,
           this.logger.warn(`Copilot session cleanup failed: ${error?.message ?? error}`);
         });
       }
-
-      const stopErrors = await client.stop().catch(error => [error]);
-      for (const error of stopErrors) {
-        this.logger.warn(`Copilot client cleanup failed: ${error?.message ?? error}`);
-      }
     }
-  }
-
-  private buildCopilotClientOptions(): CopilotClientOptions {
-    if (!this.copilotCliUrl) {
-      throw new Error('COPILOT_CLI_URL is not configured');
-    }
-
-    return {
-      cliUrl: this.copilotCliUrl,
-      logLevel: 'error',
-    };
   }
 
   private buildCopilotPrompt(userMessage: string): string {

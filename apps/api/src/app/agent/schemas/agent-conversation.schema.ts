@@ -9,16 +9,16 @@ export class AgentConversation {
   @Prop({ type: MongooseSchema.Types.ObjectId, required: true, index: true })
   userId: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   copilotSessionId: string;
 
-  @Prop({ required: true, trim: true, maxlength: 80, default: '新對話' })
+  @Prop({ type: String, required: true, trim: true, maxlength: 80, default: '新對話' })
   title: string;
 
   @Prop({ type: Object })
   contextSnapshot?: MarketResearchContextDto;
 
-  @Prop({ required: true, default: 0, min: 0 })
+  @Prop({ type: Number, required: true, default: 0, min: 0 })
   messageCount: number;
 
   @Prop({ type: Date, required: true, default: Date.now, index: true })

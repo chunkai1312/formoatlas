@@ -15,25 +15,25 @@ export class AgentMessage {
   @Prop({ type: MongooseSchema.Types.ObjectId, required: true, index: true })
   conversationId: Types.ObjectId;
 
-  @Prop({ required: true, enum: ['user', 'assistant'] })
+  @Prop({ type: String, required: true, enum: ['user', 'assistant'] })
   role: AgentMessageRole;
 
-  @Prop({ required: true, enum: ['completed', 'failed'], default: 'completed' })
+  @Prop({ type: String, required: true, enum: ['completed', 'failed'], default: 'completed' })
   status: AgentMessageStatus;
 
-  @Prop({ trim: true, maxlength: 1000 })
+  @Prop({ type: String, trim: true, maxlength: 1000 })
   question?: string;
 
   @Prop({ type: Object })
   answer?: MarketResearchAgentOutput;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   date: string;
 
   @Prop({ type: Object })
   context?: MarketResearchContextDto;
 
-  @Prop({ trim: true, maxlength: 300 })
+  @Prop({ type: String, trim: true, maxlength: 300 })
   error?: string;
 
   @Prop({ type: Date })

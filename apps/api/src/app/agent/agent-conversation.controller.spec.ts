@@ -11,7 +11,7 @@ describe('AgentConversationController', () => {
 
   it('delegates list/create/detail/delete with the authenticated user id', async () => {
     const conversationService = createConversationService();
-    const controller = new AgentConversationController(conversationService as any, {} as any);
+    const controller = new AgentConversationController(conversationService as any, {} as any, createSessionLock() as any);
     const req = createReq('user-1');
 
     await controller.list(req as any);
@@ -34,15 +34,18 @@ describe('AgentConversationController', () => {
         return answer;
       }),
     };
-    const controller = new AgentConversationController(conversationService as any, agentService as any);
+    const sessionLock = createSessionLock();
+    const controller = new AgentConversationController(conversationService as any, agentService as any, sessionLock as any);
     const response = createMockResponse();
     const body = { question: '今天偏多的證據？', date: '2026-04-24' };
 
     await controller.streamMessage(createReq('user-1') as any, 'conversation-1', body, response as any);
 
     const output = response.write.mock.calls.map(call => call[0]).join('');
-    expect(conversationService.ensureOwned).toHaveBeenCalledWith('user-1', 'conversation-1');
+    expect(conversationService.getCopilotSessionId).toHaveBeenCalledWith('user-1', 'conversation-1');
     expect(conversationService.recordUserMessage).toHaveBeenCalledWith('user-1', 'conversation-1', body);
+    expect(sessionLock.withLock).toHaveBeenCalledWith('copilot-session-1', expect.any(Function));
+    expect(agentService.query).toHaveBeenCalledWith(body, expect.any(Function), 'copilot-session-1');
     expect(conversationService.recordAssistantSuccess).toHaveBeenCalledWith('user-1', 'conversation-1', body, answer);
     expect(output).toContain('event: final');
     expect(response.end).toHaveBeenCalled();
@@ -53,7 +56,7 @@ describe('AgentConversationController', () => {
     const agentService = {
       query: vi.fn().mockRejectedValue(new Error('boom')),
     };
-    const controller = new AgentConversationController(conversationService as any, agentService as any);
+    const controller = new AgentConversationController(conversationService as any, agentService as any, createSessionLock() as any);
     const response = createMockResponse();
     const body = { question: '今天偏多的證據？', date: '2026-04-24' };
 
@@ -74,9 +77,16 @@ function createConversationService() {
     detail: vi.fn().mockResolvedValue({ id: 'conversation-1', messages: [] }),
     delete: vi.fn().mockResolvedValue(undefined),
     ensureOwned: vi.fn().mockResolvedValue(undefined),
+    getCopilotSessionId: vi.fn().mockResolvedValue('copilot-session-1'),
     recordUserMessage: vi.fn().mockResolvedValue({ id: 'message-1' }),
     recordAssistantSuccess: vi.fn().mockResolvedValue({ id: 'message-2' }),
     recordAssistantFailure: vi.fn().mockResolvedValue({ id: 'message-2' }),
+  };
+}
+
+function createSessionLock() {
+  return {
+    withLock: vi.fn((_sessionId: string, fn: () => Promise<unknown>) => fn()),
   };
 }
 

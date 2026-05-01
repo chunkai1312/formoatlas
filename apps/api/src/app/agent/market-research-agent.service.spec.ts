@@ -1,59 +1,46 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MarketResearchAgentService } from './market-research-agent.service';
 
 const sendAndWait = vi.fn();
 const disconnect = vi.fn();
-const stop = vi.fn();
-const createSession = vi.fn();
-
-vi.mock('@github/copilot-sdk', async () => {
-  const actual = await vi.importActual<typeof import('@github/copilot-sdk')>('@github/copilot-sdk');
-  return {
-    ...actual,
-    CopilotClient: vi.fn().mockImplementation(function () {
-      return {
-        createSession,
-        stop,
-      };
-    }),
-  };
-});
+const createEphemeralSession = vi.fn();
+const createOrResumeSession = vi.fn();
+const getModel = vi.fn();
 
 describe('MarketResearchAgentService', () => {
   beforeEach(() => {
-    process.env.COPILOT_CLI_URL = 'localhost:4321';
     vi.clearAllMocks();
-    createSession.mockResolvedValue({ sendAndWait, disconnect });
-    stop.mockResolvedValue([]);
+    createEphemeralSession.mockResolvedValue({ sendAndWait, disconnect });
+    createOrResumeSession.mockResolvedValue({ sendAndWait, disconnect });
+    getModel.mockReturnValue('gpt-5-mini');
     disconnect.mockResolvedValue(undefined);
   });
 
   it('returns validated structured output from Copilot', async () => {
-    const { MarketResearchAgentService } = await import('./market-research-agent.service');
     sendAndWait.mockResolvedValueOnce({
       data: {
         content: JSON.stringify(validAgentOutput()),
       },
     });
 
-    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    const service = createService();
     const result = await service.query({ question: '今天偏多的證據？', date: '2026-04-24' });
 
     expect(result.summary).toBe('今日籌碼偏多但需留意量能。');
-    expect(createSession).toHaveBeenCalledWith(expect.objectContaining({
+    expect(createEphemeralSession).toHaveBeenCalledWith(expect.objectContaining({
       availableTools: [],
       clientName: 'formoatlas-market-research-agent',
     }));
   });
 
   it('includes assistant mode framing in the prompt', async () => {
-    const { MarketResearchAgentService } = await import('./market-research-agent.service');
     sendAndWait.mockResolvedValueOnce({
       data: {
         content: JSON.stringify(validAgentOutput()),
       },
     });
 
-    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    const service = createService();
     await service.query({
       question: '分析這檔',
       date: '2026-04-24',
@@ -76,7 +63,6 @@ describe('MarketResearchAgentService', () => {
   });
 
   it('emits status events during a streaming query', async () => {
-    const { MarketResearchAgentService } = await import('./market-research-agent.service');
     sendAndWait.mockResolvedValueOnce({
       data: {
         content: JSON.stringify(validAgentOutput()),
@@ -84,7 +70,7 @@ describe('MarketResearchAgentService', () => {
     });
     const emit = vi.fn();
 
-    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    const service = createService();
     await service.query({ question: '今天偏多的證據？', date: '2026-04-24' }, emit);
 
     expect(emit).toHaveBeenCalledWith({ type: 'status', message: '正在建立市場研究 session' });
@@ -92,12 +78,11 @@ describe('MarketResearchAgentService', () => {
   });
 
   it('retries once after invalid output', async () => {
-    const { MarketResearchAgentService } = await import('./market-research-agent.service');
     sendAndWait
       .mockResolvedValueOnce({ data: { content: 'not json' } })
       .mockResolvedValueOnce({ data: { content: JSON.stringify(validAgentOutput()) } });
 
-    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    const service = createService();
     const result = await service.query({ question: '今天偏多的證據？', date: '2026-04-24' });
 
     expect(result.keyFindings).toHaveLength(1);
@@ -105,12 +90,11 @@ describe('MarketResearchAgentService', () => {
   });
 
   it('fails after retrying invalid output', async () => {
-    const { MarketResearchAgentService } = await import('./market-research-agent.service');
     sendAndWait
       .mockResolvedValueOnce({ data: { content: 'not json' } })
       .mockResolvedValueOnce({ data: { content: '{}' } });
 
-    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    const service = createService();
 
     await expect(service.query({ question: '今天偏多的證據？', date: '2026-04-24' }))
       .rejects
@@ -118,14 +102,40 @@ describe('MarketResearchAgentService', () => {
   });
 
   it('rejects non-market permission requests', async () => {
-    const { MarketResearchAgentService } = await import('./market-research-agent.service');
-    const service = new MarketResearchAgentService({ createTools: () => [] } as any);
+    const service = createService();
 
     const result = (service as any).permissionHandler({ kind: 'shell' }, { sessionId: 'session' });
 
     expect(result).toMatchObject({ kind: 'reject' });
   });
+
+  it('uses a named Copilot session for conversation-scoped execution', async () => {
+    const service = createService();
+    sendAndWait.mockResolvedValueOnce({
+      data: {
+        content: JSON.stringify(validAgentOutput()),
+      },
+    });
+
+    await service.query({ question: '延續前面問題', date: '2026-04-24' }, undefined, 'formoatlas:session:1');
+
+    expect(createOrResumeSession).toHaveBeenCalledWith('formoatlas:session:1', expect.objectContaining({
+      clientName: 'formoatlas-market-research-agent',
+    }));
+    expect(createEphemeralSession).not.toHaveBeenCalled();
+  });
 });
+
+function createService() {
+  return new MarketResearchAgentService(
+    { createTools: () => [] } as any,
+    {
+      createEphemeralSession,
+      createOrResumeSession,
+      getModel,
+    } as any,
+  );
+}
 
 function validAgentOutput() {
   return {

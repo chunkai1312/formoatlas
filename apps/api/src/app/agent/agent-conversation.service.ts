@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { CopilotRuntimeService } from '../copilot/copilot-runtime.service';
 import { CreateAgentConversationDto } from './dto/create-agent-conversation.dto';
 import { MarketResearchQueryDto } from './dto/market-research-query.dto';
 import { MarketResearchAgentOutput } from './market-research-agent.schema';
@@ -10,9 +11,12 @@ import { AgentConversationDetail, AgentConversationMessage, AgentConversationSum
 
 @Injectable()
 export class AgentConversationService {
+  private readonly logger = new Logger(AgentConversationService.name);
+
   constructor(
     @InjectModel(AgentConversation.name) private readonly conversationModel: Model<AgentConversationDocument>,
     @InjectModel(AgentMessage.name) private readonly messageModel: Model<AgentMessageDocument>,
+    private readonly copilotRuntime: CopilotRuntimeService,
   ) {}
 
   async create(userId: string, input: CreateAgentConversationDto = {}): Promise<AgentConversationSummary> {
@@ -55,14 +59,25 @@ export class AgentConversationService {
   }
 
   async delete(userId: string, conversationId: string): Promise<void> {
-    await this.findOwnedConversation(userId, conversationId);
+    const conversation = await this.findOwnedConversation(userId, conversationId);
     const query = { userId: this.toObjectId(userId), conversationId: this.toObjectId(conversationId) };
     await this.messageModel.deleteMany(query);
     await this.conversationModel.deleteOne({ _id: this.toObjectId(conversationId), userId: this.toObjectId(userId) });
+
+    if (conversation.copilotSessionId) {
+      await this.copilotRuntime.deleteSession(conversation.copilotSessionId).catch(error => {
+        this.logger.warn(`Copilot session cleanup failed: ${error?.message ?? error}`);
+      });
+    }
   }
 
   async ensureOwned(userId: string, conversationId: string): Promise<void> {
     await this.findOwnedConversation(userId, conversationId);
+  }
+
+  async getCopilotSessionId(userId: string, conversationId: string): Promise<string> {
+    const conversation = await this.findOwnedConversation(userId, conversationId);
+    return conversation.copilotSessionId;
   }
 
   async recordUserMessage(userId: string, conversationId: string, input: MarketResearchQueryDto): Promise<AgentConversationMessage> {

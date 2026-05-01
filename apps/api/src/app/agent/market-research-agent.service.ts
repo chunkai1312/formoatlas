@@ -1,5 +1,6 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
-import { CopilotClient, CopilotSession, type CopilotClientOptions, type PermissionHandler } from '@github/copilot-sdk';
+import { CopilotSession, type PermissionHandler, type SessionConfig } from '@github/copilot-sdk';
+import { CopilotRuntimeService } from '../copilot/copilot-runtime.service';
 import { MarketResearchQueryDto } from './dto/market-research-query.dto';
 import { MarketResearchAgentOutput, MarketResearchAgentOutputSchema } from './market-research-agent.schema';
 import { buildMarketResearchPrompt, MARKET_RESEARCH_SYSTEM_PROMPT } from './market-research-agent.prompt';
@@ -12,8 +13,6 @@ const MAX_TOOL_CALLS = 8;
 @Injectable()
 export class MarketResearchAgentService {
   private readonly logger = new Logger(MarketResearchAgentService.name);
-  private readonly copilotModel = process.env.COPILOT_MODEL || 'gpt-5-mini';
-  private readonly copilotCliUrl = process.env.COPILOT_CLI_URL;
 
   private readonly permissionHandler: PermissionHandler = (request) => {
     if (request.kind === 'custom-tool') {
@@ -25,20 +24,26 @@ export class MarketResearchAgentService {
     };
   };
 
-  constructor(private readonly agentTools: MarketResearchAgentTools) {}
+  constructor(
+    private readonly agentTools: MarketResearchAgentTools,
+    private readonly copilotRuntime: CopilotRuntimeService,
+  ) {}
 
-  async query(input: MarketResearchQueryDto, emit?: MarketResearchEventEmitter): Promise<MarketResearchAgentOutput> {
+  async query(
+    input: MarketResearchQueryDto,
+    emit?: MarketResearchEventEmitter,
+    copilotSessionId?: string,
+  ): Promise<MarketResearchAgentOutput> {
     emit?.({ type: 'status', message: '正在建立市場研究 session' });
-    const client = new CopilotClient(this.buildCopilotClientOptions());
     let session: CopilotSession | null = null;
     const toolState = { toolCalls: 0 };
     const tools = this.agentTools.createTools(toolState, { maxToolCalls: MAX_TOOL_CALLS }, emit);
     const toolNames = tools.map(tool => tool.name);
 
     try {
-      session = await client.createSession({
+      const sessionConfig: SessionConfig = {
         clientName: 'formoatlas-market-research-agent',
-        model: this.copilotModel,
+        model: this.copilotRuntime.getModel(),
         tools,
         availableTools: toolNames,
         enableConfigDiscovery: false,
@@ -47,7 +52,10 @@ export class MarketResearchAgentService {
           content: MARKET_RESEARCH_SYSTEM_PROMPT,
         },
         onPermissionRequest: this.permissionHandler,
-      });
+      };
+      session = copilotSessionId
+        ? await this.copilotRuntime.createOrResumeSession(copilotSessionId, sessionConfig)
+        : await this.copilotRuntime.createEphemeralSession(sessionConfig);
 
       emit?.({ type: 'status', message: '正在理解問題並查詢必要資料' });
       const prompt = buildMarketResearchPrompt(input.question, input.date, input.context, input.mode ?? 'research');
@@ -85,23 +93,7 @@ ${firstResponse}`,
           this.logger.warn(`Copilot session cleanup failed: ${error?.message ?? error}`);
         });
       }
-
-      const stopErrors = await client.stop().catch(error => [error]);
-      for (const error of stopErrors) {
-        this.logger.warn(`Copilot client cleanup failed: ${error?.message ?? error}`);
-      }
     }
-  }
-
-  private buildCopilotClientOptions(): CopilotClientOptions {
-    if (!this.copilotCliUrl) {
-      throw new Error('COPILOT_CLI_URL is not configured');
-    }
-
-    return {
-      cliUrl: this.copilotCliUrl,
-      logLevel: 'error',
-    };
   }
 
   private async sendPrompt(session: CopilotSession, prompt: string): Promise<string> {
