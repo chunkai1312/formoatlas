@@ -11,6 +11,7 @@ import { MarketResearchAgentModule } from './agent/market-research-agent.module'
 import { AuthModule } from './auth/auth.module';
 import { MarketStatsService } from './marketdata/services/market-stats.service';
 import { TickerService } from './marketdata/services/ticker.service';
+import { CopilotRuntimeModule } from './copilot/copilot-runtime.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TickerService } from './marketdata/services/ticker.service';
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
     MarketDataModule,
+    CopilotRuntimeModule,
     BarometerModule,
     MarketResearchAgentModule,
     AuthModule,
