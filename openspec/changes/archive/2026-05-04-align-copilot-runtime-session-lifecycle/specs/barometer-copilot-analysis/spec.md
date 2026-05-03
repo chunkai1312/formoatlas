@@ -1,7 +1,7 @@
-## MODIFIED Requirements
+## 修改 Requirements
 
 ### Requirement: Copilot SDK 晴雨表分析提供者
-系統 SHALL 使用 GitHub Copilot SDK shared runtime 產生未快取的每日晴雨表分析，且 SHALL 一律透過 `COPILOT_CLI_URL` 連線至 Copilot CLI headless server。晴雨表分析 SHALL retain ephemeral one-shot session semantics and MUST NOT persist Copilot runtime memory by date.
+系統 SHALL 使用 GitHub Copilot SDK shared runtime 產生未快取的每日晴雨表分析，且 SHALL 一律透過 `COPILOT_CLI_URL` 連線至 Copilot CLI headless server。晴雨表分析 SHALL 保持 ephemeral 一次性 session 語意，且 MUST NOT 以日期持久化 Copilot runtime memory。
 
 #### Scenario: 已設定 Headless CLI URL
 - **WHEN** 請求未快取的晴雨表分析，且 API process 可讀取 `COPILOT_CLI_URL`
@@ -9,8 +9,8 @@
 
 #### Scenario: 晴雨表分析使用 ephemeral session
 - **WHEN** 系統執行未快取的晴雨表 Copilot analysis
-- **THEN** 系統 SHALL create a fresh Copilot session without a persistent date-scoped session id
-- **AND** 系統 SHALL disconnect that session after completion or failure
+- **THEN** 系統 SHALL 建立不帶持久化日期範圍 session id 的全新 Copilot session
+- **AND** 系統 SHALL 在完成或失敗後 disconnect 該 session
 
 #### Scenario: 未設定 Headless CLI URL
 - **WHEN** 請求未快取的晴雨表分析，且 API process 無 `COPILOT_CLI_URL`
