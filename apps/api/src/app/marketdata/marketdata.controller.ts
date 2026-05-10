@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { MarketStatsRepository } from './repositories/market-stats.repository';
 import { TickerRepository } from './repositories/ticker.repository';
 import { EquityRepository } from './repositories/equity.repository';
+import { AdjustedPriceService } from './services/adjusted-price.service';
 import { GetMarketStatsDto } from './dto/get-market-stats.dto';
 import { GetTickerOhlcDto } from './dto/get-ticker-ohlc.dto';
 import { GetSectorFlowDto } from './dto/get-sector-flow.dto';
@@ -20,6 +21,7 @@ export class MarketDataController {
     private readonly marketStatsRepository: MarketStatsRepository,
     private readonly tickerRepository: TickerRepository,
     private readonly equityRepository: EquityRepository,
+    private readonly adjustedPriceService: AdjustedPriceService,
   ) {}
 
   @ApiOperation({ summary: '取得指定日期當天或之前最近的交易日' })
@@ -42,12 +44,13 @@ export class MarketDataController {
 
   @ApiOperation({ summary: '取得 Ticker OHLC 收盤行情' })
   @Get('tickers')
-  getTickers(@Query() query: GetTickerOhlcDto) {
-    return this.tickerRepository.getOhlcBySymbol({
+  async getTickers(@Query() query: GetTickerOhlcDto) {
+    const rows = await this.tickerRepository.getOhlcBySymbol({
       symbol: query.symbol,
       startDate: query.startDate,
       endDate: query.endDate,
     });
+    return query.adjusted ? this.adjustedPriceService.adjustOhlc(query.symbol, rows) : rows;
   }
 
   @ApiOperation({ summary: '取得股票代號 metadata（名稱與市場別）' })

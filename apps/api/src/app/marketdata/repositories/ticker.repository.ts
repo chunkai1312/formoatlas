@@ -50,7 +50,7 @@ export class TickerRepository {
       .exec();
   }
 
-  async getOhlcBySymbol(options: { symbol: string, startDate?: string, endDate?: string }) {
+  async getOhlcBySymbol(options: { symbol: string, startDate?: string, endDate?: string, adjusted?: boolean }) {
     const startDate = options.startDate ?? DateTime.local().minus({ months: 3 }).toISODate();
     const endDate = options.endDate ?? DateTime.local().toISODate();
 

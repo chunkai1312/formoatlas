@@ -1,4 +1,5 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsDateString, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetTickerOhlcDto {
@@ -25,4 +26,13 @@ export class GetTickerOhlcDto {
   @IsOptional()
   @IsDateString()
   endDate?: string;
+
+  @ApiPropertyOptional({
+    description: '是否回傳向後還原 OHLC；true 時啟用',
+    example: true,
+  })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  adjusted?: boolean;
 }

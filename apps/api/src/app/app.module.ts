@@ -10,6 +10,7 @@ import { BarometerModule } from './barometer/barometer.module';
 import { MarketResearchAgentModule } from './agent/market-research-agent.module';
 import { AuthModule } from './auth/auth.module';
 import { MarketStatsService } from './marketdata/services/market-stats.service';
+import { PriceAdjustmentEventService } from './marketdata/services/price-adjustment-event.service';
 import { TickerService } from './marketdata/services/ticker.service';
 import { CopilotRuntimeModule } from './copilot/copilot-runtime.module';
 import { BacktestingModule } from './backtesting/backtesting.module';
@@ -33,6 +34,7 @@ import { BacktestingModule } from './backtesting/backtesting.module';
 export class AppModule implements OnApplicationBootstrap {
   constructor(
     private readonly marketStatsService: MarketStatsService,
+    private readonly priceAdjustmentEventService: PriceAdjustmentEventService,
     private readonly tickerService: TickerService
   ) {}
 
@@ -47,6 +49,7 @@ export class AppModule implements OnApplicationBootstrap {
       for (let dt = startDate; dt <= endDate; dt = dt.plus({ day: 1 })) {
         try {
           await this.marketStatsService.updateMarketStats(dt.toISODate());
+          await this.priceAdjustmentEventService.updatePriceAdjustmentEvents(dt.toISODate());
           await this.tickerService.updateTickers(dt.toISODate());
         } catch (error) {
           dt = dt.minus({ day: 1 });
