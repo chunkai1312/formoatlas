@@ -22,7 +22,7 @@ class MockDashboardStateService {
 
 describe('StockDetailComponent', () => {
   let fixture: ComponentFixture<StockDetailComponent>;
-  let tickerService: { getStockSummary: ReturnType<typeof vi.fn> };
+  let tickerService: { getStockSummary: ReturnType<typeof vi.fn>; getTicker: ReturnType<typeof vi.fn> };
   let watchlistService: {
     watchList: ReturnType<typeof signal<string[]>>;
     load: ReturnType<typeof vi.fn>;
@@ -37,6 +37,7 @@ describe('StockDetailComponent', () => {
     loggedIn = signal(true);
     tickerService = {
       getStockSummary: vi.fn(() => of(stockSummary())),
+      getTicker: vi.fn(() => of(adjustedOhlc())),
     };
     watchlistService = {
       watchList: signal<string[]>([]),
@@ -120,6 +121,8 @@ describe('StockDetailComponent', () => {
   it('shows daily and weekly K-line controls with moving averages', () => {
     expect(fixture.nativeElement.textContent).toContain('日K');
     expect(fixture.nativeElement.textContent).toContain('週K');
+    expect(fixture.nativeElement.textContent).toContain('原始');
+    expect(fixture.nativeElement.textContent).toContain('還原');
     expect(fixture.nativeElement.textContent).toContain('MA5');
 
     fixture.componentInstance.setChartInterval('W');
@@ -128,6 +131,31 @@ describe('StockDetailComponent', () => {
     expect(fixture.componentInstance.chartInterval()).toBe('W');
     expect(fixture.nativeElement.textContent).toContain('2Y');
     expect(fixture.nativeElement.textContent).toContain('MA60');
+  });
+
+  it('defaults stock K-line to raw summary OHLC', () => {
+    expect(fixture.componentInstance.priceBasis()).toBe('raw');
+    expect(fixture.componentInstance.normalizedOhlc()[0].closePrice).toBe(905);
+    expect(tickerService.getTicker).not.toHaveBeenCalled();
+  });
+
+  it('requests adjusted OHLC when switching price basis', () => {
+    fixture.componentInstance.setPriceBasis('adjusted');
+    fixture.detectChanges();
+
+    expect(tickerService.getTicker).toHaveBeenCalledWith('2330', '2021-04-29', '2026-04-29', true);
+    expect(fixture.componentInstance.normalizedOhlc()[0].closePrice).toBe(900);
+    expect(fixture.componentInstance.priceBasis()).toBe('adjusted');
+  });
+
+  it('switches back to raw OHLC without sending adjusted query', () => {
+    fixture.componentInstance.setPriceBasis('adjusted');
+    fixture.componentInstance.setPriceBasis('raw');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.priceBasis()).toBe('raw');
+    expect(fixture.componentInstance.normalizedOhlc()[0].closePrice).toBe(905);
+    expect(tickerService.getTicker).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -177,4 +205,11 @@ function stockSummary() {
       sectorWeightByTradeValue: 0.12,
     },
   };
+}
+
+function adjustedOhlc() {
+  return [
+    { date: '2026-04-28', openPrice: 895, highPrice: 905, lowPrice: 885, closePrice: 900, tradeVolume: 1000, tradeValue: 10_000_000 },
+    { date: '2026-04-29', openPrice: 900, highPrice: 915, lowPrice: 897, closePrice: 913, tradeVolume: 1200, tradeValue: 12_000_000 },
+  ];
 }

@@ -21,9 +21,11 @@ export class TickerService {
   private readonly tickerMetadataCache = new Map<string, TickerMetadata>();
   private readonly tickerMetadataQueried = new Set<string>();
 
-  getTicker(symbol: string, startDate: string, endDate: string): Observable<TickerOhlc[]> {
+  getTicker(symbol: string, startDate: string, endDate: string, adjusted = false): Observable<TickerOhlc[]> {
+    const params: Record<string, string> = { symbol, startDate, endDate };
+    if (adjusted) params['adjusted'] = 'true';
     return this.http.get<TickerOhlc[]>(this.baseUrl, {
-      params: { symbol, startDate, endDate },
+      params,
     });
   }
 

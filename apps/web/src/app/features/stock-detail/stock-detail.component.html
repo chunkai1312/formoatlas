@@ -56,6 +56,10 @@
               <button type="button" class="range-btn" [class.active]="chartInterval() === 'D'" (click)="setChartInterval('D')">日K</button>
               <button type="button" class="range-btn" [class.active]="chartInterval() === 'W'" (click)="setChartInterval('W')">週K</button>
             </div>
+            <div class="interval-buttons" aria-label="價格基準">
+              <button type="button" class="range-btn" [class.active]="priceBasis() === 'raw'" (click)="setPriceBasis('raw')">原始</button>
+              <button type="button" class="range-btn" [class.active]="priceBasis() === 'adjusted'" (click)="setPriceBasis('adjusted')">還原</button>
+            </div>
             <div class="range-buttons" aria-label="顯示區間">
               @for (range of ranges(); track range) {
                 <button type="button" class="range-btn" [class.active]="localRange() === range" (click)="setLocalRange(range)">{{ range }}</button>

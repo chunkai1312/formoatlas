@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, combineLatest, finalize, of, switchMap } from 'rxjs';
@@ -22,6 +22,7 @@ const BEAR_COLOR = '#22c55e';
 const WEEKLY_VISIBLE_MA_MAX_PERIOD = 60;
 
 type ChartInterval = 'D' | 'W';
+type PriceBasis = 'raw' | 'adjusted';
 
 const MA_DEFS: { period: number; color: string }[] = [
   { period: 5, color: '#FBBF24' },
@@ -107,6 +108,7 @@ export class StockDetailComponent {
   private readonly watchlistService = inject(WatchlistService);
   private readonly loginRequired = inject(LoginRequiredService);
   private readonly researchContext = inject(ResearchAssistantContextService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly selectedDate = this.dashboardState.selectedDate;
   readonly isLoggedIn = this.authService.isLoggedIn;
@@ -118,6 +120,8 @@ export class StockDetailComponent {
   readonly currentSymbol = signal('');
   readonly localRange = signal<TimeRange>('3M');
   readonly chartInterval = signal<ChartInterval>('D');
+  readonly priceBasis = signal<PriceBasis>('raw');
+  readonly chartOhlc = signal<TickerOhlc[]>([]);
   readonly hoveredIndex = signal<number | null>(null);
   readonly maDefs = MA_DEFS;
 
@@ -141,7 +145,7 @@ export class StockDetailComponent {
       ? MA_DEFS.filter(({ period }) => period <= WEEKLY_VISIBLE_MA_MAX_PERIOD)
       : MA_DEFS
   );
-  readonly normalizedOhlc = computed(() => normalizeOhlcData(this.summary()?.ohlc ?? []));
+  readonly normalizedOhlc = computed(() => normalizeOhlcData(this.chartOhlc()));
   readonly visibleHotStockRanks = computed(() => this.summary()?.context.hotStockRanks.slice(0, 3) ?? []);
   readonly hiddenHotStockRankCount = computed(() => Math.max((this.summary()?.context.hotStockRanks.length ?? 0) - 3, 0));
   readonly weeklyData = computed(() => aggregateToWeekly(this.normalizedOhlc()));
@@ -220,6 +224,7 @@ export class StockDetailComponent {
       )
       .subscribe(summary => {
         this.summary.set(summary);
+        this.loadChartOhlc(summary);
         if (summary) {
           this.researchContext.setContext({
             route: 'stock-detail',
@@ -310,8 +315,40 @@ export class StockDetailComponent {
     this.resetHover();
   }
 
+  setPriceBasis(basis: PriceBasis) {
+    if (this.priceBasis() === basis) return;
+    this.priceBasis.set(basis);
+    this.loadChartOhlc(this.summary());
+    this.resetHover();
+  }
+
   resetHover() {
     this.hoveredIndex.set(null);
+  }
+
+  private loadChartOhlc(summary: StockSummary | null) {
+    if (!summary) {
+      this.chartOhlc.set([]);
+      return;
+    }
+
+    if (this.priceBasis() === 'raw') {
+      this.chartOhlc.set(summary.ohlc);
+      return;
+    }
+
+    const startDate = DateTime.fromISO(summary.date).minus({ years: 5 }).toISODate() ?? summary.requestedDate;
+    this.tickerService.getTicker(summary.symbol, startDate, summary.date, true)
+      .pipe(
+        catchError(() => of(summary.ohlc)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(rows => {
+        const current = this.summary();
+        if (this.priceBasis() === 'adjusted' && current?.symbol === summary.symbol && current.date === summary.date) {
+          this.chartOhlc.set(rows);
+        }
+      });
   }
 
   private buildChartOption(
