@@ -17,6 +17,12 @@
         }
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run apps/api/src/app --environment node"
+      }
+    },
     "prune-lockfile": {
       "dependsOn": ["build"],
       "cache": true,

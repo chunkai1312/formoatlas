@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { MarketStatsService } from './marketdata/services/market-stats.service';
 import { TickerService } from './marketdata/services/ticker.service';
 import { CopilotRuntimeModule } from './copilot/copilot-runtime.module';
+import { BacktestingModule } from './backtesting/backtesting.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CopilotRuntimeModule } from './copilot/copilot-runtime.module';
     BarometerModule,
     MarketResearchAgentModule,
     AuthModule,
+    BacktestingModule,
   ]
 })
 export class AppModule implements OnApplicationBootstrap {
