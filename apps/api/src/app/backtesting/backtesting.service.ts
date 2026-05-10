@@ -9,6 +9,7 @@ import {
   TradeLogColumn,
 } from 'node-backtesting';
 import type { Candle } from 'node-backtesting';
+import { AdjustedPriceService } from '../marketdata/services/adjusted-price.service';
 import { TickerRepository } from '../marketdata/repositories/ticker.repository';
 import { RunBacktestDto } from './dto/run-backtest.dto';
 import { BuyAndHoldStrategy } from './strategies/buy-and-hold.strategy';
@@ -21,7 +22,10 @@ const DEFAULT_YEARS = 5;
 
 @Injectable()
 export class BacktestingService {
-  constructor(private readonly tickerRepository: TickerRepository) {}
+  constructor(
+    private readonly tickerRepository: TickerRepository,
+    private readonly adjustedPriceService: AdjustedPriceService,
+  ) {}
 
   async runBacktest(input: RunBacktestDto): Promise<BacktestResult> {
     const symbol = input.symbol.trim().toUpperCase();
@@ -36,7 +40,8 @@ export class BacktestingService {
     const params = input.params ?? {};
     this.validateStrategyParams(input.strategy, params);
 
-    const rows = await this.tickerRepository.getOhlcBySymbol({ symbol, startDate, endDate });
+    const rawRows = await this.tickerRepository.getOhlcBySymbol({ symbol, startDate, endDate });
+    const rows = await this.adjustedPriceService.adjustOhlc(symbol, rawRows);
     const data = this.toHistoricalData(rows);
     if (!data.length) {
       throw new BadRequestException(`找不到 ${symbol} 在指定區間內的 OHLC 資料`);
@@ -106,6 +111,7 @@ export class BacktestingService {
           : 'SMA 策略結果會同時回傳買進持有 benchmark，供使用者比較策略是否優於單純持有。',
         `成交假設：${tradeOnClose ? '以收盤價成交' : '以下一根 K 棒開盤價成交'}，以股為交易單位，不限制整張。`,
         `交易成本假設：手續費率 ${feeRate}、證交稅率 ${taxRate}；目前回測引擎以有效雙邊 commission ${effectiveCommissionRate} 近似交易成本。`,
+        '價格資料假設：回測使用向後還原 OHLC，以降低除權息、減資、面額變更與 ETF 分割造成的價格跳空干擾。',
       ],
     };
   }

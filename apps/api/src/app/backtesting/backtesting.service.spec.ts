@@ -10,7 +10,8 @@ describe('BacktestingService', () => {
     const repository = {
       getOhlcBySymbol: vi.fn().mockResolvedValue(sampleOhlc()),
     };
-    const service = new BacktestingService(repository as any);
+    const adjustedPriceService = { adjustOhlc: vi.fn().mockResolvedValue(sampleOhlc()) };
+    const service = new BacktestingService(repository as any, adjustedPriceService as any);
 
     const result = await service.runBacktest({
       symbol: '2330',
@@ -29,6 +30,7 @@ describe('BacktestingService', () => {
       startDate: '2026-01-01',
       endDate: '2026-01-10',
     });
+    expect(adjustedPriceService.adjustOhlc).toHaveBeenCalledWith('2330', sampleOhlc());
     expect(result).toMatchObject({
       symbol: '2330',
       strategy: 'sma-cross',
@@ -48,13 +50,14 @@ describe('BacktestingService', () => {
     expect(result.drawdownCurve).toHaveLength(sampleOhlc().length);
     expect(result.trades[0]).toMatchObject({ size: 10 });
     expect(result.warnings.join(' ')).toContain('不構成投資建議');
+    expect(result.warnings.join(' ')).toContain('還原 OHLC');
   });
 
   it('runs a buy-and-hold backtest without SMA params', async () => {
     const repository = {
       getOhlcBySymbol: vi.fn().mockResolvedValue(sampleOhlc()),
     };
-    const service = new BacktestingService(repository as any);
+    const service = new BacktestingService(repository as any, { adjustOhlc: vi.fn().mockResolvedValue(sampleOhlc()) } as any);
 
     const result = await service.runBacktest({
       symbol: '2330',
@@ -77,7 +80,7 @@ describe('BacktestingService', () => {
   });
 
   it('rejects invalid SMA window relationship', async () => {
-    const service = new BacktestingService({ getOhlcBySymbol: vi.fn() } as any);
+    const service = new BacktestingService({ getOhlcBySymbol: vi.fn() } as any, { adjustOhlc: vi.fn() } as any);
 
     await expect(service.runBacktest({
       symbol: '2330',
@@ -92,6 +95,8 @@ describe('BacktestingService', () => {
   it('rejects insufficient historical data', async () => {
     const service = new BacktestingService({
       getOhlcBySymbol: vi.fn().mockResolvedValue(sampleOhlc().slice(0, 2)),
+    } as any, {
+      adjustOhlc: vi.fn().mockResolvedValue(sampleOhlc().slice(0, 2)),
     } as any);
 
     await expect(service.runBacktest({
