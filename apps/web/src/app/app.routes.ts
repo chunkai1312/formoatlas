@@ -37,6 +37,13 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'goal-simulation',
+    loadComponent: () =>
+      import('./features/goal-simulation/goal-simulation.component').then(
+        (m) => m.GoalSimulationComponent
+      ),
+  },
+  {
     path: 'stocks/:symbol',
     loadComponent: () =>
       import('./features/stock-detail/stock-detail.component').then(

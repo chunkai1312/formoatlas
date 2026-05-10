@@ -54,6 +54,7 @@ describe('ToolbarComponent', () => {
           { path: 'market-overview', component: EmptyRouteComponent },
           { path: 'sector-flow', component: EmptyRouteComponent },
           { path: 'hot-stocks', component: EmptyRouteComponent },
+          { path: 'goal-simulation', component: EmptyRouteComponent },
           { path: 'watchlist', component: EmptyRouteComponent },
         ]),
         { provide: DashboardStateService, useClass: MockDashboardStateService },
@@ -90,6 +91,7 @@ describe('ToolbarComponent', () => {
       '大盤總覽',
       '資金流向',
       '熱門個股',
+      '目標模擬',
       '自選股',
     ]);
     expect(links.some((link) => link.classList.contains('active'))).toBe(false);
@@ -114,6 +116,13 @@ describe('ToolbarComponent', () => {
     links = Array.from(fixture.nativeElement.querySelectorAll('.nav-link')) as HTMLAnchorElement[];
 
     expect(links[2].classList.contains('active')).toBe(true);
+
+    await router.navigateByUrl('/goal-simulation');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    links = Array.from(fixture.nativeElement.querySelectorAll('.nav-link')) as HTMLAnchorElement[];
+
+    expect(links[3].classList.contains('active')).toBe(true);
   });
 
   it('opens the login-required prompt instead of navigating to watchlist when signed out', () => {
@@ -121,7 +130,7 @@ describe('ToolbarComponent', () => {
     const loginRequired = TestBed.inject(LoginRequiredService) as unknown as MockLoginRequiredService;
     const links = Array.from(fixture.nativeElement.querySelectorAll('.nav-link')) as HTMLElement[];
 
-    links[3].click();
+    links[4].click();
 
     expect(loginRequired.open).toHaveBeenCalled();
   });
@@ -140,7 +149,7 @@ describe('ToolbarComponent', () => {
     await fixture.whenStable();
 
     const links = Array.from(fixture.nativeElement.querySelectorAll('.nav-link')) as HTMLElement[];
-    expect(links[3].textContent?.trim()).toBe('自選股');
-    expect(links[3].classList.contains('active')).toBe(true);
+    expect(links[4].textContent?.trim()).toBe('自選股');
+    expect(links[4].classList.contains('active')).toBe(true);
   });
 });
