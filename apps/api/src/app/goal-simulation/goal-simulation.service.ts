@@ -265,10 +265,6 @@ export class GoalSimulationService {
       suggestions.push('此組合在歷史情境下達成目標，可再檢查最大回撤是否符合風險承受度。');
     }
 
-    const tolerance = input.maxDrawdownTolerancePct;
-    if (tolerance !== undefined && Math.abs(metrics.maxDrawdownPct) > tolerance) {
-      suggestions.push('最大回撤超過容忍度，可提高現金保留、降低單一股票曝險或重新設定目標條件。');
-    }
     return suggestions;
   }
 

@@ -19,7 +19,6 @@ describe('GoalSimulationService', () => {
       endDate: '2025-03-31',
       initialCapital: 1_000_000,
       monthlyContribution: 10_000,
-      maxDrawdownTolerancePct: 20,
       universe: { type: 'single-symbol', symbols: ['2330'] },
     });
 
@@ -180,7 +179,6 @@ describe('RunGoalSimulationDto', () => {
       endDate: '2026-01-01',
       initialCapital: 1_000_000,
       monthlyContribution: 10_000,
-      maxDrawdownTolerancePct: 20,
       universe: { type: 'single-symbol', symbols: ['2330'] },
     });
 

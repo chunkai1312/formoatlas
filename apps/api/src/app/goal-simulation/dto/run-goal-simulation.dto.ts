@@ -78,14 +78,6 @@ export class RunGoalSimulationDto {
   @Max(1_000_000_000_000)
   monthlyContribution!: number;
 
-  @ApiPropertyOptional({ description: '最大回撤容忍度百分比', example: 20, minimum: 0, maximum: 100 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  maxDrawdownTolerancePct?: number;
-
   @ApiProperty({ type: GoalSimulationUniverseDto })
   @IsObject()
   @ValidateNested()

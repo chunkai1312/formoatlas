@@ -8,7 +8,6 @@ export interface RunGoalSimulationRequest {
   endDate?: string;
   initialCapital: number;
   monthlyContribution: number;
-  maxDrawdownTolerancePct?: number;
   universe: {
     type: 'single-symbol';
     symbols: string[];

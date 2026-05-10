@@ -133,7 +133,6 @@ describe('GoalSimulationComponent', () => {
       endDate: '2026-01-05',
       initialCapital: '500000',
       monthlyContribution: '12000',
-      maxDrawdownTolerancePct: '18',
     });
     fixture.detectChanges();
 
@@ -146,7 +145,6 @@ describe('GoalSimulationComponent', () => {
     expect(fixture.componentInstance.endDate).toBe('2026-01-05');
     expect(fixture.componentInstance.initialCapital).toBe(500_000);
     expect(fixture.componentInstance.monthlyContribution).toBe(12_000);
-    expect(fixture.componentInstance.maxDrawdownTolerancePct).toBe(18);
 
     fixture.componentInstance.runSimulation();
 
@@ -157,7 +155,6 @@ describe('GoalSimulationComponent', () => {
       endDate: '2026-01-05',
       initialCapital: 500_000,
       monthlyContribution: 12_000,
-      maxDrawdownTolerancePct: 18,
       universe: { type: 'single-symbol', symbols: ['006208'] },
     }));
   });

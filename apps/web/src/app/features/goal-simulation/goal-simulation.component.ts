@@ -40,7 +40,6 @@ export class GoalSimulationComponent {
   endDate = '';
   initialCapital = 1_000_000;
   monthlyContribution = 30_000;
-  maxDrawdownTolerancePct: number | null = 25;
   symbol = '0050';
 
   constructor() {
@@ -124,7 +123,6 @@ export class GoalSimulationComponent {
     }
     if (this.startDate) request.startDate = this.startDate;
     if (this.endDate) request.endDate = this.endDate;
-    if (this.maxDrawdownTolerancePct !== null) request.maxDrawdownTolerancePct = this.maxDrawdownTolerancePct;
 
     this.goalSimulationService.run(request)
       .pipe(finalize(() => this.loading.set(false)))
@@ -175,7 +173,6 @@ export class GoalSimulationComponent {
     this.horizonYears = this.numberParam('horizonYears') ?? this.horizonYears;
     this.initialCapital = this.numberParam('initialCapital') ?? this.initialCapital;
     this.monthlyContribution = this.numberParam('monthlyContribution') ?? this.monthlyContribution;
-    this.maxDrawdownTolerancePct = this.numberParam('maxDrawdownTolerancePct') ?? this.maxDrawdownTolerancePct;
 
     const startDate = this.dateParam('startDate');
     const endDate = this.dateParam('endDate');
