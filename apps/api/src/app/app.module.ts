@@ -14,6 +14,7 @@ import { PriceAdjustmentEventService } from './marketdata/services/price-adjustm
 import { TickerService } from './marketdata/services/ticker.service';
 import { CopilotRuntimeModule } from './copilot/copilot-runtime.module';
 import { BacktestingModule } from './backtesting/backtesting.module';
+import { GoalSimulationModule } from './goal-simulation/goal-simulation.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BacktestingModule } from './backtesting/backtesting.module';
     MarketResearchAgentModule,
     AuthModule,
     BacktestingModule,
+    GoalSimulationModule,
   ]
 })
 export class AppModule implements OnApplicationBootstrap {
