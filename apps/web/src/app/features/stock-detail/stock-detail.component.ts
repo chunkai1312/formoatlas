@@ -15,6 +15,7 @@ import { ResearchAssistantContextService } from '../../core/services/research-as
 import { StockSummary } from '../../core/models/stock-summary.model';
 import { TickerOhlc } from '../../core/models/ticker-ohlc.model';
 import { IndicatorChartComponent } from '../dashboard/components/trend-chart/indicator-chart/indicator-chart.component';
+import { BacktestPanelComponent } from './components/backtest-panel/backtest-panel.component';
 
 const BULL_COLOR = '#ef4444';
 const BEAR_COLOR = '#22c55e';
@@ -94,7 +95,7 @@ function calcMa(period: number, closes: number[]): (number | null)[] {
 @Component({
   selector: 'app-stock-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatIconModule, IndicatorChartComponent],
+  imports: [CommonModule, RouterLink, MatIconModule, IndicatorChartComponent, BacktestPanelComponent],
   templateUrl: './stock-detail.component.html',
   styleUrl: './stock-detail.component.scss',
 })

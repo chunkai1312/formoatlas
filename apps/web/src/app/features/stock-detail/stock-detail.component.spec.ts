@@ -12,6 +12,7 @@ import { ResearchAssistantContextService } from '../../core/services/research-as
 import { TickerService } from '../../core/services/ticker.service';
 import { WatchlistService } from '../../core/services/watchlist.service';
 import { IndicatorChartComponent } from '../dashboard/components/trend-chart/indicator-chart/indicator-chart.component';
+import { BacktestPanelComponent } from './components/backtest-panel/backtest-panel.component';
 import { StockDetailComponent } from './stock-detail.component';
 
 class MockDashboardStateService {
@@ -67,6 +68,9 @@ describe('StockDetailComponent', () => {
       .overrideComponent(IndicatorChartComponent, {
         set: { template: '' },
       })
+      .overrideComponent(BacktestPanelComponent, {
+        set: { template: '<section class="mock-backtest-panel"></section>' },
+      })
       .compileComponents();
 
     contextService = TestBed.inject(ResearchAssistantContextService);
@@ -79,7 +83,7 @@ describe('StockDetailComponent', () => {
     expect(tickerService.getStockSummary).toHaveBeenCalledWith('2330', '2026-04-30');
     expect(fixture.nativeElement.textContent).toContain('台積電');
     expect(fixture.nativeElement.textContent).toContain('選取日期 2026-04-30 無個股資料');
-    expect(fixture.nativeElement.textContent).toContain('3 個榜單命中');
+    expect(fixture.nativeElement.textContent).toContain('漲幅榜');
     expect(fixture.nativeElement.textContent).toContain('成交金額排行');
     expect(fixture.nativeElement.textContent).toContain('#2');
     expect(fixture.nativeElement.textContent).not.toContain('actives.byValue');
