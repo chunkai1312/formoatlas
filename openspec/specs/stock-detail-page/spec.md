@@ -99,3 +99,32 @@ Existing controls such as watch-list toggle buttons SHALL remain usable without 
 - **WHEN** user activates a watch-list toggle or remove control in a symbol-bearing row
 - **THEN** web app performs that control action
 - **AND** does not navigate to the stock detail page as a side effect
+
+### Requirement: K 線圖價格基準切換
+Stock detail page SHALL provide a price basis toggle for the K-line chart allowing the user to switch between raw（原始）and adjusted（還原）OHLC.
+
+The toggle SHALL default to adjusted（還原）as the stable displayed basis on initial page load.
+
+The chart SHALL preserve 台股紅漲綠跌 semantics regardless of the selected price basis.
+
+When the user switches price basis, the chart SHALL reload the OHLC series using the appropriate `adjusted` parameter on the ticker OHLC API and re-render without navigating away.
+
+#### Scenario: 預設顯示還原 K 線
+- **WHEN** user navigates to a stock detail page
+- **THEN** K-line chart displays backward-adjusted OHLC（還原價）
+- **AND** price basis toggle shows 還原 as the active selection
+
+#### Scenario: 切換至原始 K 線
+- **WHEN** user activates the 原始 option in the price basis toggle
+- **THEN** K-line chart reloads and displays raw OHLC
+- **AND** 台股紅漲綠跌 semantics are preserved
+
+#### Scenario: 切換至還原 K 線
+- **WHEN** user activates the 還原 option in the price basis toggle
+- **THEN** K-line chart reloads and displays backward-adjusted OHLC
+- **AND** 台股紅漲綠跌 semantics are preserved
+
+#### Scenario: 指數 symbol 的價格基準切換
+- **WHEN** user views a stock detail page for an index symbol
+- **THEN** K-line chart displays raw OHLC（指數不支援還原）
+- **AND** price basis toggle is hidden or disabled

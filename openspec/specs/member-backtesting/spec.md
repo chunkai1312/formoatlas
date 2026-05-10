@@ -32,7 +32,9 @@ API SHALL 提供由 `JwtAuthGuard` 保護的 `POST /api/backtesting/run` 端點�
 - **則** API 回傳 HTTP 400
 
 ### 需求：OHLC 資料轉接器
-`BacktestingService` SHALL 透過 `TickerRepository.getOhlcBySymbol()` 取得 OHLC 資料，並轉換為 `node-backtesting` 所需格式。
+`BacktestingService` SHALL 透過等效市場資料 OHLC 轉接器（`adjusted=true`）取得還原 OHLC 資料，並轉換為 `node-backtesting` 所需格式。
+
+`RunBacktestDto` SHALL NOT 包含 `adjusted` 切換欄位；回測服務固定使用還原價格，不暴露此選項給呼叫端。
 
 若解析後的 OHLC 序列資料點數少於 `longWindow`，服務 SHALL 回傳 HTTP 400 並說明資料不足。
 
@@ -41,6 +43,7 @@ API SHALL 提供由 `JwtAuthGuard` 保護的 `POST /api/backtesting/run` 端點�
 #### 情境：資料充足
 - **當** 解析後 OHLC 序列長度 >= `longWindow`（sma-cross）或 >= 2（buy-and-hold）
 - **則** 回測正常執行
+- **且** 策略輸入資料使用還原 OHLC
 
 #### 情境：sma-cross 資料不足
 - **當** 解析後 OHLC 序列長度 < `longWindow`
