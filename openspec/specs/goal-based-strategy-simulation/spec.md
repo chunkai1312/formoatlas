@@ -11,7 +11,6 @@
 - `endDate`：string（選填，YYYY-MM-DD）— 歷史模擬結束日期
 - `initialCapital`：number（必填）— 初始本金
 - `monthlyContribution`：number（必填）— 每月定期投入金額（純單筆投入時填 0）
-- `maxDrawdownTolerancePct`：number（選填）— 可接受的最大回撤幅度
 - `universe.type`：第一版 SHALL 支援 `'single-symbol'`
 - `universe.symbols`：string[]（當 type 為 `single-symbol` 時必填且只能包含一個 symbol）
 
@@ -154,7 +153,7 @@ web app SHALL 提供目標導向買進持有模擬頁面，讓已登入會員設
 
 股票代號欄位預設值 SHALL 為 `0050`。
 
-頁面 SHALL 支援 URL query params 帶入表單初始設定，包含 `symbol`、`targetMode`、`targetAmount`、`targetAnnualReturnPct`、`horizonYears`、`startDate`、`endDate`、`initialCapital`、`monthlyContribution` 與 `maxDrawdownTolerancePct`。
+頁面 SHALL 支援 URL query params 帶入表單初始設定，包含 `symbol`、`targetMode`、`targetAmount`、`targetAnnualReturnPct`、`horizonYears`、`startDate`、`endDate`、`initialCapital` 與 `monthlyContribution`。
 
 URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 
