@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: 目標導向模擬請求模型
 系統 SHALL 定義 `GoalSimulationRequest` 模型，供目標導向買進持有模擬功能使用。
