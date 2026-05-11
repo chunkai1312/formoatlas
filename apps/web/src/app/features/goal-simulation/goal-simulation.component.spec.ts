@@ -146,6 +146,32 @@ describe('GoalSimulationComponent', () => {
     }));
   });
 
+  it('auto submits once when URL query params include autoRun=true', () => {
+    createComponent({
+      symbol: '006208',
+      targetMode: 'annual-return',
+      targetAnnualReturnPct: '6.5',
+      horizonYears: '8',
+      startDate: '2018-01-02',
+      endDate: '2026-01-05',
+      initialCapital: '500000',
+      monthlyContribution: '12000',
+      autoRun: 'true',
+    });
+    fixture.detectChanges();
+
+    expect(goalSimulationService.run).toHaveBeenCalledTimes(1);
+    expect(goalSimulationService.run).toHaveBeenCalledWith(expect.objectContaining({
+      targetAnnualReturnPct: 6.5,
+      horizonYears: 8,
+      startDate: '2018-01-02',
+      endDate: '2026-01-05',
+      initialCapital: 500_000,
+      monthlyContribution: 12_000,
+      universe: { type: 'single-symbol', symbols: ['006208'] },
+    }));
+  });
+
   it('does not render strategy selection controls', () => {
     createComponent();
     fixture.detectChanges();

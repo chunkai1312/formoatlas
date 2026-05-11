@@ -39,6 +39,9 @@ export class GoalSimulationComponent {
 
   constructor() {
     this.applyQueryParams();
+    if (this.shouldAutoRun()) {
+      this.runSimulation();
+    }
   }
 
   readonly sortedCandidates = computed(() => {
@@ -180,6 +183,10 @@ export class GoalSimulationComponent {
   private dateParam(name: string): string | null {
     const value = this.route.snapshot.queryParamMap.get(name)?.trim();
     return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+  }
+
+  private shouldAutoRun(): boolean {
+    return this.route.snapshot.queryParamMap.get('autoRun') === 'true';
   }
 
   private errorMessage(error: any): string {
