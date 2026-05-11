@@ -1,5 +1,6 @@
+## Purpose
+Define the request model, API behavior, UI behavior, price adjustment assumptions, cost assumptions, and return calculations for FormoAtlas goal-based buy-and-hold investment simulations.
 ## Requirements
-
 ### Requirement: 目標導向模擬請求模型
 系統 SHALL 定義 `GoalSimulationRequest` 模型，供目標導向買進持有模擬功能使用。
 
@@ -158,15 +159,19 @@ web app SHALL 提供公開可用的目標導向買進持有模擬頁面，讓使
 
 股票代號欄位預設值 SHALL 為 `0050`。
 
-頁面 SHALL 支援 URL query params 帶入表單初始設定，包含 `symbol`、`targetMode`、`targetAmount`、`targetAnnualReturnPct`、`horizonYears`、`startDate`、`endDate`、`initialCapital` 與 `monthlyContribution`。
+頁面 SHALL 支援 URL query params 帶入表單初始設定，包含 `symbol`、`targetMode`、`targetAmount`、`targetAnnualReturnPct`、`horizonYears`、`startDate`、`endDate`、`initialCapital`、`monthlyContribution` 與 `autoRun`。
 
-URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
+URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬，除非 `autoRun=true`。
+
+當 URL query params 包含 `autoRun=true` 時，web app SHALL 在套用 query params 後自動提交一次目標模擬。
 
 未登入使用者 SHALL 可看到目標模擬表單與提交 action。
 
 頁面 SHALL NOT 要求使用者登入才可提交目標模擬。
 
 頁面 SHALL NOT 顯示策略選擇、SMA 參數或股票配置百分比。
+
+頁面 SHALL 顯示固定投資警語「過去的投資績效不代表未來的保證收益」。
 
 頁面 SHALL 顯示買進持有結果、權益總值、目標缺口、主要風險指標、requested/resolved range、成本假設摘要、資產曲線、回撤曲線與交易紀錄。
 
@@ -191,9 +196,15 @@ URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 - **THEN** 股票代號欄位 SHALL 顯示 `0050`
 
 #### Scenario: URL query params 初始化表單
-- **WHEN** 使用者開啟 `/goal-simulation` 且 URL query params 包含表單設定
+- **WHEN** 使用者開啟 `/goal-simulation` 且 URL query params 包含表單設定但未包含 `autoRun=true`
 - **THEN** web app SHALL 以有效 query params 覆蓋表單初始值
 - **AND** web app SHALL NOT 自動提交模擬
+
+#### Scenario: URL query params 自動提交
+- **WHEN** 使用者開啟 `/goal-simulation` 且 URL query params 包含有效表單設定與 `autoRun=true`
+- **THEN** web app SHALL 以有效 query params 覆蓋表單初始值
+- **AND** web app SHALL 自動呼叫 `POST /api/goal-simulation/run` 一次
+- **AND** request SHALL 使用 query params 帶入的表單值組成
 
 #### Scenario: URL query params 提交
 - **WHEN** URL query params 已初始化表單且使用者提交模擬
@@ -295,3 +306,4 @@ URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 #### Scenario: 第一版拒絕未支援範圍
 - **WHEN** 使用者提交 watchlist、market、multi-asset allocation 或 rolling-window 模擬 request
 - **THEN** 系統 SHALL 以驗證錯誤拒絕
+
