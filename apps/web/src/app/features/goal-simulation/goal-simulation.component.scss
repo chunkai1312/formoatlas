@@ -24,22 +24,6 @@
   }
 }
 
-.auth-gate {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: center;
-  border: 1px dashed var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-surface);
-  padding: 18px;
-
-  p {
-    margin: 4px 0 0;
-    color: var(--text-secondary);
-  }
-}
-
 .goal-form {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -331,7 +315,6 @@ tbody tr:last-child td {
     padding: 16px;
   }
 
-  .auth-gate,
   .goal-form,
   .summary-band,
   .metric-grid {

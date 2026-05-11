@@ -9,9 +9,7 @@ import {
   GoalSimulationResult,
   RunGoalSimulationRequest,
 } from '../../core/models/goal-simulation.model';
-import { AuthService } from '../../core/services/auth.service';
 import { GoalSimulationService } from '../../core/services/goal-simulation.service';
-import { LoginRequiredService } from '../../core/services/login-required.service';
 import { IndicatorChartComponent } from '../dashboard/components/trend-chart/indicator-chart/indicator-chart.component';
 
 @Component({
@@ -22,24 +20,21 @@ import { IndicatorChartComponent } from '../dashboard/components/trend-chart/ind
   styleUrl: './goal-simulation.component.scss',
 })
 export class GoalSimulationComponent {
-  private readonly authService = inject(AuthService);
   private readonly goalSimulationService = inject(GoalSimulationService);
-  private readonly loginRequired = inject(LoginRequiredService);
   private readonly route = inject(ActivatedRoute);
 
-  readonly isLoggedIn = this.authService.isLoggedIn;
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly result = signal<GoalSimulationResult | null>(null);
 
   targetMode: 'amount' | 'annual-return' = 'amount';
-  targetAmount: number | null = 20_000_000;
+  targetAmount: number | null = 3_000_000;
   targetAnnualReturnPct: number | null = 8;
-  horizonYears = 10;
+  horizonYears = 5;
   startDate = '';
   endDate = '';
   initialCapital = 1_000_000;
-  monthlyContribution = 30_000;
+  monthlyContribution = 10_000;
   symbol = '0050';
 
   constructor() {
@@ -99,13 +94,8 @@ export class GoalSimulationComponent {
     };
   });
 
-  openLoginPrompt() {
-    this.loginRequired.open();
-  }
-
   runSimulation() {
-    if (!this.isLoggedIn() || this.loading()) {
-      if (!this.isLoggedIn()) this.openLoginPrompt();
+    if (this.loading()) {
       return;
     }
 

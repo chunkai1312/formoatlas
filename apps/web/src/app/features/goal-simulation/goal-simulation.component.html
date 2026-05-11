@@ -6,182 +6,170 @@
     </div>
   </section>
 
-  @if (!isLoggedIn()) {
-    <section class="auth-gate">
-      <mat-icon>lock</mat-icon>
-      <div>
-        <strong>登入會員後可執行目標模擬</strong>
-        <p>模擬會即時計算，不會保存設定或結果。</p>
-      </div>
-      <button type="button" (click)="openLoginPrompt()">登入</button>
-    </section>
-  } @else {
-    <form class="goal-form" (ngSubmit)="runSimulation()">
-      <div class="form-row segmented">
-        <button type="button" [class.active]="targetMode === 'amount'" (click)="targetMode = 'amount'">目標金額</button>
-        <button type="button" [class.active]="targetMode === 'annual-return'" (click)="targetMode = 'annual-return'">目標年化</button>
-      </div>
+  <form class="goal-form" (ngSubmit)="runSimulation()">
+    <div class="form-row segmented">
+      <button type="button" [class.active]="targetMode === 'amount'" (click)="targetMode = 'amount'">目標金額</button>
+      <button type="button" [class.active]="targetMode === 'annual-return'" (click)="targetMode = 'annual-return'">目標年化</button>
+    </div>
 
-      @if (targetMode === 'amount') {
-        <label>
-          <span>目標金額</span>
-          <input name="targetAmount" type="number" min="1" [(ngModel)]="targetAmount" />
-        </label>
-      } @else {
-        <label>
-          <span>目標年化報酬 (%)</span>
-          <input name="targetAnnualReturnPct" type="number" min="-99" max="100" step="0.1" [(ngModel)]="targetAnnualReturnPct" />
-        </label>
-      }
-
+    @if (targetMode === 'amount') {
       <label>
-        <span>投資年限</span>
-        <input name="horizonYears" type="number" min="1" max="30" [(ngModel)]="horizonYears" />
+        <span>目標金額</span>
+        <input name="targetAmount" type="number" min="1" [(ngModel)]="targetAmount" />
       </label>
+    } @else {
       <label>
-        <span>開始日期</span>
-        <input name="startDate" type="date" [(ngModel)]="startDate" />
+        <span>目標年化報酬 (%)</span>
+        <input name="targetAnnualReturnPct" type="number" min="-99" max="100" step="0.1" [(ngModel)]="targetAnnualReturnPct" />
       </label>
-      <label>
-        <span>結束日期</span>
-        <input name="endDate" type="date" [(ngModel)]="endDate" />
-      </label>
-      <label>
-        <span>初始本金</span>
-        <input name="initialCapital" type="number" min="1" [(ngModel)]="initialCapital" />
-      </label>
-      <label>
-        <span>每月投入</span>
-        <input name="monthlyContribution" type="number" min="0" [(ngModel)]="monthlyContribution" />
-      </label>
-      <label>
-        <span>股票代號</span>
-        <input name="symbol" type="text" maxlength="20" [(ngModel)]="symbol" />
-      </label>
-
-      <button class="submit-button" type="submit" [disabled]="loading()">
-        <mat-icon>play_arrow</mat-icon>
-        {{ loading() ? '模擬中' : '執行模擬' }}
-      </button>
-    </form>
-
-    @if (error()) {
-      <div class="error-box">{{ error() }}</div>
     }
 
-    @if (result(); as simulation) {
-      <section class="summary-band">
-        <div>
-          <span>目標金額</span>
-          <strong>{{ formatNumber(simulation.target.targetAmount) }}</strong>
-        </div>
-        <div>
-          <span>總投入</span>
-          <strong>{{ formatNumber(simulation.cashflow.totalContributed) }}</strong>
-        </div>
-        <div>
-          <span>請求區間</span>
-          <strong>{{ simulation.requestedRange.startDate }} - {{ simulation.requestedRange.endDate }}</strong>
-        </div>
-        <div>
-          <span>實際資料區間</span>
-          <strong>{{ simulation.resolvedRange.startDate }} - {{ simulation.resolvedRange.endDate }}</strong>
-        </div>
-        <div>
-          <span>成本假設</span>
-          <strong>{{ simulation.costAssumption.mode === 'ignored' ? '未扣交易成本' : '台股預設成本' }}</strong>
-        </div>
-      </section>
+    <label>
+      <span>投資年限</span>
+      <input name="horizonYears" type="number" min="1" max="30" [(ngModel)]="horizonYears" />
+    </label>
+    <label>
+      <span>開始日期</span>
+      <input name="startDate" type="date" [(ngModel)]="startDate" />
+    </label>
+    <label>
+      <span>結束日期</span>
+      <input name="endDate" type="date" [(ngModel)]="endDate" />
+    </label>
+    <label>
+      <span>初始本金</span>
+      <input name="initialCapital" type="number" min="1" [(ngModel)]="initialCapital" />
+    </label>
+    <label>
+      <span>每月投入</span>
+      <input name="monthlyContribution" type="number" min="0" [(ngModel)]="monthlyContribution" />
+    </label>
+    <label>
+      <span>股票代號</span>
+      <input name="symbol" type="text" maxlength="20" [(ngModel)]="symbol" />
+    </label>
 
-      <section class="candidate-list">
-        @for (candidate of sortedCandidates(); track candidate.strategy) {
-          <article class="candidate-card" [class.unavailable]="candidate.status === 'unavailable'">
-            <header>
+    <button class="submit-button" type="submit" [disabled]="loading()">
+      <mat-icon>play_arrow</mat-icon>
+      {{ loading() ? '模擬中' : '執行模擬' }}
+    </button>
+  </form>
+
+  @if (error()) {
+    <div class="error-box">{{ error() }}</div>
+  }
+
+  @if (result(); as simulation) {
+    <section class="summary-band">
+      <div>
+        <span>目標金額</span>
+        <strong>{{ formatNumber(simulation.target.targetAmount) }}</strong>
+      </div>
+      <div>
+        <span>總投入</span>
+        <strong>{{ formatNumber(simulation.cashflow.totalContributed) }}</strong>
+      </div>
+      <div>
+        <span>請求區間</span>
+        <strong>{{ simulation.requestedRange.startDate }} - {{ simulation.requestedRange.endDate }}</strong>
+      </div>
+      <div>
+        <span>實際資料區間</span>
+        <strong>{{ simulation.resolvedRange.startDate }} - {{ simulation.resolvedRange.endDate }}</strong>
+      </div>
+      <div>
+        <span>成本假設</span>
+        <strong>{{ simulation.costAssumption.mode === 'ignored' ? '未扣交易成本' : '台股預設成本' }}</strong>
+      </div>
+    </section>
+
+    <section class="candidate-list">
+      @for (candidate of sortedCandidates(); track candidate.strategy) {
+        <article class="candidate-card" [class.unavailable]="candidate.status === 'unavailable'">
+          <header>
+            <div>
+              <h2>{{ candidate.label }}</h2>
+              <p>
+                @if (candidate.status === 'available') {
+                  達成率 {{ formatNumber(candidate.goalAttainmentRate, 2) }}%
+                } @else {
+                  無法執行
+                }
+              </p>
+            </div>
+          </header>
+
+          @if (candidate.status === 'unavailable') {
+            <div class="unavailable-reason">{{ candidate.unavailableReason }}</div>
+          } @else {
+            <div class="metric-grid">
               <div>
-                <h2>{{ candidate.label }}</h2>
-                <p>
-                  @if (candidate.status === 'available') {
-                    達成率 {{ formatNumber(candidate.goalAttainmentRate, 2) }}%
-                  } @else {
-                    無法執行
-                  }
-                </p>
+                <span>權益總值</span>
+                <strong [class]="valueClass(candidate.projectedFinalValue)">{{ formatNumber(candidate.projectedFinalValue) }}</strong>
               </div>
-            </header>
-
-            @if (candidate.status === 'unavailable') {
-              <div class="unavailable-reason">{{ candidate.unavailableReason }}</div>
-            } @else {
-              <div class="metric-grid">
-                <div>
-                  <span>權益總值</span>
-                  <strong [class]="valueClass(candidate.projectedFinalValue)">{{ formatNumber(candidate.projectedFinalValue) }}</strong>
-                </div>
-                <div>
-                  <span>目標差距</span>
-                  <strong [class]="valueClass(candidate.targetGap)">{{ formatNumber(candidate.targetGap) }}</strong>
-                </div>
-                <div>
-                  <span>總報酬</span>
-                  <strong [class]="valueClass(candidate.metrics.totalReturnPct)">{{ formatPercent(candidate.metrics.totalReturnPct) }}</strong>
-                </div>
-                <div>
-                  <span>年化報酬</span>
-                  <strong [class]="valueClass(candidate.metrics.annualizedReturnPct)">{{ formatPercent(candidate.metrics.annualizedReturnPct) }}</strong>
-                </div>
-                <div>
-                  <span>最大回撤</span>
-                  <strong class="negative">{{ formatPercent(candidate.metrics.maxDrawdownPct) }}</strong>
-                </div>
+              <div>
+                <span>目標差距</span>
+                <strong [class]="valueClass(candidate.targetGap)">{{ formatNumber(candidate.targetGap) }}</strong>
               </div>
+              <div>
+                <span>總報酬</span>
+                <strong [class]="valueClass(candidate.metrics.totalReturnPct)">{{ formatPercent(candidate.metrics.totalReturnPct) }}</strong>
+              </div>
+              <div>
+                <span>年化報酬</span>
+                <strong [class]="valueClass(candidate.metrics.annualizedReturnPct)">{{ formatPercent(candidate.metrics.annualizedReturnPct) }}</strong>
+              </div>
+              <div>
+                <span>最大回撤</span>
+                <strong class="negative">{{ formatPercent(candidate.metrics.maxDrawdownPct) }}</strong>
+              </div>
+            </div>
 
-              @if (candidate.metrics.worstPeriod) {
-                <p class="worst-period">最差區間：{{ candidate.metrics.worstPeriod.startDate }} - {{ candidate.metrics.worstPeriod.endDate }}</p>
-              }
-
-              @if (chartOption()) {
-                <app-indicator-chart [option]="chartOption()" height="340px"></app-indicator-chart>
-              }
-
-              @if (candidate.tradeRecords.length) {
-                <section class="trade-records" aria-label="交易紀錄">
-                  <header>
-                    <h3>交易紀錄</h3>
-                    <span>{{ candidate.tradeRecords.length }} 筆</span>
-                  </header>
-                  <div class="trade-table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>日期</th>
-                          <th>來源</th>
-                          <th>成交價</th>
-                          <th>股數</th>
-                          <th>成交金額</th>
-                          <th>交易後現金</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (trade of candidate.tradeRecords; track trade.date + trade.reason + trade.shares + trade.amount) {
-                          <tr>
-                            <td>{{ trade.date }}</td>
-                            <td>{{ tradeReasonLabel(trade.reason) }}</td>
-                            <td>{{ formatNumber(trade.price, 2) }}</td>
-                            <td>{{ formatNumber(trade.shares) }}</td>
-                            <td>{{ formatNumber(trade.amount) }}</td>
-                            <td>{{ formatNumber(trade.cashAfter) }}</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-              }
+            @if (candidate.metrics.worstPeriod) {
+              <p class="worst-period">最差區間：{{ candidate.metrics.worstPeriod.startDate }} - {{ candidate.metrics.worstPeriod.endDate }}</p>
             }
 
-          </article>
-        }
-      </section>
-    }
+            @if (chartOption()) {
+              <app-indicator-chart [option]="chartOption()" height="340px"></app-indicator-chart>
+            }
+
+            @if (candidate.tradeRecords.length) {
+              <section class="trade-records" aria-label="交易紀錄">
+                <header>
+                  <h3>交易紀錄</h3>
+                  <span>{{ candidate.tradeRecords.length }} 筆</span>
+                </header>
+                <div class="trade-table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>日期</th>
+                        <th>來源</th>
+                        <th>成交價</th>
+                        <th>股數</th>
+                        <th>成交金額</th>
+                        <th>交易後現金</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (trade of candidate.tradeRecords; track trade.date + trade.reason + trade.shares + trade.amount) {
+                        <tr>
+                          <td>{{ trade.date }}</td>
+                          <td>{{ tradeReasonLabel(trade.reason) }}</td>
+                          <td>{{ formatNumber(trade.price, 2) }}</td>
+                          <td>{{ formatNumber(trade.shares) }}</td>
+                          <td>{{ formatNumber(trade.amount) }}</td>
+                          <td>{{ formatNumber(trade.cashAfter) }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            }
+          }
+        </article>
+      }
+    </section>
   }
 </main>

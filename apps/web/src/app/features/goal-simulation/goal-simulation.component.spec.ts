@@ -1,20 +1,12 @@
-import { computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts';
 import { of, throwError } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
 import { GoalSimulationService } from '../../core/services/goal-simulation.service';
-import { LoginRequiredService } from '../../core/services/login-required.service';
 import { IndicatorChartComponent } from '../dashboard/components/trend-chart/indicator-chart/indicator-chart.component';
 import { GoalSimulationComponent } from './goal-simulation.component';
-
-class MockAuthService {
-  readonly currentUser = signal<null | { sub: string; email: string; name: string; picture: string }>(null);
-  readonly isLoggedIn = computed(() => this.currentUser() !== null);
-}
 
 class MockGoalSimulationService {
   run = vi.fn((request: unknown) => {
@@ -23,13 +15,8 @@ class MockGoalSimulationService {
   });
 }
 
-class MockLoginRequiredService {
-  open = vi.fn();
-}
-
 describe('GoalSimulationComponent', () => {
   let fixture: ComponentFixture<GoalSimulationComponent>;
-  let authService: MockAuthService;
   let goalSimulationService: MockGoalSimulationService;
   let routeQueryParams: Record<string, string>;
 
@@ -38,9 +25,7 @@ describe('GoalSimulationComponent', () => {
     await TestBed.configureTestingModule({
       imports: [GoalSimulationComponent],
       providers: [
-        { provide: AuthService, useClass: MockAuthService },
         { provide: GoalSimulationService, useClass: MockGoalSimulationService },
-        { provide: LoginRequiredService, useClass: MockLoginRequiredService },
         {
           provide: ActivatedRoute,
           useFactory: () => ({ snapshot: { queryParamMap: convertToParamMap(routeQueryParams) } }),
@@ -51,25 +36,28 @@ describe('GoalSimulationComponent', () => {
       .overrideComponent(IndicatorChartComponent, { set: { template: '' } })
       .compileComponents();
 
-    authService = TestBed.inject(AuthService) as unknown as MockAuthService;
     goalSimulationService = TestBed.inject(GoalSimulationService) as unknown as MockGoalSimulationService;
   });
 
-  it('shows a login gate and hides the submit action when signed out', () => {
+  it('shows the form and submit action without requiring sign in', () => {
     createComponent();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('登入會員後可執行目標模擬');
-    expect(fixture.nativeElement.querySelector('.submit-button')).toBeNull();
-
-    const loginRequired = TestBed.inject(LoginRequiredService) as unknown as MockLoginRequiredService;
-    fixture.nativeElement.querySelector('.auth-gate button').click();
-
-    expect(loginRequired.open).toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).not.toContain('登入會員後可執行目標模擬');
+    expect(fixture.nativeElement.querySelector('.auth-gate')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.submit-button')).not.toBeNull();
   });
 
-  it('submits the form and renders candidate results when signed in', () => {
-    signIn();
+  it('submits the form and renders candidate results without sign in', () => {
+    createComponent();
+    fixture.detectChanges();
+
+    fixture.componentInstance.runSimulation();
+
+    expect(goalSimulationService.run).toHaveBeenCalled();
+  });
+
+  it('submits the form and renders candidate results', () => {
     createComponent();
     fixture.detectChanges();
 
@@ -111,7 +99,6 @@ describe('GoalSimulationComponent', () => {
   });
 
   it('defaults the symbol to 0050', async () => {
-    signIn();
     createComponent();
     fixture.detectChanges();
     await fixture.whenStable();
@@ -123,7 +110,6 @@ describe('GoalSimulationComponent', () => {
   });
 
   it('initializes form settings from URL query params without auto submitting', () => {
-    signIn();
     createComponent({
       symbol: ' 006208 ',
       targetMode: 'annual-return',
@@ -160,7 +146,6 @@ describe('GoalSimulationComponent', () => {
   });
 
   it('does not render strategy selection controls', () => {
-    signIn();
     createComponent();
     fixture.detectChanges();
 
@@ -171,7 +156,6 @@ describe('GoalSimulationComponent', () => {
   });
 
   it('renders API error messages', () => {
-    signIn();
     goalSimulationService.run.mockReturnValue(throwError(() => ({ error: { message: '資料不足' } })));
     createComponent();
     fixture.detectChanges();
@@ -182,15 +166,6 @@ describe('GoalSimulationComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('資料不足');
   });
-
-  function signIn() {
-    authService.currentUser.set({
-      sub: 'u1',
-      email: 'u1@example.com',
-      name: 'User',
-      picture: '',
-    });
-  }
 
   function createComponent(queryParams: Record<string, string> = {}) {
     routeQueryParams = queryParams;
