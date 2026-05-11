@@ -148,6 +148,21 @@ export class StockDetailComponent {
   readonly normalizedOhlc = computed(() => normalizeOhlcData(this.chartOhlc()));
   readonly visibleHotStockRanks = computed(() => this.summary()?.context.hotStockRanks.slice(0, 3) ?? []);
   readonly hiddenHotStockRankCount = computed(() => Math.max((this.summary()?.context.hotStockRanks.length ?? 0) - 3, 0));
+  readonly dailySummaryMetrics = computed(() => {
+    const summary = this.summary();
+    if (!summary) return [];
+    const quote = summary.quote;
+    return [
+      { label: '開盤', value: this.formatNumber(quote.openPrice, 2) },
+      { label: '最高', value: this.formatNumber(quote.highPrice, 2), tone: 'positive' },
+      { label: '最低', value: this.formatNumber(quote.lowPrice, 2), tone: 'negative' },
+      { label: '收盤', value: this.formatNumber(quote.closePrice, 2), tone: this.valueClass(quote.change) },
+      { label: '成交量', value: this.formatShareLots(quote.tradeVolume) },
+      { label: '成交金額', value: this.formatBillion(quote.tradeValue) },
+      { label: '振幅', value: this.formatPercent(this.intradayAmplitudePct(summary)) },
+      { label: '量比', value: this.formatRatio(this.volumeRatio(summary)) },
+    ];
+  });
   readonly weeklyData = computed(() => aggregateToWeekly(this.normalizedOhlc()));
   readonly chartAllData = computed(() =>
     this.chartInterval() === 'W' ? this.weeklyData() : this.normalizedOhlc()
@@ -294,6 +309,18 @@ export class StockDetailComponent {
     return value === null || value === undefined ? '-' : `${this.formatNumber(value / 1e8, 2)} 億`;
   }
 
+  formatPercent(value: number | null | undefined): string {
+    return value === null || value === undefined || !Number.isFinite(value)
+      ? '-'
+      : `${this.formatNumber(value, 2)}%`;
+  }
+
+  formatRatio(value: number | null | undefined): string {
+    return value === null || value === undefined || !Number.isFinite(value)
+      ? '-'
+      : `${this.formatNumber(value, 2)}x`;
+  }
+
   consecutiveLabel(name: string, value: number | null): string {
     if (value === null || Math.abs(value) < 2) return '';
     return value > 0 ? `${name}連 ${value} 買` : `${name}連 ${Math.abs(value)} 賣`;
@@ -349,6 +376,24 @@ export class StockDetailComponent {
           this.chartOhlc.set(rows);
         }
       });
+  }
+
+  private intradayAmplitudePct(summary: StockSummary): number | null {
+    const { highPrice, lowPrice, closePrice } = summary.quote;
+    if (!closePrice) return null;
+    return ((highPrice - lowPrice) / closePrice) * 100;
+  }
+
+  private volumeRatio(summary: StockSummary): number | null {
+    const recentVolumes = summary.ohlc
+      .slice(-5)
+      .flatMap((row): number[] => {
+        const volume = toFiniteNumber(row.tradeVolume);
+        return volume !== null && volume > 0 ? [volume] : [];
+      });
+    if (!recentVolumes.length || !summary.quote.tradeVolume) return null;
+    const averageVolume = recentVolumes.reduce<number>((sum, volume) => sum + volume, 0) / recentVolumes.length;
+    return averageVolume > 0 ? summary.quote.tradeVolume / averageVolume : null;
   }
 
   private buildChartOption(

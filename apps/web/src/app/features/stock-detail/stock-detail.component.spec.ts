@@ -95,6 +95,35 @@ describe('StockDetailComponent', () => {
     });
   });
 
+  it('renders an expanded daily summary from quote and OHLC data', () => {
+    const text = fixture.nativeElement.textContent;
+
+    expect(text).toContain('開盤');
+    expect(text).toContain('900.00');
+    expect(text).toContain('最高');
+    expect(text).toContain('920.00');
+    expect(text).toContain('最低');
+    expect(text).toContain('890.00');
+    expect(text).toContain('收盤');
+    expect(text).toContain('918.00');
+    expect(text).toContain('成交量');
+    expect(text).toContain('1 張');
+    expect(text).toContain('成交金額');
+    expect(text).toContain('0.12 億');
+    expect(text).toContain('振幅');
+    expect(text).toContain('3.27%');
+    expect(text).toContain('量比');
+    expect(text).toContain('1.09x');
+    expect(text).not.toContain('成交筆數');
+  });
+
+  it('shows trade volume directly under the header quote', () => {
+    const volume = fixture.nativeElement.querySelector('.quote-volume') as HTMLElement | null;
+
+    expect(volume?.textContent).toContain('成交量');
+    expect(volume?.textContent).toContain('1 張');
+  });
+
   it('adds the current stock to watchlist', () => {
     fixture.componentInstance.toggleWatchlist();
 

@@ -28,11 +28,14 @@
       <div class="header-divider"></div>
 
       <div class="quote-panel">
-        <strong [class]="priceClass()">{{ formatNumber(stock.quote.closePrice, 2) }}</strong>
-        <div class="change-line" [class]="priceClass()">
-          <span>{{ stock.quote.change >= 0 ? '+' : '' }}{{ formatNumber(stock.quote.change, 2) }}</span>
-          <span>{{ stock.quote.changePercent >= 0 ? '+' : '' }}{{ formatNumber(stock.quote.changePercent, 2) }}%</span>
+        <div class="quote-main">
+          <strong [class]="priceClass()">{{ formatNumber(stock.quote.closePrice, 2) }}</strong>
+          <div class="change-line" [class]="priceClass()">
+            <span>{{ stock.quote.change >= 0 ? '+' : '' }}{{ formatNumber(stock.quote.change, 2) }}</span>
+            <span>{{ stock.quote.changePercent >= 0 ? '+' : '' }}{{ formatNumber(stock.quote.changePercent, 2) }}%</span>
+          </div>
         </div>
+        <p class="quote-volume">成交量 {{ formatShareLots(stock.quote.tradeVolume) }}</p>
       </div>
 
       <button
@@ -84,15 +87,13 @@
       <aside class="summary-panel">
         <section>
           <h2>今日摘要</h2>
-          <dl class="metric-list">
-            <div>
-              <dt>成交量</dt>
-              <dd>{{ formatShareLots(stock.quote.tradeVolume) }}</dd>
-            </div>
-            <div>
-              <dt>成交金額</dt>
-              <dd>{{ formatBillion(stock.quote.tradeValue) }}</dd>
-            </div>
+          <dl class="metric-grid compact">
+            @for (metric of dailySummaryMetrics(); track metric.label) {
+              <div>
+                <dt>{{ metric.label }}</dt>
+                <dd [class]="metric.tone ?? ''">{{ metric.value }}</dd>
+              </div>
+            }
           </dl>
         </section>
 
