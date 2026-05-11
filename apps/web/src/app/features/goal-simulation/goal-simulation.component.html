@@ -6,6 +6,10 @@
     </div>
   </section>
 
+  <section class="investment-warning" aria-label="投資警語">
+    模擬結果不構成投資建議，過去的投資績效不代表未來的保證收益。
+  </section>
+
   <form class="goal-form" (ngSubmit)="runSimulation()">
     <div class="form-row segmented">
       <button type="button" [class.active]="targetMode === 'amount'" (click)="targetMode = 'amount'">目標金額</button>

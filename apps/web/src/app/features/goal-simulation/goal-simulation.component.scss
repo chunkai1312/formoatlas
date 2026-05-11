@@ -55,6 +55,19 @@
   filter: invert(1);
 }
 
+.investment-warning {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.08);
+  color: #b45309;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+}
+
+:host-context(html.dark-mode) .investment-warning {
+  color: #fbbf24;
+}
+
 button {
   display: inline-flex;
   align-items: center;

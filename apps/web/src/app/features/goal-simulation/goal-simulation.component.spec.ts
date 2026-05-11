@@ -44,6 +44,7 @@ describe('GoalSimulationComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).not.toContain('登入會員後可執行目標模擬');
+    expect(fixture.nativeElement.textContent).toContain('過去的投資績效不代表未來的保證收益');
     expect(fixture.nativeElement.querySelector('.auth-gate')).toBeNull();
     expect(fixture.nativeElement.querySelector('.submit-button')).not.toBeNull();
   });
@@ -68,7 +69,7 @@ describe('GoalSimulationComponent', () => {
     fixture.detectChanges();
 
     expect(goalSimulationService.run).toHaveBeenCalledWith(expect.objectContaining({
-      targetAmount: 20_000_000,
+      targetAmount: 3_000_000,
       startDate: '2021-01-01',
       endDate: '2026-01-01',
       universe: { type: 'single-symbol', symbols: ['2317'] },
@@ -240,6 +241,6 @@ function sampleResult() {
         warnings: ['買進持有策略警示'],
       },
     ],
-    warnings: ['歷史模擬不代表未來績效', '價格資料使用還原 OHLC'],
+    warnings: ['過去的投資績效不代表未來的保證收益', '價格資料使用還原 OHLC'],
   };
 }
