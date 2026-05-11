@@ -8,6 +8,23 @@
   height: 680px;
 }
 
+.map-skeleton {
+  height: 680px;
+
+  .large {
+    width: 46%;
+    height: 1.2rem;
+  }
+
+  .medium {
+    width: 34%;
+  }
+
+  .short {
+    width: 22%;
+  }
+}
+
 .map-state {
   display: flex;
   align-items: center;

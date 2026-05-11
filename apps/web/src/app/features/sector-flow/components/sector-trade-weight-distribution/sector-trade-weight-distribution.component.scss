@@ -40,6 +40,27 @@
   gap: 6px;
 }
 
+.distribution-skeleton {
+  display: grid;
+  gap: 6px;
+
+  .table-skeleton-row {
+    grid-template-columns: minmax(88px, 0.95fr) minmax(120px, 2fr) minmax(64px, 0.45fr) minmax(64px, 0.45fr);
+    padding: 4px 8px;
+  }
+
+  .sector,
+  .bar,
+  .value,
+  .change {
+    width: 100%;
+  }
+
+  .bar {
+    height: 10px;
+  }
+}
+
 .distribution-row {
   display: grid;
   grid-template-columns: minmax(88px, 0.95fr) minmax(120px, 2fr) minmax(64px, 0.45fr) minmax(64px, 0.45fr);
@@ -126,6 +147,15 @@
     grid-template-columns: minmax(92px, 1fr) minmax(72px, auto) minmax(64px, auto);
 
     .bar-track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  .distribution-skeleton .table-skeleton-row {
+    grid-template-columns: minmax(92px, 1fr) minmax(72px, auto) minmax(64px, auto);
+
+    .bar {
       grid-column: 1 / -1;
       grid-row: 2;
     }

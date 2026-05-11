@@ -33,6 +33,15 @@
   }
 }
 
+.page-warning {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--color-negative) 45%, transparent);
+  border-radius: 8px;
+  color: var(--color-negative);
+  background: color-mix(in srgb, var(--color-negative) 8%, transparent);
+  font-size: 0.88rem;
+}
+
 .section {
   display: grid;
   gap: 12px;

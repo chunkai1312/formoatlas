@@ -24,11 +24,18 @@
   </div>
   <mat-card-content>
     <div class="chart-content">
-      <app-indicator-chart
-        [option]="chartOption()"
-        height="400px"
-        (chartGlobalout)="resetHover()"
-      ></app-indicator-chart>
+      @if (loading()) {
+        <div class="chart-skeleton visualization-skeleton" aria-hidden="true">
+          <span class="skeleton-line large"></span>
+          <span class="skeleton-line medium"></span>
+        </div>
+      } @else {
+        <app-indicator-chart
+          [option]="chartOption()"
+          height="400px"
+          (chartGlobalout)="resetHover()"
+        ></app-indicator-chart>
+      }
     </div>
   </mat-card-content>
 </mat-card>

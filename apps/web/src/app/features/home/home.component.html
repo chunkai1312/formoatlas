@@ -25,7 +25,15 @@
       </div>
 
       @if (loading().barometer || loading().marketStats) {
-        <div class="state">載入大盤氣候中...</div>
+        <div class="snapshot-skeleton climate-skeleton" aria-hidden="true">
+          <span class="skeleton-pill weather"></span>
+          <div class="skeleton-stack">
+            <span class="skeleton-line title"></span>
+            <span class="skeleton-line value"></span>
+          </div>
+          <span class="skeleton-line wide"></span>
+          <span class="skeleton-line medium"></span>
+        </div>
       } @else if (barometer() || marketStats()) {
         <div class="market-climate">
           @if (barometer(); as data) {
@@ -83,7 +91,15 @@
       </div>
 
       @if (loading().sectorFlow) {
-        <div class="state">載入資金流向中...</div>
+        <div class="snapshot-skeleton table-card-skeleton" aria-hidden="true">
+          @for (row of [1, 2, 3, 4, 5]; track row) {
+            <div class="table-skeleton-row">
+              <span class="skeleton-line"></span>
+              <span class="skeleton-line"></span>
+              <span class="skeleton-line"></span>
+            </div>
+          }
+        </div>
       } @else if (errors().sectorFlow) {
         <div class="state warning">{{ errors().sectorFlow }}</div>
       } @else if (topSectors().length) {
@@ -122,7 +138,15 @@
       </div>
 
       @if (loading().hotStocks) {
-        <div class="state">載入熱門個股中...</div>
+        <div class="snapshot-skeleton table-card-skeleton" aria-hidden="true">
+          @for (row of [1, 2, 3, 4, 5]; track row) {
+            <div class="table-skeleton-row">
+              <span class="skeleton-line"></span>
+              <span class="skeleton-line"></span>
+              <span class="skeleton-line"></span>
+            </div>
+          }
+        </div>
       } @else if (errors().hotStocks) {
         <div class="state warning">{{ errors().hotStocks }}</div>
       } @else if (focusStocks().length) {

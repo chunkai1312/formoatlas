@@ -19,6 +19,31 @@
   overflow-x: auto;
 }
 
+.hot-stock-table-skeleton {
+  display: grid;
+  gap: 0;
+
+  .table-skeleton-row {
+    grid-template-columns: 34px 42px 54px minmax(72px, 1fr) repeat(4, minmax(52px, 0.75fr));
+  }
+
+  .rank,
+  .watch {
+    justify-self: center;
+  }
+
+  .watch {
+    width: 22px;
+    height: 22px;
+  }
+
+  .symbol,
+  .name,
+  .num {
+    width: 100%;
+  }
+}
+
 .rank-table {
   width: 100%;
   border-collapse: collapse;

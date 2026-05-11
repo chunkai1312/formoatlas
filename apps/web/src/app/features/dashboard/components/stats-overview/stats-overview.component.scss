@@ -9,3 +9,21 @@
   text-align: center;
   padding: 24px;
 }
+
+.stat-card-skeleton {
+  min-height: 75px;
+  padding: 16px 20px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+  border-radius: 12px;
+  background: var(--bg-surface);
+
+  .label {
+    width: 58%;
+    margin-bottom: 10px;
+  }
+
+  .value {
+    width: 78%;
+    height: 1.5rem;
+  }
+}

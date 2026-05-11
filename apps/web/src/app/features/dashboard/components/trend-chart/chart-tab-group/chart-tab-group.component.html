@@ -8,6 +8,12 @@
     </div>
   </div>
   <mat-card-content>
+    @if (loading()) {
+      <div class="chart-tab-skeleton visualization-skeleton" aria-hidden="true">
+        <span class="skeleton-line large"></span>
+        <span class="skeleton-line medium"></span>
+      </div>
+    } @else {
     <mat-tab-group>
       @for (tab of tabs; track tab.label; let i = $index) {
         <mat-tab [label]="tab.label">
@@ -34,5 +40,6 @@
         </mat-tab>
       }
     </mat-tab-group>
+    }
   </mat-card-content>
 </mat-card>

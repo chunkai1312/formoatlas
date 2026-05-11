@@ -81,4 +81,17 @@
   .chart-content {
     padding: 0 16px 8px;
   }
+
+  .chart-skeleton {
+    min-height: 400px;
+
+    .large {
+      width: 48%;
+      height: 1.1rem;
+    }
+
+    .medium {
+      width: 32%;
+    }
+  }
 }

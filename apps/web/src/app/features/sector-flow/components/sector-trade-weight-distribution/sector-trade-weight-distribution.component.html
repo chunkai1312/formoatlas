@@ -8,7 +8,18 @@
       <span>Top 10</span>
     </div>
 
-    @if (topRows().length) {
+    @if (loading()) {
+      <div class="distribution-skeleton" aria-hidden="true">
+        @for (row of [1, 2, 3, 4, 5, 6]; track row) {
+          <div class="table-skeleton-row">
+            <span class="skeleton-line sector"></span>
+            <span class="skeleton-pill bar"></span>
+            <span class="skeleton-line value"></span>
+            <span class="skeleton-line change"></span>
+          </div>
+        }
+      </div>
+    } @else if (topRows().length) {
       <div class="distribution-list">
         @for (row of topRows(); track row.symbol) {
           <button

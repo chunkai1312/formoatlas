@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { BarometerService } from '../../core/services/barometer.service';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
@@ -33,5 +33,29 @@ describe('DashboardComponent', () => {
     expect(contextService.context()).toEqual({ route: 'market-overview' });
 
     component.ngOnDestroy();
+  });
+
+  it('renders metric-card skeletons while market stats are loading', async () => {
+    const pendingStats = new Subject<never[]>();
+
+    await TestBed.configureTestingModule({
+      imports: [DashboardComponent],
+      providers: [
+        { provide: DashboardStateService, useClass: MockDashboardStateService },
+        { provide: BarometerService, useValue: { getBarometer: () => of(null) } },
+        { provide: MarketStatsService, useValue: { getMarketStats: () => pendingStats.asObservable() } },
+        ResearchAssistantContextService,
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(DashboardComponent);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(fixture.nativeElement.querySelectorAll('.stat-card-skeleton')).toHaveLength(6);
+    expect(text).not.toContain('載入中...');
+
+    pendingStats.next([]);
+    pendingStats.complete();
   });
 });

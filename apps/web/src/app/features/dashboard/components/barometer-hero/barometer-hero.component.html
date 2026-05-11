@@ -1,9 +1,24 @@
 <mat-card class="hero-card" [style.--hero-accent]="accentColor()">
   @if (loading()) {
-    <div class="state-center">
-      <mat-spinner color="accent" diameter="48"></mat-spinner>
-      <p class="state-text">分析中...</p>
-    </div>
+    <mat-card-content class="hero-content hero-skeleton" aria-hidden="true">
+      <div class="hero-left">
+        <span class="skeleton-line date"></span>
+        <span class="skeleton-line label"></span>
+        <span class="skeleton-line value"></span>
+        <span class="skeleton-line label short"></span>
+        <span class="skeleton-line value small"></span>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-right">
+        <div class="hero-header">
+          <span class="skeleton-pill weather"></span>
+          <span class="skeleton-pill chip"></span>
+        </div>
+        <span class="skeleton-line summary wide"></span>
+        <span class="skeleton-line summary"></span>
+        <span class="skeleton-line summary short"></span>
+      </div>
+    </mat-card-content>
   } @else if (error()) {
     <div class="state-center">
       <mat-icon class="state-icon">cloud_off</mat-icon>

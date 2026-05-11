@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { HomeComponent } from './home.component';
 import { BarometerLevel, BarometerResult } from '../../core/models/barometer.model';
@@ -367,5 +367,31 @@ describe('HomeComponent', () => {
 
     expect(text).toContain('資料不足');
     expect(text).toContain('暫不產生市場結論');
+  });
+
+  it('renders snapshot and map skeletons while panel data is loading', () => {
+    const pendingBarometer = new Subject<BarometerResult>();
+    const pendingSectorFlow = new Subject<any[]>();
+    const pendingMarketMap = new Subject<any>();
+    barometerService.getBarometer.mockReturnValueOnce(pendingBarometer.asObservable());
+    tickerService.getSectorFlow.mockReturnValueOnce(pendingSectorFlow.asObservable());
+    tickerService.getMarketMap.mockReturnValue(pendingMarketMap.asObservable());
+
+    fixture = TestBed.createComponent(HomeComponent);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(fixture.nativeElement.querySelectorAll('.snapshot-skeleton').length).toBeGreaterThan(0);
+    expect(fixture.nativeElement.querySelector('.map-skeleton')).toBeTruthy();
+    expect(text).not.toContain('載入大盤氣候中');
+    expect(text).not.toContain('載入資金流向中');
+    expect(text).not.toContain('載入市場熱力圖中');
+
+    pendingBarometer.next(barometer);
+    pendingBarometer.complete();
+    pendingSectorFlow.next([]);
+    pendingSectorFlow.complete();
+    pendingMarketMap.next({ date: '2026-04-24', market: 'TSE', sectors: [] });
+    pendingMarketMap.complete();
   });
 });

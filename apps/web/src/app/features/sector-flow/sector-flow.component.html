@@ -5,14 +5,19 @@
     <button class="tab-btn" [class.active]="state.activeMarket() === 'OTC'" (click)="setMarket('OTC')">上櫃</button>
   </div>
 
+  @if (error()) {
+    <div class="page-warning">{{ error() }}</div>
+  }
+
   <!-- Section 1: 排行表 -->
   <section class="section">
     <div class="section-title">產業資金流向</div>
     <app-sector-trade-weight-distribution
       [rows]="rows()"
+      [loading]="loading()"
       (sectorSelected)="selectSector($event)"
     ></app-sector-trade-weight-distribution>
-    <app-sector-ranking-table></app-sector-ranking-table>
+    <app-sector-ranking-table [loading]="loading()"></app-sector-ranking-table>
   </section>
 
   <!-- Section 2: 資金流向圖 -->

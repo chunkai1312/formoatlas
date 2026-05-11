@@ -176,6 +176,54 @@
   gap: 8px;
 }
 
+.snapshot-skeleton {
+  display: grid;
+  min-height: 116px;
+  align-content: center;
+  gap: 10px;
+}
+
+.climate-skeleton {
+  grid-template-columns: 44px minmax(0, 1fr);
+
+  .weather {
+    width: 44px;
+    height: 44px;
+    grid-row: span 2;
+  }
+
+  .skeleton-stack {
+    display: grid;
+    gap: 8px;
+    align-content: center;
+  }
+
+  .title {
+    width: 42%;
+  }
+
+  .value {
+    width: 72%;
+    height: 1.4rem;
+  }
+
+  .wide {
+    grid-column: 1 / -1;
+    width: 88%;
+  }
+
+  .medium {
+    grid-column: 1 / -1;
+    width: 58%;
+  }
+}
+
+.table-card-skeleton {
+  .table-skeleton-row {
+    grid-template-columns: minmax(0, 1.35fr) minmax(72px, 0.75fr) minmax(64px, 0.65fr);
+  }
+}
+
 .snapshot-table-head,
 .snapshot-table-row {
   display: grid;

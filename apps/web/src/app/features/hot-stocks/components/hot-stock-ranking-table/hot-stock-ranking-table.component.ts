@@ -20,6 +20,7 @@ type SecondaryNetKey = 'finiNet' | 'sitcNet';
 export class HotStockRankingTableComponent {
   readonly title = input.required<string>();
   readonly rows = input.required<HotStockRankRow[]>();
+  readonly loading = input(false);
   readonly metricLabel = input.required<string>();
   readonly metricKey = input.required<MetricKey>();
   readonly metricKind = input<MetricKind>('net');

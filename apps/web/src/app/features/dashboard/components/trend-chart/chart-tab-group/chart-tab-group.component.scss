@@ -62,3 +62,17 @@
     margin-bottom: 16px;
   }
 }
+
+.chart-tab-skeleton {
+  margin: 16px;
+  min-height: 400px;
+
+  .large {
+    width: 48%;
+    height: 1.1rem;
+  }
+
+  .medium {
+    width: 32%;
+  }
+}

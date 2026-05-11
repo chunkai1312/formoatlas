@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { Subject, combineLatest, switchMap, catchError, of, takeUntil } from 'rxjs';
+import { Subject, combineLatest, switchMap, catchError, finalize, of, takeUntil } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import type { EChartsOption } from 'echarts';
 
@@ -250,6 +250,7 @@ export class KlineChartComponent implements OnDestroy {
   );
 
   readonly rawData = signal<TickerOhlc[]>([]);
+  readonly loading = signal(false);
   readonly hoveredIndex = signal<number | null>(null);
 
   readonly normalizedRawData = computed<TickerOhlc[]>(() => normalizeOhlcData(this.rawData()));
@@ -326,8 +327,11 @@ export class KlineChartComponent implements OnDestroy {
       .pipe(
         switchMap(([end, sym]) => {
           const start = getFetchStartDate(end);
+          this.loading.set(true);
+          this.rawData.set([]);
           return this.tickerService.getTicker(sym, start, end).pipe(
-            catchError(() => of([] as TickerOhlc[]))
+            catchError(() => of([] as TickerOhlc[])),
+            finalize(() => this.loading.set(false))
           );
         }),
         takeUntil(this.destroy$)

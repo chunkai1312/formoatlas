@@ -13,6 +13,7 @@ import { SectorFlowSnapshot } from '../../../../core/models/sector-flow-snapshot
 })
 export class SectorTradeWeightDistributionComponent {
   readonly rows = input<SectorFlowSnapshot[]>([]);
+  readonly loading = input(false);
   readonly sectorSelected = output<SectorFlowSnapshot>();
 
   readonly topRows = computed(() =>

@@ -1,5 +1,24 @@
 <mat-card class="ranking-card">
   <mat-card-content>
+    @if (loading()) {
+      <div class="sector-ranking-skeleton" aria-hidden="true">
+        @for (row of [1, 2, 3, 4, 5, 6, 7, 8]; track row) {
+          <div class="table-skeleton-row">
+            <span class="skeleton-line name"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-pill bar"></span>
+          </div>
+        }
+      </div>
+    } @else {
     <div class="table-wrap">
       <table class="ranking-table">
         <thead>
@@ -71,5 +90,6 @@
         </tbody>
       </table>
     </div>
+    }
   </mat-card-content>
 </mat-card>

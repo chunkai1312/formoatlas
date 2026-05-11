@@ -2,7 +2,22 @@
   <mat-card-content>
     <div class="card-title">{{ title() }}</div>
 
-    @if (rows().length) {
+    @if (loading()) {
+      <div class="table-skeleton hot-stock-table-skeleton" aria-hidden="true">
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="table-skeleton-row">
+            <span class="skeleton-line rank"></span>
+            <span class="skeleton-pill watch"></span>
+            <span class="skeleton-line symbol"></span>
+            <span class="skeleton-line name"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+            <span class="skeleton-line num"></span>
+          </div>
+        }
+      </div>
+    } @else if (rows().length) {
       <div class="table-wrap">
         <table class="rank-table">
           <thead>

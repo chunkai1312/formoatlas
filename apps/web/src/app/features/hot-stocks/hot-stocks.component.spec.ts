@@ -141,4 +141,23 @@ describe('HotStocksComponent watch list toggles', () => {
     pending.complete();
     expect(fixture.componentInstance.pendingWatchSymbols().has('2330')).toBe(false);
   });
+
+  it('renders ranking skeletons while ranking data is loading', () => {
+    const pending = new Subject<HotStocksResponse>();
+    const tickerService = TestBed.inject(TickerService) as unknown as {
+      getHotStocks: ReturnType<typeof vi.fn>;
+    };
+    tickerService.getHotStocks.mockReturnValueOnce(pending.asObservable());
+
+    fixture = TestBed.createComponent(HotStocksComponent);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(fixture.componentInstance.loading()).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('.table-skeleton-row').length).toBeGreaterThan(0);
+    expect(text).not.toContain('暫無資料');
+
+    pending.next(response);
+    pending.complete();
+  });
 });

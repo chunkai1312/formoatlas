@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +16,7 @@ type SortKey = keyof Pick<SectorFlowSnapshot,
   styleUrl: './sector-ranking-table.component.scss',
 })
 export class SectorRankingTableComponent {
+  readonly loading = input(false);
   readonly rows = signal<SectorFlowSnapshot[]>([]);
   readonly sortKey = signal<SortKey>('changePercent');
   readonly sortDir = signal<1 | -1>(-1);

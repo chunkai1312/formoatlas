@@ -1,7 +1,7 @@
 import { Component, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { vi } from 'vitest';
 
 import { SectorFlowComponent } from './sector-flow.component';
@@ -24,6 +24,7 @@ class MockDashboardStateService {
   template: '<div class="ranking-stub"></div>',
 })
 class StubSectorRankingTableComponent {
+  readonly loading = input(false);
   setRows = vi.fn();
 }
 
@@ -155,5 +156,25 @@ describe('SectorFlowComponent', () => {
       symbol: 'S3',
       sector: '產業3',
     });
+  });
+
+  it('renders sector skeletons while data is loading without showing detail panels', async () => {
+    const pending = new Subject<SectorFlowSnapshot[]>();
+    const tickerService = TestBed.inject(TickerService) as unknown as {
+      getSectorFlow: ReturnType<typeof vi.fn>;
+    };
+    tickerService.getSectorFlow.mockReturnValueOnce(pending.asObservable());
+
+    fixture = TestBed.createComponent(SectorFlowComponent);
+    fixture.detectChanges();
+
+    const text = fixture.nativeElement.textContent as string;
+    expect(fixture.componentInstance.loading()).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('.table-skeleton-row').length).toBeGreaterThan(0);
+    expect(text).not.toContain('此日期尚無產業成交比重資料。');
+    expect(text).not.toContain('資金流向明細');
+
+    pending.next(rows);
+    pending.complete();
   });
 });

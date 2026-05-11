@@ -1,5 +1,9 @@
 @if (loading()) {
-  <div class="map-state">載入市場熱力圖中...</div>
+  <div class="map-skeleton visualization-skeleton" aria-hidden="true">
+    <span class="skeleton-line large"></span>
+    <span class="skeleton-line medium"></span>
+    <span class="skeleton-line short"></span>
+  </div>
 } @else if (error()) {
   <div class="map-state warning">{{ error() }}</div>
 } @else if (chartOption()) {

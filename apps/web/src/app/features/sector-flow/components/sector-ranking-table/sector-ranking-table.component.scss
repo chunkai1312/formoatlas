@@ -10,6 +10,27 @@
   overflow-x: auto;
 }
 
+.sector-ranking-skeleton {
+  display: grid;
+  min-width: 960px;
+  overflow-x: auto;
+
+  .table-skeleton-row {
+    grid-template-columns: minmax(110px, 1fr) repeat(9, minmax(70px, 0.7fr)) 90px;
+    padding: 7px 10px;
+  }
+
+  .name,
+  .num,
+  .bar {
+    width: 100%;
+  }
+
+  .bar {
+    height: 10px;
+  }
+}
+
 .ranking-table {
   width: 100%;
   border-collapse: collapse;

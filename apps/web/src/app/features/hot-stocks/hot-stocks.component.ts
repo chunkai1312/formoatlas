@@ -36,6 +36,8 @@ export class HotStocksComponent {
 
   readonly activeMarket = signal<'TSE' | 'OTC'>('TSE');
   readonly data = signal<HotStocksResponse>(emptyHotStocks(this.dashState.endDate(), 'TSE'));
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
   readonly watchList = this.watchlistService.watchList;
   readonly pendingWatchSymbols = signal<Set<string>>(new Set<string>());
   readonly marketLabel = computed(() => this.data().market === 'OTC' ? '上櫃' : '上市');
@@ -48,11 +50,19 @@ export class HotStocksComponent {
       toObservable(this.activeMarket),
     ])
       .pipe(
-        switchMap(([date, market]) =>
-          this.tickerService.getHotStocks(date, market).pipe(
-            catchError(() => of(emptyHotStocks(date, market))),
-          )
-        ),
+        switchMap(([date, market]) => {
+          this.loading.set(true);
+          this.error.set(null);
+          this.data.set(emptyHotStocks(date, market));
+
+          return this.tickerService.getHotStocks(date, market).pipe(
+            catchError(() => {
+              this.error.set('資料載入失敗，請稍後再試。');
+              return of(emptyHotStocks(date, market));
+            }),
+            finalize(() => this.loading.set(false)),
+          );
+        }),
         takeUntilDestroyed(),
       )
       .subscribe(data => {

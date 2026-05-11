@@ -25,6 +25,7 @@ import type { EChartsOption } from 'echarts';
 })
 export class ChartTabGroupComponent {
   data = input<MarketStats[]>([]);
+  loading = input(false);
 
   readonly tabs = TAB_DEFINITIONS;
   readonly localRange = signal<TimeRange>('3M');

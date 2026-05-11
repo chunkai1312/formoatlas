@@ -45,6 +45,8 @@ html.dark-mode {
   /* 文字 */
   --text-primary:        #1A1A1A;
   --text-secondary:      #666666;
+  --skeleton-base:       #E5E7EB;
+  --skeleton-highlight:  #F3F4F6;
 
   /* Layout */
   --toolbar-bg:          #1565C0;
@@ -75,6 +77,8 @@ html.dark-mode {
   /* 文字 */
   --text-primary:        #D1D4DC;
   --text-secondary:      #9598A1;
+  --skeleton-base:       #2F3440;
+  --skeleton-highlight:  #3A4050;
 
   /* Layout */
   --toolbar-bg:          #1E222D;
@@ -137,4 +141,72 @@ mat-card,
 /* 深色模式：確保 hero-card 的 mat-card 文字顏色正確繼承 token */
 html.dark-mode .hero-card {
   color: var(--text-primary) !important;
+}
+
+.skeleton-block {
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeleton-base) 0%,
+      var(--skeleton-highlight) 42%,
+      var(--skeleton-base) 78%
+    );
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.35s ease-in-out infinite;
+}
+
+.skeleton-line {
+  @extend .skeleton-block;
+  height: 0.85rem;
+}
+
+.skeleton-pill {
+  @extend .skeleton-block;
+  border-radius: 999px;
+}
+
+.table-skeleton-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+}
+
+.visualization-skeleton {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  width: 100%;
+  min-height: 320px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+  border-radius: 8px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--border-color) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border-color) 55%, transparent) 1px, transparent 1px);
+  background-size: 100% 64px, 64px 100%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block,
+  .skeleton-line,
+  .skeleton-pill {
+    animation: none;
+    background: var(--skeleton-base);
+  }
 }

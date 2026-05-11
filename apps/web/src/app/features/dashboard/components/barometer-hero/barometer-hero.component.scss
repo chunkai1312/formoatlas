@@ -188,4 +188,54 @@
     line-height: 1.8;
     color: var(--text-secondary);
   }
+
+  .hero-skeleton {
+    .date {
+      width: 66%;
+      height: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    .label {
+      width: 44%;
+      height: 0.75rem;
+
+      &.short {
+        width: 36%;
+      }
+    }
+
+    .value {
+      width: 82%;
+      height: 1.6rem;
+
+      &.small {
+        width: 58%;
+        height: 1rem;
+      }
+    }
+
+    .weather {
+      width: 2.8rem;
+      height: 2.8rem;
+      flex-shrink: 0;
+    }
+
+    .chip {
+      width: 88px;
+      height: 34px;
+    }
+
+    .summary {
+      width: 82%;
+
+      &.wide {
+        width: 96%;
+      }
+
+      &.short {
+        width: 58%;
+      }
+    }
+  }
 }

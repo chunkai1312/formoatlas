@@ -4,6 +4,10 @@
     <button class="tab-btn" [class.active]="activeMarket() === 'OTC'" (click)="setMarket('OTC')">上櫃</button>
   </div>
 
+  @if (error()) {
+    <div class="page-warning">{{ error() }}</div>
+  }
+
   <section class="section">
     <div class="section-title">漲跌幅排行</div>
     <div class="rank-grid">
@@ -14,6 +18,7 @@
         metricKind="percent"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().movers.gainers"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -24,6 +29,7 @@
         metricKind="percent"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().movers.losers"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -40,6 +46,7 @@
         metricKind="volume"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().actives.byVolume"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -50,6 +57,7 @@
         metricKind="value"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().actives.byValue"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -69,6 +77,7 @@
         secondaryLabel="投信"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().institutional.finiBuy"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -82,6 +91,7 @@
         secondaryLabel="投信"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().institutional.finiSell"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -101,6 +111,7 @@
         secondaryLabel="外資"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().institutional.sitcBuy"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>
@@ -114,6 +125,7 @@
         secondaryLabel="外資"
         [watchList]="watchList()"
         [pendingWatchSymbols]="pendingWatchSymbols()"
+        [loading]="loading()"
         [rows]="data().institutional.sitcSell"
         (watchlistToggle)="toggleWatchlist($event)"
       ></app-hot-stock-ranking-table>

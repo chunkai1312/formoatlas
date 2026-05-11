@@ -10,7 +10,7 @@ import { SectorTradeWeightDistributionComponent } from './components/sector-trad
 import { KlineChartComponent } from '../dashboard/components/kline-chart/kline-chart.component';
 import { SectorFlowSnapshot } from '../../core/models/sector-flow-snapshot.model';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { switchMap, catchError, of, combineLatest } from 'rxjs';
+import { switchMap, catchError, finalize, of, combineLatest } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -38,6 +38,8 @@ export class SectorFlowComponent {
   readonly selectedSymbol = this.state.selectedSymbol;
   readonly klineSymbol = this.state.klineSymbol;
   readonly rows = signal<SectorFlowSnapshot[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal<string | null>(null);
 
   setMarket(market: 'TSE' | 'OTC') {
     this.state.activeMarket.set(market);
@@ -62,9 +64,24 @@ export class SectorFlowComponent {
       toObservable(this.state.activeMarket),
     ])
       .pipe(
-        switchMap(([date, market]) =>
-          this.tickerService.getSectorFlow(date, market).pipe(catchError(() => of([])))
-        ),
+        switchMap(([date, market]) => {
+          this.loading.set(true);
+          this.error.set(null);
+          this.rows.set([]);
+          this.rankingTable()?.setRows([]);
+          this.state.sectors.set([]);
+          this.state.selectedSymbol.set('');
+          this.state.selectedName.set('');
+          this.state.klineSymbol.set(undefined);
+
+          return this.tickerService.getSectorFlow(date, market).pipe(
+            catchError(() => {
+              this.error.set('資料載入失敗，請稍後再試。');
+              return of([] as SectorFlowSnapshot[]);
+            }),
+            finalize(() => this.loading.set(false)),
+          );
+        }),
         takeUntilDestroyed(),
       )
       .subscribe(rows => {
