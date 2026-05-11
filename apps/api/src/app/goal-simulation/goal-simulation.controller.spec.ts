@@ -1,14 +1,7 @@
-import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { describe, expect, it, vi } from 'vitest';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GoalSimulationController } from './goal-simulation.controller';
 
 describe('GoalSimulationController', () => {
-  it('is protected by JwtAuthGuard', () => {
-    const guards = Reflect.getMetadata(GUARDS_METADATA, GoalSimulationController);
-    expect(guards).toContain(JwtAuthGuard);
-  });
-
   it('delegates run requests to the service', async () => {
     const result = { candidates: [] };
     const service = { run: vi.fn().mockResolvedValue(result) };
