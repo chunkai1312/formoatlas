@@ -133,23 +133,28 @@
 - **AND** `warnings` SHALL 揭露不保證未來績效
 
 ### Requirement: 目標導向模擬 API
-系統 SHALL 提供會員限定的 `POST /api/goal-simulation/run` API。
+系統 SHALL 提供公開可呼叫的 `POST /api/goal-simulation/run` API。
 
-此 API SHALL 使用 `JwtAuthGuard` 保護。
+此 API SHALL NOT 使用 `JwtAuthGuard` 保護。
 
 此 API SHALL NOT 保存模擬結果。
 
-#### Scenario: 已登入會員執行目標模擬
-- **WHEN** 已登入會員呼叫 `POST /api/goal-simulation/run` 並提供有效 request
+#### Scenario: 使用者執行目標模擬
+- **WHEN** 任一使用者呼叫 `POST /api/goal-simulation/run` 並提供有效 request
 - **THEN** 系統 SHALL 回傳 `GoalSimulationResult`
 
-#### Scenario: 未登入使用者嘗試執行目標模擬
-- **WHEN** 未登入 request 呼叫 `POST /api/goal-simulation/run`
-- **THEN** 系統 SHALL 回傳 HTTP 401
-- **AND** SHALL NOT 執行模擬
+#### Scenario: 未登入使用者執行目標模擬
+- **WHEN** 未登入 request 呼叫 `POST /api/goal-simulation/run` 並提供有效 request
+- **THEN** 系統 SHALL 執行模擬
+- **AND** 系統 SHALL 回傳 `GoalSimulationResult`
+
+#### Scenario: 無效目標模擬 request
+- **WHEN** 任一使用者呼叫 `POST /api/goal-simulation/run` 並提供無效 request
+- **THEN** 系統 SHALL 回傳 HTTP 400
+- **AND** SHALL NOT 保存任何模擬設定或結果
 
 ### Requirement: 目標導向模擬 UI
-web app SHALL 提供目標導向買進持有模擬頁面，讓已登入會員設定目標、投資條件、歷史模擬日期區間與單一股票代號。
+web app SHALL 提供公開可用的目標導向買進持有模擬頁面，讓使用者設定目標、投資條件、歷史模擬日期區間與單一股票代號。
 
 股票代號欄位預設值 SHALL 為 `0050`。
 
@@ -157,7 +162,9 @@ web app SHALL 提供目標導向買進持有模擬頁面，讓已登入會員設
 
 URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 
-未登入使用者 SHALL 看到登入提示，而非表單提交動作。
+未登入使用者 SHALL 可看到目標模擬表單與提交 action。
+
+頁面 SHALL NOT 要求使用者登入才可提交目標模擬。
 
 頁面 SHALL NOT 顯示策略選擇、SMA 參數或股票配置百分比。
 
@@ -167,10 +174,16 @@ URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 
 頁面 SHALL NOT 顯示 suggestions、candidate warnings、頂層 warnings 或成本假設描述的純文字段落。
 
-#### Scenario: 已登入會員提交買進持有目標模擬
-- **WHEN** 已登入會員填寫目標金額或目標年化、年限、日期區間、初始本金、每月投入與單一股票代號後提交
+#### Scenario: 使用者提交買進持有目標模擬
+- **WHEN** 使用者填寫目標金額或目標年化、年限、日期區間、初始本金、每月投入與單一股票代號後提交
 - **THEN** web app SHALL 呼叫 `POST /api/goal-simulation/run`
 - **AND** request SHALL NOT 包含策略選擇、SMA 參數或股票配置百分比
+- **AND** 顯示買進持有模擬結果
+
+#### Scenario: 未登入使用者提交買進持有目標模擬
+- **WHEN** 未登入使用者填寫有效表單後提交目標模擬
+- **THEN** web app SHALL 呼叫 `POST /api/goal-simulation/run`
+- **AND** SHALL NOT 顯示登入提示作為提交前置條件
 - **AND** 顯示買進持有模擬結果
 
 #### Scenario: 使用預設股票代號
@@ -183,11 +196,11 @@ URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 - **AND** web app SHALL NOT 自動提交模擬
 
 #### Scenario: URL query params 提交
-- **WHEN** URL query params 已初始化表單且已登入會員提交模擬
+- **WHEN** URL query params 已初始化表單且使用者提交模擬
 - **THEN** web app SHALL 使用 query params 帶入的表單值組成 request
 
-#### Scenario: 已登入會員指定日期區間
-- **WHEN** 已登入會員填寫開始日期與結束日期後提交
+#### Scenario: 使用者指定日期區間
+- **WHEN** 使用者填寫開始日期與結束日期後提交
 - **THEN** web app SHALL 在 request 中送出 `startDate` 與 `endDate`
 - **AND** 結果 SHALL 顯示 requested/resolved range
 
@@ -200,11 +213,6 @@ URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 - **WHEN** API 回傳 `tradeRecords`
 - **THEN** web app SHALL 顯示交易紀錄表格
 - **AND** 表格 SHALL 顯示日期、交易來源、成交價、股數、成交金額與交易後現金
-
-#### Scenario: 未登入使用者看到登入提示
-- **WHEN** 未登入使用者開啟目標模擬頁面
-- **THEN** web app SHALL 顯示需要登入的狀態
-- **AND** SHALL NOT 暴露提交模擬 action
 
 #### Scenario: 不顯示結果說明文字段落
 - **WHEN** API 回傳 suggestions、candidate warnings、頂層 warnings 與成本假設描述
@@ -273,7 +281,7 @@ URL query params SHALL 只初始化表單，SHALL NOT 自動提交模擬。
 - **AND** candidate warnings SHALL 說明無法計算年化報酬
 
 ### Requirement: 第一階段實作範圍
-`goal-based-strategy-simulation` 在本變更中 SHALL 實作會員限定 API 與前端 UI。
+`goal-based-strategy-simulation` SHALL 提供公開可執行的 API 與前端 UI。
 
 第一階段 SHALL 支援 `single-symbol` universe 與固定 `buy-and-hold` baseline。
 
