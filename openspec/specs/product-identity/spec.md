@@ -7,7 +7,9 @@
 ### Requirement: Canonical product identity
 The system SHALL use `FormoAtlas` as the canonical display name for the product and `formoatlas` as the canonical lowercase slug where a single-token technical identifier is required.
 
-The system SHALL use the Chinese positioning line `以日期翻閱島嶼股海，讀懂每日留下的紅綠線索。` on product-facing surfaces that need a concise description.
+The system SHALL use the Chinese positioning line `以日期翻閱台股市場，從大盤溫度、籌碼流向、類股強弱與熱門個股，讀懂每日留下的紅綠線索。` on product-facing surfaces that need a concise brand statement.
+
+The system SHALL use the Chinese metadata description `FormoAtlas 整合台股盤後大盤、籌碼、期權、資金流向、類股強弱與熱門個股，幫助你以日期回看每日市場線索。` on SEO-facing metadata surfaces that need a direct product summary.
 
 #### Scenario: Display name surfaces
 - **WHEN** a user-visible surface displays the product name
@@ -19,7 +21,11 @@ The system SHALL use the Chinese positioning line `以日期翻閱島嶼股海�
 
 #### Scenario: Chinese positioning surfaces
 - **WHEN** a product-facing page, README, or project overview needs a concise positioning statement
-- **THEN** it SHALL use `以日期翻閱島嶼股海，讀懂每日留下的紅綠線索。`
+- **THEN** it SHALL use `以日期翻閱台股市場，從大盤溫度、籌碼流向、類股強弱與熱門個股，讀懂每日留下的紅綠線索。`
+
+#### Scenario: Chinese metadata description surfaces
+- **WHEN** a document metadata field or SEO-facing surface needs a direct product summary
+- **THEN** it SHALL use `FormoAtlas 整合台股盤後大盤、籌碼、期權、資金流向、類股強弱與熱門個股，幫助你以日期回看每日市場線索。`
 
 ### Requirement: Brand rename compatibility boundaries
 The system SHALL preserve existing functional routes, API routes, database collection names, and market data response schemas during the rename.
