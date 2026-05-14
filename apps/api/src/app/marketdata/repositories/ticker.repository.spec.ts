@@ -71,7 +71,10 @@ describe('TickerRepository.getMarketMap', () => {
 describe('TickerRepository.getStockSummary', () => {
   it('returns stock summary using the latest row on or before the requested date', async () => {
     const model = createAggregateModel([
-      [tickerRow({ date: '2026-04-29' })],
+      [tickerRow({
+        date: '2026-04-29',
+        marginTrading: marginTradingRow(),
+      })],
       [{ totalTradeValue: 100_000_000 }],
     ]);
     const repository = new TickerRepository(model as any);
@@ -107,6 +110,20 @@ describe('TickerRepository.getStockSummary', () => {
         dealersNet: -50,
         finiConsecutiveDays: 3,
         sitcConsecutiveDays: 2,
+      },
+      marginTrading: {
+        marginBalance: 19387,
+        marginBalanceChange: -1160,
+        shortBalance: 1633,
+        shortBalanceChange: 127,
+        marginBuy: 1209,
+        marginSell: 2295,
+        marginRedeem: 74,
+        shortBuy: 56,
+        shortSell: 284,
+        shortRedeem: 101,
+        offset: 7,
+        note: '',
       },
       context: {
         appearsInHotStocks: true,
@@ -165,6 +182,7 @@ describe('TickerRepository.getStockSummary', () => {
     });
     expect(result?.context.marketCap).toBeNull();
     expect(result?.context.appearsInHotStocks).toBe(false);
+    expect(result?.marginTrading).toBeNull();
   });
 });
 
@@ -206,5 +224,26 @@ function tickerRow(overrides: Record<string, any> = {}) {
       issuedShares: 1_000_000,
     },
     ...overrides,
+  };
+}
+
+function marginTradingRow() {
+  return {
+    marginBuy: 1209,
+    marginSell: 2295,
+    marginRedeem: 74,
+    marginBalancePrev: 20547,
+    marginBalance: 19387,
+    marginBalanceChange: -1160,
+    marginQuota: 6482595,
+    shortBuy: 56,
+    shortSell: 284,
+    shortRedeem: 101,
+    shortBalancePrev: 1506,
+    shortBalance: 1633,
+    shortBalanceChange: 127,
+    shortQuota: 6482595,
+    offset: 7,
+    note: '',
   };
 }

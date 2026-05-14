@@ -30,6 +30,57 @@ export class InstInvestors {
   dealers: InstitutionalTrade;
 }
 
+@Schema({ _id: false })
+export class MarginTrading {
+  @Prop()
+  marginBuy: number;
+
+  @Prop()
+  marginSell: number;
+
+  @Prop()
+  marginRedeem: number;
+
+  @Prop()
+  marginBalancePrev: number;
+
+  @Prop()
+  marginBalance: number;
+
+  @Prop()
+  marginBalanceChange: number;
+
+  @Prop()
+  marginQuota: number;
+
+  @Prop()
+  shortBuy: number;
+
+  @Prop()
+  shortSell: number;
+
+  @Prop()
+  shortRedeem: number;
+
+  @Prop()
+  shortBalancePrev: number;
+
+  @Prop()
+  shortBalance: number;
+
+  @Prop()
+  shortBalanceChange: number;
+
+  @Prop()
+  shortQuota: number;
+
+  @Prop()
+  offset: number;
+
+  @Prop()
+  note: string;
+}
+
 @Schema({ timestamps: true })
 export class Ticker {
   @Prop({ required: true })
@@ -82,6 +133,9 @@ export class Ticker {
 
   @Prop({ type: InstInvestors })
   instInvestors?: InstInvestors;
+
+  @Prop({ type: MarginTrading })
+  marginTrading?: MarginTrading;
 }
 
 export const TickerSchema = SchemaFactory.createForClass(Ticker)

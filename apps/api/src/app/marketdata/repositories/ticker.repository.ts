@@ -150,6 +150,22 @@ export class TickerRepository {
         finiConsecutiveDays: ticker.instInvestors?.fini?.consecutiveDays ?? null,
         sitcConsecutiveDays: ticker.instInvestors?.sitc?.consecutiveDays ?? null,
       },
+      marginTrading: ticker.marginTrading
+        ? {
+            marginBalance: ticker.marginTrading.marginBalance ?? 0,
+            marginBalanceChange: ticker.marginTrading.marginBalanceChange ?? 0,
+            shortBalance: ticker.marginTrading.shortBalance ?? 0,
+            shortBalanceChange: ticker.marginTrading.shortBalanceChange ?? 0,
+            marginBuy: ticker.marginTrading.marginBuy ?? 0,
+            marginSell: ticker.marginTrading.marginSell ?? 0,
+            marginRedeem: ticker.marginTrading.marginRedeem ?? 0,
+            shortBuy: ticker.marginTrading.shortBuy ?? 0,
+            shortSell: ticker.marginTrading.shortSell ?? 0,
+            shortRedeem: ticker.marginTrading.shortRedeem ?? 0,
+            offset: ticker.marginTrading.offset ?? 0,
+            note: ticker.marginTrading.note ?? '',
+          }
+        : null,
       ohlc: ohlc.map(row => ({
         date: row.date,
         openPrice: row.openPrice ?? 0,

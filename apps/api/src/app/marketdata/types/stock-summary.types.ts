@@ -18,6 +18,21 @@ export interface StockSummaryInstitutional {
   sitcConsecutiveDays: number | null;
 }
 
+export interface StockSummaryMarginTrading {
+  marginBalance: number;
+  marginBalanceChange: number;
+  shortBalance: number;
+  shortBalanceChange: number;
+  marginBuy: number;
+  marginSell: number;
+  marginRedeem: number;
+  shortBuy: number;
+  shortSell: number;
+  shortRedeem: number;
+  offset: number;
+  note: string;
+}
+
 export interface StockSummaryOhlcRow {
   date: string;
   openPrice: number;
@@ -56,6 +71,7 @@ export interface StockSummaryResponse {
   industryName: string | null;
   quote: StockSummaryQuote;
   institutional: StockSummaryInstitutional;
+  marginTrading: StockSummaryMarginTrading | null;
   ohlc: StockSummaryOhlcRow[];
   context: StockSummaryContext;
 }

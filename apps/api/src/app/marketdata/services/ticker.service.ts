@@ -15,6 +15,32 @@ function calcConsecutiveDays(net: number, prev: number): number {
   return 0;
 }
 
+function mapMarginTrading(row: any) {
+  const marginBalancePrev = row.marginBalancePrev ?? 0;
+  const marginBalance = row.marginBalance ?? 0;
+  const shortBalancePrev = row.shortBalancePrev ?? 0;
+  const shortBalance = row.shortBalance ?? 0;
+
+  return {
+    marginBuy: row.marginBuy ?? 0,
+    marginSell: row.marginSell ?? 0,
+    marginRedeem: row.marginRedeem ?? 0,
+    marginBalancePrev,
+    marginBalance,
+    marginBalanceChange: marginBalance - marginBalancePrev,
+    marginQuota: row.marginQuota ?? 0,
+    shortBuy: row.shortBuy ?? 0,
+    shortSell: row.shortSell ?? 0,
+    shortRedeem: row.shortRedeem ?? 0,
+    shortBalancePrev,
+    shortBalance,
+    shortBalanceChange: shortBalance - shortBalancePrev,
+    shortQuota: row.shortQuota ?? 0,
+    offset: row.offset ?? 0,
+    note: row.note ?? '',
+  };
+}
+
 @Injectable()
 export class TickerService {
   constructor(
@@ -30,6 +56,7 @@ export class TickerService {
       [this.updateTwseIndicesTrades, this.updateTpexIndicesTrades],
       [this.updateTwseEquitiesQuotes, this.updateTpexEquitiesQuotes],
       [this.updateTwseEquitiesInstInvestorsTrades, this.updateTpexEquitiesInstInvestorsTrades],
+      [this.updateTwseEquitiesMarginTrades, this.updateTpexEquitiesMarginTrades],
       [this.updateTwseEquityProfiles, this.updateTpexEquityProfiles],
     ];
 
@@ -299,6 +326,50 @@ export class TickerService {
 
     await Promise.all(tickersWithDays.map(ticker => this.tickerRepository.updateTicker(ticker)));
     Logger.log(`${date} 上櫃個股法人進出: 已更新`, TickerService.name);
+  }
+
+  @Cron('0 35 21-22 * * *')
+  async updateTwseEquitiesMarginTrades(date: string = DateTime.local().toISODate()) {
+    const rawData = await this.twstock.stocks.marginTrades({ date, exchange: 'TWSE' }) as any[] | null;
+    if (!rawData) {
+      Logger.warn(`${date} 上市個股融資融券: 尚無資料或非交易日`, TickerService.name);
+      return;
+    }
+
+    const tickers = rawData.map(row => ({
+      date: row.date,
+      type: TickerType.Equity,
+      exchange: Exchange.TWSE,
+      market: Market.TSE,
+      symbol: row.symbol,
+      marginTrading: mapMarginTrading(row),
+    }));
+
+    await Promise.all(tickers.map(ticker => this.tickerRepository.updateTicker(ticker)));
+    Logger.log(`${date} 上市個股融資融券: 已更新`, TickerService.name);
+  }
+
+  @Cron('0 35 21-22 * * *')
+  async updateTpexEquitiesMarginTrades(date: string = DateTime.local().toISODate()) {
+    const rawData = await this.twstock.stocks.marginTrades({ date, exchange: 'TPEx' }) as any[] | null;
+    if (!rawData) {
+      Logger.warn(`${date} 上櫃個股融資融券: 尚無資料或非交易日`, TickerService.name);
+      return;
+    }
+
+    const tickers = rawData
+      .filter(row => !isOtcWarrant(row.symbol))
+      .map(row => ({
+        date: row.date,
+        type: TickerType.Equity,
+        exchange: Exchange.TPEx,
+        market: Market.OTC,
+        symbol: row.symbol,
+        marginTrading: mapMarginTrading(row),
+      }));
+
+    await Promise.all(tickers.map(ticker => this.tickerRepository.updateTicker(ticker)));
+    Logger.log(`${date} 上櫃個股融資融券: 已更新`, TickerService.name);
   }
 
   @Cron('0 0 17 * * *')
