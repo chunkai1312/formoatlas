@@ -122,6 +122,47 @@
             }
           </div>
         </section>
+
+        <section>
+          <h2>融資融券</h2>
+          @if (stock.marginTrading; as margin) {
+            <dl class="metric-list">
+              <div>
+                <dt>融資餘額</dt>
+                <dd>{{ formatLots(margin.marginBalance) }}</dd>
+              </div>
+              <div>
+                <dt>融資增減</dt>
+                <dd [class]="valueClass(margin.marginBalanceChange)">{{ formatSignedLots(margin.marginBalanceChange) }}</dd>
+              </div>
+              <div>
+                <dt>融券餘額</dt>
+                <dd>{{ formatLots(margin.shortBalance) }}</dd>
+              </div>
+              <div>
+                <dt>融券增減</dt>
+                <dd [class]="valueClass(margin.shortBalanceChange)">{{ formatSignedLots(margin.shortBalanceChange) }}</dd>
+              </div>
+              <div>
+                <dt>融資買 / 賣</dt>
+                <dd>{{ formatLots(margin.marginBuy) }} / {{ formatLots(margin.marginSell) }}</dd>
+              </div>
+              <div>
+                <dt>融券賣 / 買</dt>
+                <dd>{{ formatLots(margin.shortSell) }} / {{ formatLots(margin.shortBuy) }}</dd>
+              </div>
+              <div>
+                <dt>資券互抵</dt>
+                <dd>{{ formatLots(margin.offset) }}</dd>
+              </div>
+            </dl>
+            @if (margin.note) {
+              <p class="margin-note">{{ margin.note }}</p>
+            }
+          } @else {
+            <p class="empty-note">尚無融資融券資料</p>
+          }
+        </section>
       </aside>
     </div>
 

@@ -20,6 +20,21 @@ export interface StockSummaryInstitutional {
   sitcConsecutiveDays: number | null;
 }
 
+export interface StockSummaryMarginTrading {
+  marginBalance: number;
+  marginBalanceChange: number;
+  shortBalance: number;
+  shortBalanceChange: number;
+  marginBuy: number;
+  marginSell: number;
+  marginRedeem: number;
+  shortBuy: number;
+  shortSell: number;
+  shortRedeem: number;
+  offset: number;
+  note: string;
+}
+
 export interface StockSummaryContext {
   appearsInHotStocks: boolean;
   hotStockLists: string[];
@@ -46,6 +61,7 @@ export interface StockSummary {
   industryName: string | null;
   quote: StockSummaryQuote;
   institutional: StockSummaryInstitutional;
+  marginTrading: StockSummaryMarginTrading | null;
   ohlc: TickerOhlc[];
   context: StockSummaryContext;
 }

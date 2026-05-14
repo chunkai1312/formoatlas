@@ -305,6 +305,16 @@ export class StockDetailComponent {
     return value === null || value === undefined ? '-' : `${this.formatNumber(Math.round(value / 1000))} 張`;
   }
 
+  formatLots(value: number | null | undefined): string {
+    return value === null || value === undefined ? '-' : `${this.formatNumber(value)} 張`;
+  }
+
+  formatSignedLots(value: number | null | undefined): string {
+    if (value === null || value === undefined) return '-';
+    const sign = value > 0 ? '+' : '';
+    return `${sign}${this.formatLots(value)}`;
+  }
+
   formatBillion(value: number | null | undefined): string {
     return value === null || value === undefined ? '-' : `${this.formatNumber(value / 1e8, 2)} 億`;
   }

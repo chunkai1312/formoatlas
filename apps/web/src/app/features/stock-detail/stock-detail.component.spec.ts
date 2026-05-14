@@ -14,6 +14,7 @@ import { WatchlistService } from '../../core/services/watchlist.service';
 import { IndicatorChartComponent } from '../dashboard/components/trend-chart/indicator-chart/indicator-chart.component';
 import { BacktestPanelComponent } from './components/backtest-panel/backtest-panel.component';
 import { StockDetailComponent } from './stock-detail.component';
+import { StockSummary } from '../../core/models/stock-summary.model';
 
 class MockDashboardStateService {
   readonly selectedDate = signal('2026-04-30');
@@ -124,6 +125,28 @@ describe('StockDetailComponent', () => {
     expect(volume?.textContent).toContain('1 張');
   });
 
+  it('renders margin trading metrics when available', () => {
+    const text = fixture.nativeElement.textContent;
+
+    expect(text).toContain('融資融券');
+    expect(text).toContain('融資餘額');
+    expect(text).toContain('19,387 張');
+    expect(text).toContain('-1,160 張');
+    expect(text).toContain('融券餘額');
+    expect(text).toContain('1,633 張');
+    expect(text).toContain('+127 張');
+    expect(text).toContain('資券互抵');
+    expect(text).toContain('7 張');
+  });
+
+  it('renders a neutral margin trading empty state when unavailable', () => {
+    fixture.componentInstance.summary.set({ ...stockSummary(), marginTrading: null });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('融資融券');
+    expect(fixture.nativeElement.textContent).toContain('尚無融資融券資料');
+  });
+
   it('adds the current stock to watchlist', () => {
     fixture.componentInstance.toggleWatchlist();
 
@@ -188,7 +211,7 @@ describe('StockDetailComponent', () => {
   });
 });
 
-function stockSummary() {
+function stockSummary(): StockSummary {
   return {
     requestedDate: '2026-04-30',
     date: '2026-04-29',
@@ -215,6 +238,20 @@ function stockSummary() {
       dealersNet: -50,
       finiConsecutiveDays: 3,
       sitcConsecutiveDays: 2,
+    },
+    marginTrading: {
+      marginBalance: 19387,
+      marginBalanceChange: -1160,
+      shortBalance: 1633,
+      shortBalanceChange: 127,
+      marginBuy: 1209,
+      marginSell: 2295,
+      marginRedeem: 74,
+      shortBuy: 56,
+      shortSell: 284,
+      shortRedeem: 101,
+      offset: 7,
+      note: '',
     },
     ohlc: [
       { date: '2026-04-28', openPrice: 900, highPrice: 910, lowPrice: 890, closePrice: 905, tradeVolume: 1000, tradeValue: 10_000_000 },
