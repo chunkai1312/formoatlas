@@ -59,10 +59,25 @@ describe('AssistantPanelComponent', () => {
     expect(conversationService.loadConversations).toHaveBeenCalled();
     expect(conversationService.loadDetail).not.toHaveBeenCalled();
     expect(fixture.componentInstance.assistantView()).toBe('list');
-    expect(text).toContain('助理對話');
-    expect(text).toContain('最近對話');
-    expect(text).toContain('1 筆保存的對話');
+    expect(text).toContain('FormoAtlas AI');
+    expect(text).not.toContain('最近對話');
+    expect(text).not.toContain('1 筆保存的對話');
     expect(text).toContain('市場研究');
+  });
+
+  it('places the new conversation action in the list topbar as an icon button', () => {
+    fixture.componentInstance.open();
+    fixture.detectChanges();
+
+    const headerNewButton = fixture.nativeElement.querySelector(
+      '.panel-header .icon-btn[aria-label="建立新對話"]',
+    ) as HTMLButtonElement | null;
+    const toolbar = fixture.nativeElement.querySelector(
+      '.conversation-toolbar',
+    ) as HTMLElement | null;
+
+    expect(headerNewButton?.textContent?.trim()).toBe('add');
+    expect(toolbar).toBeNull();
   });
 
   it('submits selected date and page context to the current conversation', () => {

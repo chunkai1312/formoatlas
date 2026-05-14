@@ -109,6 +109,12 @@
   gap: 8px;
 }
 
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
 .icon-btn {
   width: 36px;
   height: 36px;
@@ -124,25 +130,6 @@
   &:disabled {
     opacity: 0.45;
     cursor: default;
-  }
-}
-
-.conversation-toolbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-
-  h3 {
-    margin: 0 0 4px;
-    font-size: 1rem;
-    line-height: 1.25;
-  }
-
-  p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
   }
 }
 

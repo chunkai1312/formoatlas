@@ -22,7 +22,7 @@
       <header class="panel-header">
         <div>
           <div class="eyebrow">{{ selectedDate() }}</div>
-          <h2>助理對話</h2>
+          <h2>FormoAtlas AI</h2>
           <p>{{ contextLabel() }}</p>
         </div>
         <button
@@ -43,31 +43,30 @@
       <header class="panel-header">
         <div>
           <div class="eyebrow">{{ selectedDate() }}</div>
-          <h2>助理對話</h2>
+          <h2>FormoAtlas AI</h2>
           <p>{{ contextLabel() }}</p>
         </div>
-        <button
-          class="icon-btn"
-          type="button"
-          (click)="close()"
-          aria-label="關閉市場研究助理"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
+        <div class="panel-actions">
+          <button
+            class="icon-btn"
+            type="button"
+            (click)="newConversation()"
+            aria-label="建立新對話"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+          <button
+            class="icon-btn"
+            type="button"
+            (click)="close()"
+            aria-label="關閉市場研究助理"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </header>
 
       <section class="conversation-list-view" aria-label="對話紀錄">
-        <div class="conversation-toolbar">
-          <div>
-            <h3>最近對話</h3>
-            <p>{{ conversations().length }} 筆保存的對話</p>
-          </div>
-          <button class="action-btn" type="button" (click)="newConversation()">
-            <mat-icon>add</mat-icon>
-            新對話
-          </button>
-        </div>
-
         @if (error()) {
           <div class="error-state">{{ error() }}</div>
         }
