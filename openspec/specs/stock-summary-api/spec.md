@@ -1,5 +1,6 @@
-## ADDED Requirements
-
+## Purpose
+Define the stock summary aggregate API response contract for a single equity symbol, including quote, OHLC, institutional, margin trading, and market context fields.
+## Requirements
 ### Requirement: Stock summary aggregate endpoint
 系統 SHALL 提供 `GET /marketdata/stock-summary?symbol=<symbol>&date=YYYY-MM-DD` endpoint，一次回傳單一股票在指定日期脈絡下的個股摘要。
 
@@ -152,3 +153,37 @@ Response SHALL include `marginTrading`, whose value SHALL be either `null` or an
 - **WHEN** client requests a date that has no ticker row for the symbol but a prior row exists
 - **THEN** API uses the same nearest available ticker row selected for the stock summary
 - **AND** response `marginTrading` reflects that actual response `date` when available
+
+### Requirement: Stock summary institutional detail rows
+Stock summary response SHALL expose stock institutional summary fields from `Ticker.institutionalTrading.summary` and preserved detail rows from `Ticker.institutionalTrading.details` when available.
+
+The `institutional` object SHALL continue to include existing summary fields:
+- `finiNet`
+- `sitcNet`
+- `dealersNet`
+- `finiConsecutiveDays`
+- `sitcConsecutiveDays`
+
+The `institutional` object SHALL additionally include `details`, an array of rows containing:
+- `investor`
+- `buy`
+- `sell`
+- `net`
+
+When `Ticker.institutionalTrading` is missing, institutional summary fields SHALL be `null` and `institutional.details` SHALL be an empty array rather than causing the API to fail.
+
+#### Scenario: Stock summary includes institutional detail rows
+- **WHEN** `GET /marketdata/stock-summary` resolves a ticker row containing `institutionalTrading.summary` and `institutionalTrading.details`
+- **THEN** response `institutional.details` SHALL include the preserved investor rows
+- **AND** response `institutional.finiNet`, `institutional.sitcNet`, and `institutional.dealersNet` fields SHALL be projected from `institutionalTrading.summary`
+
+#### Scenario: Stock summary handles net-only detail rows
+- **WHEN** a preserved institutional detail row has `buy: null` or `sell: null`
+- **THEN** stock summary SHALL return the row with null buy or sell values
+- **AND** stock summary SHALL still include the row's net value
+
+#### Scenario: Stock summary with no institutional data
+- **WHEN** the resolved ticker row has no `institutionalTrading`
+- **THEN** stock summary SHALL return institutional summary fields as `null`
+- **AND** response `institutional.details` SHALL be an empty array
+
