@@ -6,6 +6,8 @@
     "serve": "nx run-many --target=serve --all",
     "build": "nx run-many --target=build --all",
     "build:docker": "npm run build && docker build -t chunkai1312/formoatlas --platform linux/amd64 .",
+    "db:backup": "bash scripts/db/backup.sh",
+    "db:restore": "bash scripts/db/restore.sh",
     "release": "release-it",
     "prepare": "husky"
   },

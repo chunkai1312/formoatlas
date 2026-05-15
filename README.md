@@ -100,6 +100,20 @@ npx nx test api
 npx nx test web
 ```
 
+### 資料庫備份與還原
+
+備份與還原腳本需要先安裝 MongoDB Database Tools，並使用 `.env` 或 shell 環境中的 `MONGODB_URI`。
+
+```sh
+# 建立壓縮備份，輸出至 backups/mongo/
+npm run db:backup
+
+# 還原指定備份至 MONGODB_URI 指向的資料庫
+npm run db:restore -- backups/mongo/formoatlas-YYYYMMDD-HHMMSS.archive.gz
+```
+
+還原會執行 `mongorestore --drop`，因此會覆蓋目標資料庫。腳本會顯示遮蔽密碼後的 MongoDB URI，並要求輸入確認字串才會繼續。預設只允許還原到 `localhost`、`127.0.0.1` 或 `::1`；若確定要還原遠端目標，需明確加上 `--allow-remote`。
+
 ## API
 
 ### MarketData

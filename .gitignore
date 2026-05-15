@@ -46,5 +46,6 @@ Thumbs.db
 __screenshots__/
 
 .env
+backups/mongo/*.archive.gz
 .spectra/
 openspec/.vector-search.db*
