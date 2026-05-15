@@ -1,35 +1,4 @@
-## Purpose
-定義大盤總覽頁的路由、日期導航、晴雨表 Hero Card、K 線圖、今日籌碼速覽、趨勢圖表與 Footer 行為。
-## Requirements
-### Requirement: 大盤總覽頁面路由
-系統 SHALL 將 `/market-overview` 對應至大盤總覽內容，並以 Lazy Loading 方式載入既有大盤總覽 component。
-
-#### Scenario: 進入大盤總覽路徑
-- **WHEN** 用戶瀏覽 `/market-overview`
-- **THEN** 系統 SHALL 顯示大盤總覽頁面，包含 Toolbar、Hero Card、K 線圖、Stat Cards、趨勢圖表區塊及 Footer
-
----
-
-### Requirement: 日期導航
-系統 SHALL 在 Toolbar 提供日期導航控制，允許用戶切換至前一日、後一日或透過 DatePicker 選取特定日期，預設顯示最後一筆市場資料的日期。
-
-#### Scenario: 預設日期為最後交易日
-- **WHEN** 應用程式首次載入
-- **THEN** 系統 SHALL 以 `market-stats` 回傳資料集中最後一筆的日期作為初始選取日期
-
-#### Scenario: 切換至前一日
-- **WHEN** 用戶點擊「前一日」按鈕
-- **THEN** 系統 SHALL 更新所有資料請求的目標日期為前一天，並重新載入頁面所有區塊
-
-#### Scenario: 透過 DatePicker 選取日期
-- **WHEN** 用戶透過 DatePicker 選取某日期
-- **THEN** 系統 SHALL 以選取日期作為基準日，重新載入 Hero Card 及 Stat Cards 數據
-
-#### Scenario: 無法切換至未來日期
-- **WHEN** 當前顯示日期已為今天
-- **THEN** 系統 SHALL 禁用「後一日」按鈕
-
----
+## MODIFIED Requirements
 
 ### Requirement: 晴雨表 Hero Card
 系統 SHALL 顯示當日晴雨分析結果，採左右分欄佈局：左側顯示日期、大盤基本數據（加權指數、成交金額）及市場廣度比例條，右側顯示天氣圖示（大字）、以 PrimeNG 或應用程式自有 label/chip 類元件呈現的中文等級標籤及 AI 生成的盤勢摘要文字。Hero Card 使用統一的表面色背景（`var(--bg-surface)`），以左側 `4px` 等級色 accent border 區分盤勢，淺色與深色模式採相同視覺語言。
@@ -61,23 +30,6 @@
 #### Scenario: 顯示 Loading 狀態
 - **WHEN** API 請求進行中
 - **THEN** 系統 SHALL 在 Hero Card 區域顯示 PrimeNG 或應用程式自有 Loading 指示器
-
----
-
-### Requirement: 今日籌碼速覽（Stat Cards）
-系統 SHALL 以 Grid 佈局顯示 6 個當日指標卡片：外資買賣超、投信買賣超、自營商買賣超、外資台指期淨OI、外資選擇權淨部位、散戶微台淨部位。
-
-#### Scenario: 數值正負色彩（台灣慣例）
-- **WHEN** 指標數值為正
-- **THEN** 數字 SHALL 顯示為紅色（#EF4444），負值顯示為綠色（#22C55E），符合台灣股市漲紅跌綠慣例
-
-#### Scenario: 單位不標色彩
-- **WHEN** 指標卡片顯示單位文字（億元、口等）
-- **THEN** 單位文字 SHALL 固定顯示為灰色，不隨數值正負變色
-
-#### Scenario: 資料來源
-- **WHEN** Dashboard 初始化取得 `market-stats` 資料
-- **THEN** Stat Cards SHALL 取用資料集中最後一筆記錄，不重複發送額外 API 請求
 
 ---
 
@@ -144,40 +96,3 @@
 #### Scenario: 匯率走勢 Tab
 - **WHEN** 用戶切換至「匯率走勢」Tab
 - **THEN** 系統 SHALL 直接顯示 USD/TWD 折線圖，不顯示指標選擇控制
-
-### Requirement: 大盤 K 線圖
-系統 SHALL 在 Dashboard 的晴雨表 Hero Card 與今日籌碼速覽之間顯示加權指數 K 線圖（IX0001），採單一繪圖區，K 棒主圖佔上方主要空間，成交量 bar 疊於主圖下方（透過獨立隱藏 Y 軸控制高度佔比約 20%），卡片標題列 SHALL 提供獨立的 `[1M][3M][6M][1Y]` range 選擇器。
-
-#### Scenario: 成功載入 K 線資料
-- **WHEN** Dashboard 載入且 `GET /marketdata/tickers?symbol=IX0001` 回傳成功
-- **THEN** 系統 SHALL 顯示 candlestick K 棒與成交量 bar（疊於主圖下方），並顯示 MA5/MA10/MA20 均線
-
-#### Scenario: 台灣紅漲綠跌色系
-- **WHEN** K 線圖渲染資料
-- **THEN** 陽線（收盤 ≥ 開盤）SHALL 顯示紅色（`#EF4444`），陰線（收 < 開）SHALL 顯示綠色（`#22C55E`）；成交量 bar 顏色 SHALL 與同日 K 棒顏色一致
-
-#### Scenario: 與卡片 range 選擇器聯動
-- **WHEN** 用戶點擊 K 線圖卡片的 `[1M]`、`[3M]`、`[6M]` 或 `[1Y]` 按鈕
-- **THEN** K 線圖 SHALL 立即更新顯示範圍至對應期間（前端 slice，不重新請求 API）
-
-#### Scenario: Tooltip 顯示
-- **WHEN** 用戶 hover K 線圖任意日期
-- **THEN** Tooltip SHALL 顯示當日開/高/低/收（與前日收盤比較顯示紅綠色）、漲跌點數、漲跌幅及成交金額（億元）
-
-#### Scenario: 無資料空狀態
-- **WHEN** API 回傳空陣列
-- **THEN** 系統 SHALL 顯示「此期間無資料」空狀態佔位，不顯示空白圖表
-
----
-
-### Requirement: Footer
-系統 SHALL 在頁面底部顯示固定 Footer，包含資料來源說明、FormoAtlas 著作權及投資警語。
-
-#### Scenario: Footer 內容
-- **WHEN** 用戶瀏覽任意頁面
-- **THEN** Footer SHALL 顯示資料來源（臺灣證券交易所・期貨交易所）、`FormoAtlas` 著作權文字及投資警語（「本網站資訊僅供參考，不構成任何投資建議或買賣依據」）
-
-#### Scenario: 行動版佈局
-- **WHEN** 螢幕寬度小於 768px
-- **THEN** Footer SHALL 改為垂直堆疊佈局，警語獨立顯示於最下方
-

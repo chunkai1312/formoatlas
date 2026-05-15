@@ -1,22 +1,4 @@
-## Purpose
-定義應用程式的淺色與深色主題切換能力，包含偏好持久化、全站視覺 token 與圖表/Material 元件的主題同步。
-## Requirements
-### Requirement: 主題切換
-系統 SHALL 提供手動切換淺色/深色模式的能力，並將用戶偏好持久化至 `localStorage`。
-
-#### Scenario: 初始載入讀取偏好
-- **WHEN** 應用程式首次載入
-- **THEN** 系統 SHALL 從 `localStorage` 讀取主題偏好，若有紀錄則套用對應主題，否則預設為淺色模式
-
-#### Scenario: 點擊 Toolbar 切換按鈕
-- **WHEN** 用戶點擊 Toolbar 中的主題切換按鈕
-- **THEN** 系統 SHALL 即時切換淺色/深色模式，並將新偏好寫入 `localStorage`
-
-#### Scenario: 深色模式 class 套用
-- **WHEN** 深色模式啟用
-- **THEN** 系統 SHALL 在 `<html>` 元素加入 `dark-mode` class；停用時移除該 class
-
----
+## MODIFIED Requirements
 
 ### Requirement: 深色模式視覺主題
 系統 SHALL 在深色模式下套用 TradingView 風格的深色調色盤，所有頁面元件均須支援雙主題，PrimeNG 元件與應用程式自有樣式 SHALL 與同一套 FormoAtlas CSS token 同步。
@@ -48,4 +30,3 @@
 #### Scenario: Echarts 圖表跟隨主題
 - **WHEN** 深色模式啟用
 - **THEN** 所有 ngx-echarts 圖表 SHALL 切換至 echarts 內建 `dark` theme
-

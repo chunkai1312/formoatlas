@@ -43,7 +43,7 @@ context: |
   
   ### Frontend (`apps/web`)
   - **Framework**: Angular 21（standalone components）
-  - **UI Library**: Angular Material
+  - **UI Library**: PrimeNG
   - **Charts**: ngx-echarts（Apache ECharts）— 支援 K 線、趨勢圖與多軸圖表
   - **HTTP**: Angular `HttpClient`
   
