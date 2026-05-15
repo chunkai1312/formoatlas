@@ -1,11 +1,10 @@
 import { Component, input, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-stat-card',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule],
   templateUrl: './stat-card.component.html',
   styleUrl: './stat-card.component.scss',
 })

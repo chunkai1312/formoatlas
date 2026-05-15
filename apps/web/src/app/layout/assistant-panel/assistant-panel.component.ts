@@ -12,7 +12,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription, finalize, map, of, switchMap } from 'rxjs';
-import { MatIconModule } from '@angular/material/icon';
 import { LoginRequiredSurfaceComponent } from '../login-required-surface/login-required-surface.component';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { AgentConversationService } from '../../core/services/agent-conversation.service';
@@ -35,7 +34,7 @@ type AssistantView = 'list' | 'session';
 @Component({
   selector: 'app-assistant-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, LoginRequiredSurfaceComponent],
+  imports: [CommonModule, FormsModule, LoginRequiredSurfaceComponent],
   templateUrl: './assistant-panel.component.html',
   styleUrl: './assistant-panel.component.scss',
 })
@@ -65,9 +64,9 @@ export class AssistantPanelComponent implements OnInit {
   private questionInput?: ElementRef<HTMLTextAreaElement>;
 
   readonly assistantModes: { value: AssistantMode; label: string; icon: string }[] = [
-    { value: 'research', label: '研究', icon: 'travel_explore' },
-    { value: 'scan', label: '掃描', icon: 'radar' },
-    { value: 'stock', label: '個股', icon: 'monitoring' },
+    { value: 'research', label: '研究', icon: 'pi pi-search' },
+    { value: 'scan', label: '掃描', icon: 'pi pi-bullseye' },
+    { value: 'stock', label: '個股', icon: 'pi pi-chart-line' },
   ];
 
   readonly contextLabel = computed(() => {

@@ -4,14 +4,13 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatMenuModule } from '@angular/material/menu';
 import { DateTime } from 'luxon';
+import { MenuItem } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { MenuModule } from 'primeng/menu';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -22,15 +21,12 @@ import { LoginRequiredService } from '../../core/services/login-required.service
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
-    MatIconButton,
-    MatButton,
-    MatIconModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatMenuModule,
+    ButtonModule,
+    DatePickerModule,
+    MenuModule,
   ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
@@ -54,6 +50,28 @@ export class ToolbarComponent {
   });
 
   readonly maxDate = new Date();
+
+  readonly userMenuItems = computed<MenuItem[]>(() => {
+    const user = this.currentUser();
+    return [
+      {
+        label: user?.name ?? '使用者',
+        disabled: true,
+        styleClass: 'user-menu-name',
+      },
+      {
+        label: user?.email ?? '',
+        disabled: true,
+        styleClass: 'user-menu-email',
+      },
+      { separator: true },
+      {
+        label: '登出',
+        icon: 'pi pi-sign-out',
+        command: () => this.logout(),
+      },
+    ];
+  });
 
   readonly isToday = computed(() => {
     return this.state.selectedDate() === (DateTime.local().toISODate() ?? '');

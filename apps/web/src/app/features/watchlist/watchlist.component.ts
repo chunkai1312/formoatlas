@@ -3,7 +3,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { TickerMetadata } from '../../core/models/ticker-metadata.model';
 import { TickerService } from '../../core/services/ticker.service';
@@ -13,7 +12,7 @@ import { LoginRequiredSurfaceComponent } from '../../layout/login-required-surfa
 @Component({
   selector: 'app-watchlist',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, MatIconModule, LoginRequiredSurfaceComponent],
+  imports: [CommonModule, FormsModule, RouterLink, LoginRequiredSurfaceComponent],
   templateUrl: './watchlist.component.html',
   styleUrl: './watchlist.component.scss',
 })

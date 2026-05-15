@@ -9,7 +9,7 @@
     <div class="state-surface">正在載入個股資料...</div>
   } @else if (error()) {
     <div class="state-surface error-state">
-      <mat-icon>error</mat-icon>
+      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
       <p>{{ error() }}</p>
     </div>
   } @else if (summary(); as stock) {
@@ -45,7 +45,7 @@
         [disabled]="savingWatchlist()"
         (click)="toggleWatchlist()"
       >
-        <mat-icon>{{ isInWatchlist() ? 'star' : 'star_border' }}</mat-icon>
+        <i [class]="isInWatchlist() ? 'pi pi-star-fill' : 'pi pi-star'" aria-hidden="true"></i>
         {{ isInWatchlist() ? '已追蹤' : '加入自選' }}
       </button>
     </header>
@@ -218,7 +218,7 @@
       <div class="shortcut-row">
         @for (shortcut of assistantShortcuts; track shortcut.label) {
           <button type="button" (click)="useAssistantShortcut(shortcut.question)">
-            <mat-icon>travel_explore</mat-icon>
+            <i class="pi pi-search" aria-hidden="true"></i>
             {{ shortcut.label }}
           </button>
         }

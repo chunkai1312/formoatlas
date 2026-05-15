@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
 import { finalize } from 'rxjs';
 import type { EChartsOption } from 'echarts';
 import { BacktestResult, BacktestStrategy, RunBacktestRequest } from '../../../../core/models/backtesting.model';
@@ -13,7 +12,7 @@ import { IndicatorChartComponent } from '../../../dashboard/components/trend-cha
 @Component({
   selector: 'app-backtest-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, IndicatorChartComponent],
+  imports: [CommonModule, FormsModule, IndicatorChartComponent],
   templateUrl: './backtest-panel.component.html',
   styleUrl: './backtest-panel.component.scss',
 })

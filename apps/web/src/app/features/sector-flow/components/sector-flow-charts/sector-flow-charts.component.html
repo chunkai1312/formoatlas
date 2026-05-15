@@ -1,4 +1,4 @@
-<mat-card class="chart-card">
+<section class="chart-card app-surface">
   <div class="card-header">
     <select class="sector-select" (change)="onSectorChange($any($event.target).value)">
       @for (s of state.sectors(); track s.symbol) {
@@ -11,9 +11,7 @@
       }
     </div>
   </div>
-  <mat-card-content>
-    <div class="tab-content">
-      <app-indicator-chart [option]="moneyFlowOption()" height="320px"></app-indicator-chart>
-    </div>
-  </mat-card-content>
-</mat-card>
+  <div class="tab-content">
+    <app-indicator-chart [option]="moneyFlowOption()" height="320px"></app-indicator-chart>
+  </div>
+</section>

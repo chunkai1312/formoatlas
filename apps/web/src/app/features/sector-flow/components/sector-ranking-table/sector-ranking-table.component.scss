@@ -1,9 +1,7 @@
 .ranking-card {
   width: 100%;
-
-  mat-card-content {
-    padding: 0 16px 16px;
-  }
+  display: block;
+  padding: 0 16px 16px;
 }
 
 .table-wrap {
@@ -56,17 +54,15 @@
       cursor: pointer;
       display: table-cell;
 
-      mat-icon {
+      .pi {
         font-size: 14px;
-        width: 14px;
-        height: 14px;
         vertical-align: middle;
         opacity: 0.6;
       }
 
       &:hover {
         color: var(--text-primary);
-        mat-icon { opacity: 1; }
+        .pi { opacity: 1; }
       }
     }
   }

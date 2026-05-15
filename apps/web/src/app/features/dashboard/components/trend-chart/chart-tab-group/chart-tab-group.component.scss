@@ -1,9 +1,6 @@
 .chart-card {
   border-radius: 16px;
-
-  mat-card-content {
-    padding: 0 !important;
-  }
+  display: block;
 }
 
 .card-header {
@@ -52,6 +49,40 @@
   }
 }
 
+.chart-card-content {
+  padding: 0;
+}
+
+.tab-list {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 76%, transparent);
+  overflow-x: auto;
+}
+
+.tab-btn {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 10px 12px 8px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+
+  &.active {
+    color: var(--section-accent);
+    border-bottom-color: var(--section-accent);
+  }
+}
+
 .tab-content {
   padding: 16px 16px 8px;
 
@@ -60,6 +91,30 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
+  }
+
+  .indicator-chip {
+    border: 1px solid color-mix(in srgb, var(--border-color) 88%, transparent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 0.84rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover {
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--border-color) 30%, transparent);
+    }
+
+    &.active {
+      color: var(--section-accent);
+      border-color: color-mix(in srgb, var(--section-accent) 55%, transparent);
+      background: color-mix(in srgb, var(--section-accent) 12%, transparent);
+      font-weight: 600;
+    }
   }
 }
 

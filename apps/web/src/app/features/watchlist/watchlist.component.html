@@ -30,7 +30,7 @@
           (ngModelChange)="setSymbolInput($event)"
         />
         <button type="submit" [disabled]="!normalizedInput() || !!savingSymbol()">
-          <mat-icon>add</mat-icon>
+          <i class="pi pi-plus" aria-hidden="true"></i>
           新增
         </button>
       </div>
@@ -68,7 +68,7 @@
               [attr.aria-label]="'移除 ' + row.symbol + ' 自選股'"
               (click)="removeSymbol(row.symbol)"
             >
-              <mat-icon>delete</mat-icon>
+              <i class="pi pi-trash" aria-hidden="true"></i>
               移除
             </button>
           </div>
@@ -76,7 +76,7 @@
       </div>
     } @else {
       <div class="empty-state">
-        <mat-icon>star</mat-icon>
+        <i class="pi pi-star" aria-hidden="true"></i>
         <h2>尚未建立自選股</h2>
         <p>從熱門股、類股資金流，或輸入股票代號開始追蹤。</p>
         <a routerLink="/hot-stocks" queryParamsHandling="preserve">查看熱門股</a>

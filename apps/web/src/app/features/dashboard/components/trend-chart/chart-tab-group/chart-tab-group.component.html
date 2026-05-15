@@ -1,4 +1,4 @@
-<mat-card class="chart-card">
+<section class="chart-card app-surface">
   <div class="card-header">
     <span class="card-title">大盤籌碼指標</span>
     <div class="range-buttons">
@@ -7,39 +7,54 @@
       }
     </div>
   </div>
-  <mat-card-content>
+  <div class="chart-card-content">
     @if (loading()) {
       <div class="chart-tab-skeleton visualization-skeleton" aria-hidden="true">
         <span class="skeleton-line large"></span>
         <span class="skeleton-line medium"></span>
       </div>
     } @else {
-    <mat-tab-group>
+      <div class="tab-list" role="tablist" aria-label="大盤籌碼指標群">
+        @for (tab of tabs; track tab.label; let i = $index) {
+          <button
+            type="button"
+            class="tab-btn"
+            role="tab"
+            [class.active]="selectedTabIndex() === i"
+            [attr.aria-selected]="selectedTabIndex() === i"
+            (click)="selectTab(i)"
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+
       @for (tab of tabs; track tab.label; let i = $index) {
-        <mat-tab [label]="tab.label">
-          <div class="tab-content">
-            <!-- 指標選擇 Chips（單一指標時隱藏） -->
+        @if (selectedTabIndex() === i) {
+          <div class="tab-content" role="tabpanel">
             @if (tab.indicators.length > 1) {
-              <mat-chip-listbox
-                class="indicator-chips"
-                [value]="selectedIndicatorIndex()[i]"
-                (change)="selectIndicator(i, $event.value)"
-                hideSingleSelectionIndicator
-              >
+              <div class="indicator-chips" role="radiogroup" [attr.aria-label]="tab.label + '指標'">
                 @for (ind of tab.indicators; track ind.key; let j = $index) {
-                  <mat-chip-option [value]="j">{{ ind.chipLabel ?? ind.label }}</mat-chip-option>
+                  <button
+                    type="button"
+                    class="indicator-chip"
+                    role="radio"
+                    [class.active]="selectedIndicatorIndex()[i] === j"
+                    [attr.aria-checked]="selectedIndicatorIndex()[i] === j"
+                    (click)="selectIndicator(i, j)"
+                  >
+                    {{ ind.chipLabel ?? ind.label }}
+                  </button>
                 }
-              </mat-chip-listbox>
+              </div>
             }
 
-            <!-- 圖表 -->
             <app-indicator-chart
               [option]="getChartOption(i)"
             ></app-indicator-chart>
           </div>
-        </mat-tab>
+        }
       }
-    </mat-tab-group>
     }
-  </mat-card-content>
-</mat-card>
+  </div>
+</section>

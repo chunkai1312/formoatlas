@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { catchError, combineLatest, finalize, of, switchMap } from 'rxjs';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { EChartsOption } from 'echarts';
@@ -96,7 +95,7 @@ function calcMa(period: number, closes: number[]): (number | null)[] {
 @Component({
   selector: 'app-stock-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatIconModule, IndicatorChartComponent, BacktestPanelComponent],
+  imports: [CommonModule, RouterLink, IndicatorChartComponent, BacktestPanelComponent],
   templateUrl: './stock-detail.component.html',
   styleUrl: './stock-detail.component.scss',
 })

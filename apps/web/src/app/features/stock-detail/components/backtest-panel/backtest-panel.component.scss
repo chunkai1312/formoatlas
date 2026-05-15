@@ -51,11 +51,9 @@
   background: var(--bg-surface);
   padding: 14px;
 
-  mat-icon {
+  .pi {
     color: var(--text-secondary);
     font-size: 20px;
-    height: 20px;
-    width: 20px;
   }
 
   strong {
@@ -116,10 +114,8 @@ button {
   cursor: pointer;
   font: inherit;
 
-  mat-icon {
+  .pi {
     font-size: 18px;
-    width: 18px;
-    height: 18px;
   }
 }
 

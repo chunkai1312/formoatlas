@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
 
 import { SectorFlowSnapshot } from '../../../../core/models/sector-flow-snapshot.model';
 
 @Component({
   selector: 'app-sector-trade-weight-distribution',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [CommonModule],
   templateUrl: './sector-trade-weight-distribution.component.html',
   styleUrl: './sector-trade-weight-distribution.component.scss',
 })

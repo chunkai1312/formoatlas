@@ -1,5 +1,4 @@
-<mat-card class="rank-card">
-  <mat-card-content>
+<section class="rank-card app-surface">
     <div class="card-title">{{ title() }}</div>
 
     @if (loading()) {
@@ -45,7 +44,7 @@
                     [attr.aria-label]="watchlistLabel(row)"
                     (click)="toggleWatchlist(row)"
                   >
-                    <mat-icon>{{ isWatched(row.symbol) ? 'star' : 'star_border' }}</mat-icon>
+                    <i [class]="isWatched(row.symbol) ? 'pi pi-star-fill' : 'pi pi-star'" aria-hidden="true"></i>
                   </button>
                 </td>
                 <td class="col-symbol">
@@ -80,5 +79,4 @@
     } @else {
       <div class="empty-state">暫無資料</div>
     }
-  </mat-card-content>
-</mat-card>
+</section>

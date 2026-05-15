@@ -9,7 +9,7 @@
 
   @if (!isLoggedIn()) {
     <div class="auth-gate">
-      <mat-icon>lock</mat-icon>
+      <i class="pi pi-lock" aria-hidden="true"></i>
       <div>
         <strong>登入會員後可執行回測</strong>
         <p>回測會使用目前個股的歷史 OHLC 資料即時計算，結果不會保存。</p>
@@ -60,7 +60,7 @@
         <span>以收盤價成交</span>
       </label>
       <button type="submit" [disabled]="loading()">
-        <mat-icon>play_arrow</mat-icon>
+        <i class="pi pi-play" aria-hidden="true"></i>
         {{ loading() ? '回測中' : '執行回測' }}
       </button>
     </form>

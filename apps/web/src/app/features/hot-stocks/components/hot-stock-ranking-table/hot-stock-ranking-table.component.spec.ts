@@ -42,7 +42,7 @@ describe('HotStockRankingTableComponent', () => {
     const button = fixture.nativeElement.querySelector('.watch-toggle') as HTMLButtonElement;
     expect(button.classList.contains('active')).toBe(true);
     expect(button.getAttribute('aria-label')).toBe('移除 2330 台積電 自選股');
-    expect(button.textContent).toContain('star');
+    expect(button.querySelector('.pi-star-fill')).toBeTruthy();
   });
 
   it('emits toggle events for unselected rows', () => {

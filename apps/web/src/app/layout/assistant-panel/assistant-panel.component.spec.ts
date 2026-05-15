@@ -76,7 +76,7 @@ describe('AssistantPanelComponent', () => {
       '.conversation-toolbar',
     ) as HTMLElement | null;
 
-    expect(headerNewButton?.textContent?.trim()).toBe('add');
+    expect(headerNewButton?.querySelector('.pi-plus')).toBeTruthy();
     expect(toolbar).toBeNull();
   });
 

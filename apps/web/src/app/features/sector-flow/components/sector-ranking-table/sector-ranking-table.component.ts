@@ -1,7 +1,5 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
 import { SectorFlowSnapshot } from '../../../../core/models/sector-flow-snapshot.model';
 
 type SortKey = keyof Pick<SectorFlowSnapshot,
@@ -11,7 +9,7 @@ type SortKey = keyof Pick<SectorFlowSnapshot,
 @Component({
   selector: 'app-sector-ranking-table',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule],
+  imports: [CommonModule],
   templateUrl: './sector-ranking-table.component.html',
   styleUrl: './sector-ranking-table.component.scss',
 })
@@ -69,7 +67,7 @@ export class SectorRankingTableComponent {
   }
 
   sortIcon(key: SortKey): string {
-    if (this.sortKey() !== key) return 'unfold_more';
-    return this.sortDir() === -1 ? 'arrow_downward' : 'arrow_upward';
+    if (this.sortKey() !== key) return 'pi pi-sort-alt';
+    return this.sortDir() === -1 ? 'pi pi-arrow-down' : 'pi pi-arrow-up';
   }
 }

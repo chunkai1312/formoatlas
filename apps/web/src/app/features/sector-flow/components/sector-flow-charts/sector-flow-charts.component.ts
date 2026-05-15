@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 import { Subject, combineLatest, switchMap, catchError, of, takeUntil } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import type { EChartsOption } from 'echarts';
@@ -15,7 +14,7 @@ import { IndicatorChartComponent } from '../../../dashboard/components/trend-cha
 @Component({
   selector: 'app-sector-flow-charts',
   standalone: true,
-  imports: [CommonModule, MatCardModule, IndicatorChartComponent],
+  imports: [CommonModule, IndicatorChartComponent],
   templateUrl: './sector-flow-charts.component.html',
   styleUrl: './sector-flow-charts.component.scss',
 })

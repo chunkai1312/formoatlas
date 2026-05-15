@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
 import type { EChartsOption } from 'echarts';
@@ -15,7 +14,7 @@ import { IndicatorChartComponent } from '../dashboard/components/trend-chart/ind
 @Component({
   selector: 'app-goal-simulation',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, IndicatorChartComponent],
+  imports: [CommonModule, FormsModule, IndicatorChartComponent],
   templateUrl: './goal-simulation.component.html',
   styleUrl: './goal-simulation.component.scss',
 })

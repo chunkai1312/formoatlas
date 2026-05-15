@@ -1,10 +1,6 @@
 import { Component, input, computed } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { DateTime } from 'luxon';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
 import {
   BarometerResult,
   BAROMETER_COLOR,
@@ -18,10 +14,6 @@ import { BreadthBarComponent } from './breadth-bar/breadth-bar.component';
   imports: [
     CommonModule,
     DecimalPipe,
-    MatCardModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-    MatChipsModule,
     BreadthBarComponent,
   ],
   templateUrl: './barometer-hero.component.html',

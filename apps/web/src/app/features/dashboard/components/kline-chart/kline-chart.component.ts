@@ -1,6 +1,5 @@
 import { Component, computed, inject, input, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
 import { Subject, combineLatest, switchMap, catchError, finalize, of, takeUntil } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import type { EChartsOption } from 'echarts';
@@ -223,7 +222,7 @@ function buildKlineOption(
 @Component({
   selector: 'app-kline-chart',
   standalone: true,
-  imports: [CommonModule, MatCardModule, IndicatorChartComponent],
+  imports: [CommonModule, IndicatorChartComponent],
   templateUrl: './kline-chart.component.html',
   styleUrl: './kline-chart.component.scss',
 })

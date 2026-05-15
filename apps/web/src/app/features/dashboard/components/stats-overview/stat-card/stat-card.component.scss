@@ -1,9 +1,7 @@
 .stat-card {
   border-radius: 12px;
-
-  mat-card-content {
-    padding: 16px 20px 16px !important;
-  }
+  display: block;
+  padding: 16px 20px 16px;
 
   .label {
     font-size: 0.78rem;

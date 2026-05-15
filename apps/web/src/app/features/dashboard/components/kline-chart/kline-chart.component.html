@@ -1,4 +1,4 @@
-<mat-card class="kline-card">
+<section class="kline-card app-surface">
   <div class="card-header">
     <ng-content select="[cardTitle]">
       <span class="card-title">加權指數 K 線</span>
@@ -22,20 +22,18 @@
       </span>
     }
   </div>
-  <mat-card-content>
-    <div class="chart-content">
-      @if (loading()) {
-        <div class="chart-skeleton visualization-skeleton" aria-hidden="true">
-          <span class="skeleton-line large"></span>
-          <span class="skeleton-line medium"></span>
-        </div>
-      } @else {
-        <app-indicator-chart
-          [option]="chartOption()"
-          height="400px"
-          (chartGlobalout)="resetHover()"
-        ></app-indicator-chart>
-      }
-    </div>
-  </mat-card-content>
-</mat-card>
+  <div class="chart-content">
+    @if (loading()) {
+      <div class="chart-skeleton visualization-skeleton" aria-hidden="true">
+        <span class="skeleton-line large"></span>
+        <span class="skeleton-line medium"></span>
+      </div>
+    } @else {
+      <app-indicator-chart
+        [option]="chartOption()"
+        height="400px"
+        (chartGlobalout)="resetHover()"
+      ></app-indicator-chart>
+    }
+  </div>
+</section>

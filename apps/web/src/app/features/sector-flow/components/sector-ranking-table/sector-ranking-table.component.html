@@ -1,5 +1,4 @@
-<mat-card class="ranking-card">
-  <mat-card-content>
+<section class="ranking-card app-surface">
     @if (loading()) {
       <div class="sector-ranking-skeleton" aria-hidden="true">
         @for (row of [1, 2, 3, 4, 5, 6, 7, 8]; track row) {
@@ -27,25 +26,25 @@
             <th class="col-num">指數</th>
             <th class="col-num">漲跌</th>
             <th class="col-num sortable" (click)="sort('changePercent')">
-              漲跌幅 <mat-icon>{{ sortIcon('changePercent') }}</mat-icon>
+              漲跌幅 <i [class]="sortIcon('changePercent')" aria-hidden="true"></i>
             </th>
             <th class="col-num sortable" (click)="sort('tradeValue')">
-              成交金額(億) <mat-icon>{{ sortIcon('tradeValue') }}</mat-icon>
+              成交金額(億) <i [class]="sortIcon('tradeValue')" aria-hidden="true"></i>
             </th>
             <th class="col-num sortable" (click)="sort('tradeValuePrev')">
-              昨日金額(億) <mat-icon>{{ sortIcon('tradeValuePrev') }}</mat-icon>
+              昨日金額(億) <i [class]="sortIcon('tradeValuePrev')" aria-hidden="true"></i>
             </th>
             <th class="col-num sortable" (click)="sort('tradeValueChange')">
-              金額差(億) <mat-icon>{{ sortIcon('tradeValueChange') }}</mat-icon>
+              金額差(億) <i [class]="sortIcon('tradeValueChange')" aria-hidden="true"></i>
             </th>
             <th class="col-num sortable" (click)="sort('tradeWeight')">
-              比重% <mat-icon>{{ sortIcon('tradeWeight') }}</mat-icon>
+              比重% <i [class]="sortIcon('tradeWeight')" aria-hidden="true"></i>
             </th>
             <th class="col-num sortable" (click)="sort('tradeWeightPrev')">
-              昨日比重% <mat-icon>{{ sortIcon('tradeWeightPrev') }}</mat-icon>
+              昨日比重% <i [class]="sortIcon('tradeWeightPrev')" aria-hidden="true"></i>
             </th>
             <th class="col-num sortable" (click)="sort('tradeWeightChange')">
-              比重差 <mat-icon>{{ sortIcon('tradeWeightChange') }}</mat-icon>
+              比重差 <i [class]="sortIcon('tradeWeightChange')" aria-hidden="true"></i>
             </th>
             <th class="col-bar">漲跌幅圖</th>
           </tr>
@@ -91,5 +90,4 @@
       </table>
     </div>
     }
-  </mat-card-content>
-</mat-card>
+</section>

@@ -4,7 +4,7 @@
   (click)="open()"
   aria-label="開啟市場研究助理"
 >
-  <mat-icon>psychology</mat-icon>
+  <i class="pi pi-sparkles" aria-hidden="true"></i>
 </button>
 
 @if (isOpen()) {
@@ -31,7 +31,7 @@
           (click)="close()"
           aria-label="關閉市場研究助理"
         >
-          <mat-icon>close</mat-icon>
+          <i class="pi pi-times" aria-hidden="true"></i>
         </button>
       </header>
 
@@ -53,7 +53,7 @@
             (click)="newConversation()"
             aria-label="建立新對話"
           >
-            <mat-icon>add</mat-icon>
+            <i class="pi pi-plus" aria-hidden="true"></i>
           </button>
           <button
             class="icon-btn"
@@ -61,7 +61,7 @@
             (click)="close()"
             aria-label="關閉市場研究助理"
           >
-            <mat-icon>close</mat-icon>
+            <i class="pi pi-times" aria-hidden="true"></i>
           </button>
         </div>
       </header>
@@ -91,14 +91,14 @@
           </div>
         } @else {
           <div class="empty-list">
-            <mat-icon>forum</mat-icon>
+            <i class="pi pi-comments" aria-hidden="true"></i>
             <p>尚無對話紀錄</p>
             <button
               class="action-btn"
               type="button"
               (click)="newConversation()"
             >
-              <mat-icon>add</mat-icon>
+              <i class="pi pi-plus" aria-hidden="true"></i>
               開始新對話
             </button>
           </div>
@@ -112,7 +112,7 @@
           (click)="showConversationList()"
           aria-label="返回對話列表"
         >
-          <mat-icon>arrow_back</mat-icon>
+          <i class="pi pi-arrow-left" aria-hidden="true"></i>
         </button>
         <div>
           <div class="eyebrow">{{ selectedDate() }}</div>
@@ -127,7 +127,7 @@
             [disabled]="!currentConversation()"
             aria-label="刪除目前對話"
           >
-            <mat-icon>delete</mat-icon>
+            <i class="pi pi-trash" aria-hidden="true"></i>
           </button>
           <button
             class="icon-btn"
@@ -135,7 +135,7 @@
             (click)="close()"
             aria-label="關閉市場研究助理"
           >
-            <mat-icon>close</mat-icon>
+            <i class="pi pi-times" aria-hidden="true"></i>
           </button>
         </div>
       </header>
@@ -290,7 +290,7 @@
                 [class.active]="selectedMode() === mode.value"
                 (click)="setMode(mode.value)"
               >
-                <mat-icon>{{ mode.icon }}</mat-icon>
+                <i [class]="mode.icon" aria-hidden="true"></i>
                 <span>{{ mode.label }}</span>
               </button>
             }

@@ -1,8 +1,5 @@
 import { Component, computed, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatCardModule } from '@angular/material/card';
 import { DateTime } from 'luxon';
 import { MarketStats } from '../../../../../core/models/market-stats.model';
 import { TimeRange, RANGE_MONTHS } from '../../../../../core/services/dashboard-state.service';
@@ -15,9 +12,6 @@ import type { EChartsOption } from 'echarts';
   standalone: true,
   imports: [
     CommonModule,
-    MatTabsModule,
-    MatChipsModule,
-    MatCardModule,
     IndicatorChartComponent,
   ],
   templateUrl: './chart-tab-group.component.html',
@@ -30,6 +24,7 @@ export class ChartTabGroupComponent {
   readonly tabs = TAB_DEFINITIONS;
   readonly localRange = signal<TimeRange>('3M');
   readonly ranges: TimeRange[] = ['1M', '3M', '6M', '1Y'];
+  readonly selectedTabIndex = signal(0);
 
   readonly filteredData = computed<MarketStats[]>(() => {
     const data = this.data();
@@ -55,6 +50,10 @@ export class ChartTabGroupComponent {
       next[tabIndex] = indicatorIndex;
       return next;
     });
+  }
+
+  selectTab(tabIndex: number) {
+    this.selectedTabIndex.set(tabIndex);
   }
 
   getChartOption(tabIndex: number): EChartsOption | null {

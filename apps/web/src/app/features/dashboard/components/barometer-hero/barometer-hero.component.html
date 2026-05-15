@@ -1,6 +1,6 @@
-<mat-card class="hero-card" [style.--hero-accent]="accentColor()">
+<section class="hero-card app-surface" [style.--hero-accent]="accentColor()">
   @if (loading()) {
-    <mat-card-content class="hero-content hero-skeleton" aria-hidden="true">
+    <div class="hero-content hero-skeleton" aria-hidden="true">
       <div class="hero-left">
         <span class="skeleton-line date"></span>
         <span class="skeleton-line label"></span>
@@ -18,14 +18,14 @@
         <span class="skeleton-line summary"></span>
         <span class="skeleton-line summary short"></span>
       </div>
-    </mat-card-content>
+    </div>
   } @else if (error()) {
     <div class="state-center">
-      <mat-icon class="state-icon">cloud_off</mat-icon>
+      <i class="pi pi-cloud state-icon" aria-hidden="true"></i>
       <p class="state-text">{{ error() }}</p>
     </div>
   } @else if (data()) {
-    <mat-card-content class="hero-content">
+    <div class="hero-content">
       <!-- 左側：日期 + 市場基本數據 -->
       <div class="hero-left">
         <div class="left-date">{{ formattedDate() }}</div>
@@ -35,7 +35,7 @@
             <div class="taiex-row">
               <span class="taiex-price" [class.up]="taiexUp()" [class.down]="!taiexUp()">{{ s.taiexPrice | number:'1.2-2' }}</span>
               <span class="taiex-change" [class.up]="taiexUp()" [class.down]="!taiexUp()">
-                <mat-icon class="change-arrow">{{ taiexUp() ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>{{ s.taiexChange | number:'1.2-2' }}
+                <i [class]="taiexUp() ? 'pi pi-arrow-up change-arrow' : 'pi pi-arrow-down change-arrow'" aria-hidden="true"></i>{{ s.taiexChange | number:'1.2-2' }}
               </span>
             </div>
           </div>
@@ -59,17 +59,15 @@
       <div class="hero-right">
         <div class="hero-header">
           <span class="weather-emoji">{{ data()!.weather }}</span>
-          <mat-chip-set>
-            <mat-chip class="level-chip" disableRipple>{{ data()!.label }}</mat-chip>
-          </mat-chip-set>
+          <span class="level-chip">{{ data()!.label }}</span>
         </div>
         <p class="summary-text">{{ data()!.summary }}</p>
       </div>
-    </mat-card-content>
+    </div>
   } @else {
     <div class="state-center">
-      <mat-icon class="state-icon">event_busy</mat-icon>
+      <i class="pi pi-calendar-times state-icon" aria-hidden="true"></i>
       <p class="state-text">此日期無市場資料</p>
     </div>
   }
-</mat-card>
+</section>

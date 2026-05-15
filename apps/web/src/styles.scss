@@ -1,36 +1,4 @@
-@use '@angular/material' as mat;
-
-@include mat.core();
-
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$azure-palette,
-  ),
-  typography: (
-    brand-family: 'Roboto, sans-serif',
-    plain-family: 'Roboto, sans-serif',
-  ),
-));
-
-$dark-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: mat.$azure-palette,
-  ),
-  typography: (
-    brand-family: 'Roboto, sans-serif',
-    plain-family: 'Roboto, sans-serif',
-  ),
-));
-
-html {
-  @include mat.all-component-themes($light-theme);
-}
-
-html.dark-mode {
-  @include mat.all-component-themes($dark-theme);
-}
+@import 'primeicons/primeicons.css';
 
 /* CSS Custom Property Token 系統 */
 :root {
@@ -116,31 +84,40 @@ app-root {
   flex: 1;
 }
 
-/* Toolbar 全域覆寫 */
-.app-toolbar.mat-toolbar {
-  background-color: var(--toolbar-bg) !important;
-  color: white !important;
-
-  .mat-icon-button,
-  button[mat-icon-button] {
-    color: white !important;
-  }
+/* PrimeNG + app-owned surfaces follow the FormoAtlas token layer. */
+.app-toolbar {
+  background-color: var(--toolbar-bg);
+  color: white;
 }
 
-html.dark-mode .app-toolbar.mat-toolbar {
-  border-bottom-color: var(--border-color) !important;
+html.dark-mode .app-toolbar {
+  border-bottom-color: var(--border-color);
 }
 
-/* 所有 mat-card 背景統一使用 token（light & dark） */
-mat-card,
-.mat-mdc-card {
-  background-color: var(--bg-surface) !important;
-  color: var(--text-primary) !important;
+.app-surface,
+.p-card {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
 }
 
-/* 深色模式：確保 hero-card 的 mat-card 文字顏色正確繼承 token */
-html.dark-mode .hero-card {
-  color: var(--text-primary) !important;
+.p-card {
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+  box-shadow: none;
+}
+
+.p-card .p-card-body,
+.p-card .p-card-content {
+  padding: 0;
+}
+
+.p-menu,
+.p-datepicker-panel {
+  color: var(--text-primary);
+}
+
+html.dark-mode .p-menu,
+html.dark-mode .p-datepicker-panel {
+  border-color: var(--border-color);
 }
 
 .skeleton-block {

@@ -10,10 +10,6 @@
   flex-direction: column;
   justify-content: center;
 
-  mat-card-content {
-    padding: 0 !important;
-  }
-
   .state-center {
     display: flex;
     flex-direction: column;
@@ -24,8 +20,6 @@
 
     .state-icon {
       font-size: 3rem;
-      width: 3rem;
-      height: 3rem;
       color: var(--text-secondary);
     }
 
@@ -110,8 +104,6 @@
 
       .change-arrow {
         font-size: 0.82rem;
-        width: 0.82rem;
-        height: 0.82rem;
       }
 
       &.up   { color: var(--color-positive); }
@@ -174,6 +166,11 @@
     }
 
     .level-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 5px 12px;
+      border-radius: 999px;
       background-color: color-mix(in srgb, var(--hero-accent, var(--color-neutral)) 15%, transparent);
       color: var(--hero-accent, var(--color-neutral));
       font-size: 1rem;

@@ -1,9 +1,6 @@
 .chart-card {
   border-radius: 16px;
-
-  mat-card-content {
-    padding: 0 !important;
-  }
+  display: block;
 }
 
 .card-header {

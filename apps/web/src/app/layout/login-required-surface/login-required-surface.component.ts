@@ -1,11 +1,10 @@
 import { Component, input, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login-required-surface',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [],
   templateUrl: './login-required-surface.component.html',
   styleUrl: './login-required-surface.component.scss',
 })

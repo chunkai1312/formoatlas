@@ -143,10 +143,8 @@ h2 {
   padding: 8px 12px;
   cursor: pointer;
 
-  mat-icon {
+  .pi {
     font-size: 18px;
-    width: 18px;
-    height: 18px;
   }
 }
 
@@ -156,7 +154,7 @@ h2 {
   right: 20px;
 }
 
-.watch-btn.active mat-icon {
+.watch-btn.active .pi {
   color: #f59e0b;
 }
 
