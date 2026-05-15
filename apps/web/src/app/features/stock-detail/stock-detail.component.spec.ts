@@ -139,6 +139,35 @@ describe('StockDetailComponent', () => {
     expect(text).toContain('7 張');
   });
 
+  it('renders institutional detail rows including net-only placeholders', () => {
+    const text = fixture.nativeElement.textContent;
+
+    expect(text).toContain('法人明細');
+    expect(text).toContain('外資及陸資(不含外資自營商)');
+    expect(text).toContain('1,000 張');
+    expect(text).toContain('200 張');
+    expect(text).toContain('+800 張');
+    expect(text).toContain('自營商');
+    expect(text).toContain('-50 張');
+    expect(fixture.nativeElement.querySelector('.institutional-detail-table')?.textContent).toContain('-');
+  });
+
+  it('renders a neutral institutional detail empty state when unavailable', () => {
+    fixture.componentInstance.summary.set({
+      ...stockSummary(),
+      institutional: {
+        ...stockSummary().institutional,
+        details: [],
+      },
+    });
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('法人明細');
+    expect(fixture.nativeElement.textContent).toContain('尚無法人明細資料');
+    expect(fixture.nativeElement.textContent).toContain('外資');
+    expect(fixture.nativeElement.textContent).toContain('1 張');
+  });
+
   it('renders a neutral margin trading empty state when unavailable', () => {
     fixture.componentInstance.summary.set({ ...stockSummary(), marginTrading: null });
     fixture.detectChanges();
@@ -238,6 +267,10 @@ function stockSummary(): StockSummary {
       dealersNet: -50,
       finiConsecutiveDays: 3,
       sitcConsecutiveDays: 2,
+      details: [
+        { investor: '外資及陸資(不含外資自營商)', buy: 1000, sell: 200, net: 800 },
+        { investor: '自營商', buy: null, sell: null, net: -50 },
+      ],
     },
     marginTrading: {
       marginBalance: 19387,

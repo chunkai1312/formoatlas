@@ -69,6 +69,12 @@ h2 {
   font-size: 1rem;
 }
 
+h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
 .date-eyebrow {
   grid-area: date;
   margin: 0;
@@ -295,6 +301,42 @@ h2 {
   border-radius: 8px;
   padding: 8px 10px;
   background: var(--bg-surface-elevated);
+}
+
+.institutional-detail {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.institutional-detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 6px 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th:first-child,
+  td:first-child {
+    max-width: 128px;
+    color: var(--text-secondary);
+    text-align: left;
+  }
+
+  th {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  td {
+    color: var(--text-primary);
+  }
 }
 
 .metric-grid {

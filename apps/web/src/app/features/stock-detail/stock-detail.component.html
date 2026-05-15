@@ -121,6 +121,33 @@
               <span [class.positive]="(stock.institutional.sitcConsecutiveDays ?? 0) > 0" [class.negative]="(stock.institutional.sitcConsecutiveDays ?? 0) < 0">{{ consecutiveLabel('投信', stock.institutional.sitcConsecutiveDays) }}</span>
             }
           </div>
+          <div class="institutional-detail">
+            <h3>法人明細</h3>
+            @if (stock.institutional.details.length) {
+              <table class="institutional-detail-table">
+                <thead>
+                  <tr>
+                    <th scope="col">法人</th>
+                    <th scope="col">買進</th>
+                    <th scope="col">賣出</th>
+                    <th scope="col">買賣超</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of stock.institutional.details; track row.investor) {
+                    <tr>
+                      <td>{{ row.investor }}</td>
+                      <td>{{ formatInstitutionalDetailLots(row.buy) }}</td>
+                      <td>{{ formatInstitutionalDetailLots(row.sell) }}</td>
+                      <td [class]="valueClass(row.net)">{{ formatSignedLots(row.net) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="empty-note">尚無法人明細資料</p>
+            }
+          </div>
         </section>
 
         <section>

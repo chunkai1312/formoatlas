@@ -12,12 +12,20 @@ export interface StockSummaryQuote {
   transaction: number;
 }
 
+export interface StockSummaryInstitutionalDetail {
+  investor: string;
+  buy: number | null;
+  sell: number | null;
+  net: number;
+}
+
 export interface StockSummaryInstitutional {
   finiNet: number | null;
   sitcNet: number | null;
   dealersNet: number | null;
   finiConsecutiveDays: number | null;
   sitcConsecutiveDays: number | null;
+  details: StockSummaryInstitutionalDetail[];
 }
 
 export interface StockSummaryMarginTrading {
