@@ -5,7 +5,9 @@ import { AgentConversationService } from './agent-conversation.service';
 const deleteSession = vi.fn();
 const deleteMany = vi.fn();
 const deleteOne = vi.fn();
+const create = vi.fn();
 const findOne = vi.fn();
+const updateOne = vi.fn();
 
 describe('AgentConversationService', () => {
   beforeEach(() => {
@@ -13,6 +15,20 @@ describe('AgentConversationService', () => {
     deleteSession.mockResolvedValue(undefined);
     deleteMany.mockResolvedValue({ deletedCount: 1 });
     deleteOne.mockResolvedValue({ deletedCount: 1 });
+    create.mockImplementation(async (doc) => doc);
+    updateOne.mockResolvedValue({ modifiedCount: 1 });
+  });
+
+  it('creates CLI-safe Copilot session ids for new conversations', async () => {
+    const userId = new Types.ObjectId().toString();
+    const service = createService();
+
+    await service.create(userId, { title: '研究' });
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({
+      copilotSessionId: expect.stringMatching(/^[a-zA-Z0-9_-]+$/),
+    }));
+    expect(create.mock.calls[0][0].copilotSessionId).not.toContain(':');
   });
 
   it('returns the owned Copilot session id', async () => {
@@ -25,7 +41,29 @@ describe('AgentConversationService', () => {
     const service = createService();
     const result = await service.getCopilotSessionId(userId, conversationId);
 
-    expect(result).toBe(`formoatlas:user:${userId}:conversation:${conversationId}`);
+    expect(result).toBe(`formoatlas-user-${userId}-conversation-${conversationId}`);
+  });
+
+  it('migrates legacy Copilot session ids before returning them', async () => {
+    const userId = new Types.ObjectId().toString();
+    const conversationId = new Types.ObjectId().toString();
+    const legacySessionId = `formoatlas:user:${userId}:conversation:${conversationId}`;
+    findOne.mockReturnValueOnce({
+      lean: vi.fn().mockResolvedValue({
+        ...conversationDoc(userId, conversationId),
+        copilotSessionId: legacySessionId,
+      }),
+    });
+
+    const service = createService();
+    const result = await service.getCopilotSessionId(userId, conversationId);
+
+    const migratedSessionId = `formoatlas-user-${userId}-conversation-${conversationId}`;
+    expect(result).toBe(migratedSessionId);
+    expect(updateOne).toHaveBeenCalledWith(
+      { _id: expect.any(Types.ObjectId), userId: expect.any(Types.ObjectId) },
+      { $set: { copilotSessionId: migratedSessionId } },
+    );
   });
 
   it('deletes app-owned records and best-effort deletes the Copilot session', async () => {
@@ -69,8 +107,10 @@ describe('AgentConversationService', () => {
 function createService() {
   return new AgentConversationService(
     {
+      create,
       findOne,
       deleteOne,
+      updateOne,
     } as any,
     {
       deleteMany,
@@ -85,7 +125,7 @@ function conversationDoc(userId: string, conversationId: string) {
   return {
     _id: new Types.ObjectId(conversationId),
     userId: new Types.ObjectId(userId),
-    copilotSessionId: `formoatlas:user:${userId}:conversation:${conversationId}`,
+    copilotSessionId: `formoatlas-user-${userId}-conversation-${conversationId}`,
     title: '研究',
     messageCount: 0,
     lastMessageAt: new Date('2026-04-24T00:00:00.000Z'),

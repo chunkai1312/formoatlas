@@ -77,7 +77,15 @@ export class AgentConversationService {
 
   async getCopilotSessionId(userId: string, conversationId: string): Promise<string> {
     const conversation = await this.findOwnedConversation(userId, conversationId);
-    return conversation.copilotSessionId;
+    const expectedSessionId = this.buildCopilotSessionId(conversation.userId, conversation._id);
+    if (conversation.copilotSessionId !== expectedSessionId) {
+      await this.conversationModel.updateOne(
+        { _id: conversation._id, userId: conversation.userId },
+        { $set: { copilotSessionId: expectedSessionId } },
+      );
+    }
+
+    return expectedSessionId;
   }
 
   async recordUserMessage(userId: string, conversationId: string, input: MarketResearchQueryDto): Promise<AgentConversationMessage> {
@@ -209,7 +217,7 @@ export class AgentConversationService {
   }
 
   private buildCopilotSessionId(userId: Types.ObjectId, conversationId: Types.ObjectId): string {
-    return `formoatlas:user:${userId.toString()}:conversation:${conversationId.toString()}`;
+    return `formoatlas-user-${userId.toString()}-conversation-${conversationId.toString()}`;
   }
 
   private truncate(value: string, maxLength: number): string {

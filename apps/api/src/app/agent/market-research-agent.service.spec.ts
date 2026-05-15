@@ -117,9 +117,9 @@ describe('MarketResearchAgentService', () => {
       },
     });
 
-    await service.query({ question: '延續前面問題', date: '2026-04-24' }, undefined, 'formoatlas:session:1');
+    await service.query({ question: '延續前面問題', date: '2026-04-24' }, undefined, 'formoatlas-session-1');
 
-    expect(createOrResumeSession).toHaveBeenCalledWith('formoatlas:session:1', expect.objectContaining({
+    expect(createOrResumeSession).toHaveBeenCalledWith('formoatlas-session-1', expect.objectContaining({
       clientName: 'formoatlas-market-research-agent',
     }));
     expect(createEphemeralSession).not.toHaveBeenCalled();
