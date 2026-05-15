@@ -31,7 +31,7 @@ Nx monorepo，包含兩個 apps：
 | App | 路徑 | 技術 |
 |-----|------|------|
 | `api` | `apps/api/` | NestJS 11 · MongoDB · GitHub Copilot SDK |
-| `web` | `apps/web/` | Angular 21 · Angular Material · ngx-echarts |
+| `web` | `apps/web/` | Angular 21 · PrimeNG · ngx-echarts |
 
 ## 快速開始
 
