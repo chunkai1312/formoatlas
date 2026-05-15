@@ -144,11 +144,17 @@ export class TickerRepository {
         transaction: ticker.transaction ?? 0,
       },
       institutional: {
-        finiNet: ticker.instInvestors?.fini?.net ?? null,
-        sitcNet: ticker.instInvestors?.sitc?.net ?? null,
-        dealersNet: ticker.instInvestors?.dealers?.net ?? null,
-        finiConsecutiveDays: ticker.instInvestors?.fini?.consecutiveDays ?? null,
-        sitcConsecutiveDays: ticker.instInvestors?.sitc?.consecutiveDays ?? null,
+        finiNet: ticker.institutionalTrading?.summary?.fini?.net ?? null,
+        sitcNet: ticker.institutionalTrading?.summary?.sitc?.net ?? null,
+        dealersNet: ticker.institutionalTrading?.summary?.dealers?.net ?? null,
+        finiConsecutiveDays: ticker.institutionalTrading?.summary?.fini?.consecutiveDays ?? null,
+        sitcConsecutiveDays: ticker.institutionalTrading?.summary?.sitc?.consecutiveDays ?? null,
+        details: (ticker.institutionalTrading?.details ?? []).map((row: any) => ({
+          investor: row.investor,
+          buy: row.buy ?? null,
+          sell: row.sell ?? null,
+          net: row.net ?? 0,
+        })),
       },
       marginTrading: ticker.marginTrading
         ? {
@@ -371,7 +377,7 @@ export class TickerRepository {
     const inst = options?.inst || `fini`;
     const net = options?.net || 'buy';
     const top = options?.top || 50;
-    const instKey = `instInvestors.${inst}.net`;
+    const instKey = `institutionalTrading.summary.${inst}.net`;
 
     const results = await this.model.aggregate([
       { $match: {
@@ -407,15 +413,15 @@ export class TickerRepository {
           date: { $lt: beforeDate },
           market,
           symbol: { $in: symbols },
-          instInvestors: { $exists: true },
+          institutionalTrading: { $exists: true },
         },
       },
       { $sort: { date: -1 } },
       {
         $group: {
           _id: '$symbol',
-          finiConsecutiveDays: { $first: '$instInvestors.fini.consecutiveDays' },
-          sitcConsecutiveDays: { $first: '$instInvestors.sitc.consecutiveDays' },
+          finiConsecutiveDays: { $first: '$institutionalTrading.summary.fini.consecutiveDays' },
+          sitcConsecutiveDays: { $first: '$institutionalTrading.summary.sitc.consecutiveDays' },
         },
       },
     ]).exec();
@@ -453,10 +459,10 @@ export class TickerRepository {
       this.getEquityRanking({ date: latestDate, market, sortKey: 'changePercent', sortDir: 1, filter: { changePercent: { $lt: 0 } } }),
       this.getEquityRanking({ date: latestDate, market, sortKey: 'tradeVolume', sortDir: -1 }),
       this.getEquityRanking({ date: latestDate, market, sortKey: 'tradeValue', sortDir: -1 }),
-      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.fini.net', sortDir: -1, filter: { 'instInvestors.fini.net': { $gt: 0 } } }),
-      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.fini.net', sortDir: 1, filter: { 'instInvestors.fini.net': { $lt: 0 } } }),
-      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.sitc.net', sortDir: -1, filter: { 'instInvestors.sitc.net': { $gt: 0 } } }),
-      this.getEquityRanking({ date: latestDate, market, sortKey: 'instInvestors.sitc.net', sortDir: 1, filter: { 'instInvestors.sitc.net': { $lt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'institutionalTrading.summary.fini.net', sortDir: -1, filter: { 'institutionalTrading.summary.fini.net': { $gt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'institutionalTrading.summary.fini.net', sortDir: 1, filter: { 'institutionalTrading.summary.fini.net': { $lt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'institutionalTrading.summary.sitc.net', sortDir: -1, filter: { 'institutionalTrading.summary.sitc.net': { $gt: 0 } } }),
+      this.getEquityRanking({ date: latestDate, market, sortKey: 'institutionalTrading.summary.sitc.net', sortDir: 1, filter: { 'institutionalTrading.summary.sitc.net': { $lt: 0 } } }),
     ]);
 
     return {
@@ -512,10 +518,10 @@ export class TickerRepository {
           changePercent: { $ifNull: ['$changePercent', 0] },
           tradeVolume: { $ifNull: ['$tradeVolume', 0] },
           tradeValue: { $ifNull: ['$tradeValue', 0] },
-          finiNet: { $ifNull: ['$instInvestors.fini.net', null] },
-          sitcNet: { $ifNull: ['$instInvestors.sitc.net', null] },
-          finiConsecutiveDays: { $ifNull: ['$instInvestors.fini.consecutiveDays', null] },
-          sitcConsecutiveDays: { $ifNull: ['$instInvestors.sitc.consecutiveDays', null] },
+          finiNet: { $ifNull: ['$institutionalTrading.summary.fini.net', null] },
+          sitcNet: { $ifNull: ['$institutionalTrading.summary.sitc.net', null] },
+          finiConsecutiveDays: { $ifNull: ['$institutionalTrading.summary.fini.consecutiveDays', null] },
+          sitcConsecutiveDays: { $ifNull: ['$institutionalTrading.summary.sitc.consecutiveDays', null] },
         },
       },
     ]).exec();

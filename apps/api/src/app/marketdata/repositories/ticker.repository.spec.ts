@@ -110,6 +110,10 @@ describe('TickerRepository.getStockSummary', () => {
         dealersNet: -50,
         finiConsecutiveDays: 3,
         sitcConsecutiveDays: 2,
+        details: [
+          { investor: '外資及陸資(不含外資自營商)', buy: 1000, sell: 200, net: 800 },
+          { investor: '自營商', buy: null, sell: null, net: -50 },
+        ],
       },
       marginTrading: {
         marginBalance: 19387,
@@ -156,7 +160,7 @@ describe('TickerRepository.getStockSummary', () => {
   it('keeps optional institutional and market-cap fields nullable', async () => {
     const model = createAggregateModel([
       [tickerRow({
-        instInvestors: undefined,
+        institutionalTrading: undefined,
         equityInfo: { symbol: '2330', exchange: 'TWSE', name: '台積電', industryCode: '24' },
       })],
       [],
@@ -179,10 +183,27 @@ describe('TickerRepository.getStockSummary', () => {
       dealersNet: null,
       finiConsecutiveDays: null,
       sitcConsecutiveDays: null,
+      details: [],
     });
     expect(result?.context.marketCap).toBeNull();
     expect(result?.context.appearsInHotStocks).toBe(false);
     expect(result?.marginTrading).toBeNull();
+  });
+
+  it('uses institutional trading summary paths for institutional rankings', async () => {
+    let capturedPipeline: any[] = [];
+    const model = {
+      aggregate: vi.fn((pipeline: any[]) => {
+        capturedPipeline = pipeline;
+        return Promise.resolve([{ data: [] }]);
+      }),
+    };
+    const repository = new TickerRepository(model as any);
+
+    await repository.getInstInvestorsTrades({ date: '2026-04-30', market: 'TSE' as any, inst: 'fini', net: 'buy' });
+
+    expect(capturedPipeline[0].$match['institutionalTrading.summary.fini.net']).toEqual({ $gt: 0 });
+    expect(capturedPipeline[2].$sort['institutionalTrading.summary.fini.net']).toBe(-1);
   });
 });
 
@@ -211,10 +232,16 @@ function tickerRow(overrides: Record<string, any> = {}) {
     tradeVolume: 1200,
     tradeValue: 12_000_000,
     transaction: 3000,
-    instInvestors: {
-      fini: { net: 1000, consecutiveDays: 3 },
-      sitc: { net: 200, consecutiveDays: 2 },
-      dealers: { net: -50 },
+    institutionalTrading: {
+      summary: {
+        fini: { net: 1000, consecutiveDays: 3 },
+        sitc: { net: 200, consecutiveDays: 2 },
+        dealers: { net: -50 },
+      },
+      details: [
+        { investor: '外資及陸資(不含外資自營商)', buy: 1000, sell: 200, net: 800 },
+        { investor: '自營商', buy: null, sell: null, net: -50 },
+      ],
     },
     equityInfo: {
       symbol: '2330',

@@ -31,6 +31,30 @@ export class InstInvestors {
 }
 
 @Schema({ _id: false })
+export class InstitutionalTradingRow {
+  @Prop({ required: true })
+  investor: string;
+
+  @Prop()
+  buy: number | null;
+
+  @Prop()
+  sell: number | null;
+
+  @Prop({ required: true })
+  net: number;
+}
+
+@Schema({ _id: false })
+export class InstitutionalTrading {
+  @Prop({ type: InstInvestors })
+  summary: InstInvestors;
+
+  @Prop({ type: [InstitutionalTradingRow], default: [] })
+  details: InstitutionalTradingRow[];
+}
+
+@Schema({ _id: false })
 export class MarginTrading {
   @Prop()
   marginBuy: number;
@@ -131,8 +155,8 @@ export class Ticker {
   @Prop()
   tradeWeight: number;
 
-  @Prop({ type: InstInvestors })
-  instInvestors?: InstInvestors;
+  @Prop({ type: InstitutionalTrading })
+  institutionalTrading?: InstitutionalTrading;
 
   @Prop({ type: MarginTrading })
   marginTrading?: MarginTrading;

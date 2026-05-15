@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { sumBy } from 'lodash';
 import { TwStock } from 'node-twstock';
 import { InjectTwStock } from 'nest-twstock';
 import { TickerType, Exchange, Market, Index } from '../enums';
@@ -9,10 +8,70 @@ import { EquityRepository } from '../repositories/equity.repository';
 import { TickerRepository } from '../repositories/ticker.repository';
 import { isOtcWarrant } from '../utils';
 
+const FINI_INVESTORS = ['外資及陸資(不含外資自營商)', '外資自營商', '外資及陸資'];
+const SITC_INVESTORS = ['投信'];
+const DEALER_INVESTORS = ['自營商(自行買賣)', '自營商(避險)'];
+
+interface InstitutionalSourceRow {
+  investor: string;
+  totalBuy?: number | null;
+  totalSell?: number | null;
+  difference?: number | null;
+}
+
+interface InstitutionalTradingMappedRow {
+  investor: string;
+  buy: number | null;
+  sell: number | null;
+  net: number;
+}
+
+interface InstitutionalInvestorAggregate {
+  buy: number;
+  sell: number;
+  net: number;
+}
+
 function calcConsecutiveDays(net: number, prev: number): number {
   if (net > 0) return prev > 0 ? prev + 1 : 1;
   if (net < 0) return prev < 0 ? prev - 1 : -1;
   return 0;
+}
+
+function toNullableNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function toNumber(value: unknown): number {
+  return toNullableNumber(value) ?? 0;
+}
+
+function sumRows(rows: InstitutionalTradingMappedRow[]): InstitutionalInvestorAggregate {
+  return rows.reduce<InstitutionalInvestorAggregate>(
+    (total, row) => ({
+      buy: (total.buy ?? 0) + (row.buy ?? 0),
+      sell: (total.sell ?? 0) + (row.sell ?? 0),
+      net: total.net + row.net,
+    }),
+    { buy: 0, sell: 0, net: 0 },
+  );
+}
+
+function mapInstitutionalTrading(sourceRows: InstitutionalSourceRow[] = []) {
+  const rows = sourceRows.map(row => ({
+    investor: row.investor,
+    buy: toNullableNumber(row.totalBuy),
+    sell: toNullableNumber(row.totalSell),
+    net: toNumber(row.difference),
+  }));
+  const rowsByInvestor = (investors: string[]) => rows.filter(row => investors.includes(row.investor));
+  const summary = {
+    fini: sumRows(rowsByInvestor(FINI_INVESTORS)),
+    sitc: sumRows(rowsByInvestor(SITC_INVESTORS)),
+    dealers: sumRows(rowsByInvestor(DEALER_INVESTORS)),
+  };
+
+  return { summary, details: rows };
 }
 
 function mapMarginTrading(row: any) {
@@ -253,20 +312,14 @@ export class TickerService {
     }
 
     const tickers = rawData.map(ticker => {
-      const finiRows = ticker.institutional.filter(row => ['外資及陸資(不含外資自營商)', '外資自營商'].includes(row.investor));
-      const sitcRows = ticker.institutional.filter(row => ['投信'].includes(row.investor));
-      const dealersRows = ticker.institutional.filter(row => ['自營商(自行買賣)', '自營商(避險)'].includes(row.investor));
+      const mappedInstitutional = mapInstitutionalTrading(ticker.institutional);
       return {
         date: ticker.date,
         type: TickerType.Equity,
         exchange: Exchange.TWSE,
         market: Market.TSE,
         symbol: ticker.symbol,
-        instInvestors: {
-          fini:    { buy: sumBy(finiRows, 'totalBuy'),    sell: sumBy(finiRows, 'totalSell'),    net: sumBy(finiRows, 'difference') },
-          sitc:    { buy: sumBy(sitcRows, 'totalBuy'),    sell: sumBy(sitcRows, 'totalSell'),    net: sumBy(sitcRows, 'difference') },
-          dealers: { buy: sumBy(dealersRows, 'totalBuy'), sell: sumBy(dealersRows, 'totalSell'), net: sumBy(dealersRows, 'difference') },
-        },
+        institutionalTrading: mappedInstitutional,
       };
     });
 
@@ -275,10 +328,19 @@ export class TickerService {
 
     const tickersWithDays = tickers.map(ticker => ({
       ...ticker,
-      instInvestors: {
-        ...ticker.instInvestors,
-        fini: { ...ticker.instInvestors.fini, consecutiveDays: calcConsecutiveDays(ticker.instInvestors.fini.net, prevDaysMap.get(ticker.symbol)?.fini ?? 0) },
-        sitc: { ...ticker.instInvestors.sitc, consecutiveDays: calcConsecutiveDays(ticker.instInvestors.sitc.net, prevDaysMap.get(ticker.symbol)?.sitc ?? 0) },
+      institutionalTrading: {
+        ...ticker.institutionalTrading,
+        summary: {
+          ...ticker.institutionalTrading.summary,
+          fini: {
+            ...ticker.institutionalTrading.summary.fini,
+            consecutiveDays: calcConsecutiveDays(ticker.institutionalTrading.summary.fini.net, prevDaysMap.get(ticker.symbol)?.fini ?? 0),
+          },
+          sitc: {
+            ...ticker.institutionalTrading.summary.sitc,
+            consecutiveDays: calcConsecutiveDays(ticker.institutionalTrading.summary.sitc.net, prevDaysMap.get(ticker.symbol)?.sitc ?? 0),
+          },
+        },
       },
     }));
 
@@ -295,20 +357,14 @@ export class TickerService {
     }
 
     const tickers = rawData.filter(ticker => !isOtcWarrant(ticker.symbol)).map(ticker => {
-      const finiRows = ticker.institutional.filter(row => ['外資及陸資(不含外資自營商)', '外資自營商'].includes(row.investor));
-      const sitcRows = ticker.institutional.filter(row => ['投信'].includes(row.investor));
-      const dealersRows = ticker.institutional.filter(row => ['自營商(自行買賣)', '自營商(避險)'].includes(row.investor));
+      const mappedInstitutional = mapInstitutionalTrading(ticker.institutional);
       return {
         date: ticker.date,
         type: TickerType.Equity,
         exchange: Exchange.TPEx,
         market: Market.OTC,
         symbol: ticker.symbol,
-        instInvestors: {
-          fini:    { buy: sumBy(finiRows, 'totalBuy'),    sell: sumBy(finiRows, 'totalSell'),    net: sumBy(finiRows, 'difference') },
-          sitc:    { buy: sumBy(sitcRows, 'totalBuy'),    sell: sumBy(sitcRows, 'totalSell'),    net: sumBy(sitcRows, 'difference') },
-          dealers: { buy: sumBy(dealersRows, 'totalBuy'), sell: sumBy(dealersRows, 'totalSell'), net: sumBy(dealersRows, 'difference') },
-        },
+        institutionalTrading: mappedInstitutional,
       };
     });
 
@@ -317,10 +373,19 @@ export class TickerService {
 
     const tickersWithDays = tickers.map(ticker => ({
       ...ticker,
-      instInvestors: {
-        ...ticker.instInvestors,
-        fini: { ...ticker.instInvestors.fini, consecutiveDays: calcConsecutiveDays(ticker.instInvestors.fini.net, prevDaysMap.get(ticker.symbol)?.fini ?? 0) },
-        sitc: { ...ticker.instInvestors.sitc, consecutiveDays: calcConsecutiveDays(ticker.instInvestors.sitc.net, prevDaysMap.get(ticker.symbol)?.sitc ?? 0) },
+      institutionalTrading: {
+        ...ticker.institutionalTrading,
+        summary: {
+          ...ticker.institutionalTrading.summary,
+          fini: {
+            ...ticker.institutionalTrading.summary.fini,
+            consecutiveDays: calcConsecutiveDays(ticker.institutionalTrading.summary.fini.net, prevDaysMap.get(ticker.symbol)?.fini ?? 0),
+          },
+          sitc: {
+            ...ticker.institutionalTrading.summary.sitc,
+            consecutiveDays: calcConsecutiveDays(ticker.institutionalTrading.summary.sitc.net, prevDaysMap.get(ticker.symbol)?.sitc ?? 0),
+          },
+        },
       },
     }));
 
