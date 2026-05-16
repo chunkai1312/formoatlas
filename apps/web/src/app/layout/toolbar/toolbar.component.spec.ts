@@ -1,6 +1,8 @@
 import { Component, computed, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
+import { Menu } from 'primeng/menu';
 import { ToolbarComponent } from './toolbar.component';
 import { DashboardStateService } from '../../core/services/dashboard-state.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -151,5 +153,20 @@ describe('ToolbarComponent', () => {
     const links = Array.from(fixture.nativeElement.querySelectorAll('.nav-link')) as HTMLElement[];
     expect(links[4].textContent?.trim()).toBe('自選股');
     expect(links[4].classList.contains('active')).toBe(true);
+  });
+
+  it('assigns a stable overlay class to the signed-in user menu for theme styling', () => {
+    const authService = TestBed.inject(AuthService) as unknown as MockAuthService;
+    authService.currentUser.set({
+      sub: 'u1',
+      email: 'u1@example.com',
+      name: 'User',
+      picture: '',
+    });
+
+    fixture.detectChanges();
+
+    const menu = fixture.debugElement.query(By.directive(Menu)).componentInstance as Menu;
+    expect(menu.styleClass).toBe('user-profile-menu');
   });
 });

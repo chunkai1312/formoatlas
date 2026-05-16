@@ -68,7 +68,7 @@
     >
       <img [src]="currentUser()?.picture" [alt]="currentUser()?.name" class="user-avatar" referrerpolicy="no-referrer" />
     </button>
-    <p-menu #userMenu [model]="userMenuItems()" [popup]="true" appendTo="body"></p-menu>
+    <p-menu #userMenu [model]="userMenuItems()" [popup]="true" appendTo="body" styleClass="user-profile-menu"></p-menu>
   } @else {
     <button pButton type="button" class="login-btn" (click)="login()" aria-label="使用 Google 帳戶登入">
       <i class="pi pi-sign-in" aria-hidden="true"></i>

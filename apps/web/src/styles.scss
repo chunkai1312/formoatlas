@@ -120,6 +120,39 @@ html.dark-mode .p-datepicker-panel {
   border-color: var(--border-color);
 }
 
+.user-profile-menu.p-menu {
+  min-width: 270px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.user-profile-menu .p-menu-item-content {
+  color: var(--text-primary);
+}
+
+.user-profile-menu .p-menu-item:not(.p-disabled) .p-menu-item-content:hover {
+  background: color-mix(in srgb, var(--section-accent) 14%, transparent);
+}
+
+.user-profile-menu .p-menu-item-label,
+.user-profile-menu .p-menu-item-icon {
+  color: var(--text-primary);
+}
+
+.user-profile-menu .user-menu-email .p-menu-item-label {
+  color: var(--text-secondary);
+}
+
+.user-profile-menu .p-menu-separator {
+  border-color: var(--border-color);
+}
+
+html.dark-mode .user-profile-menu.p-menu {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.42);
+}
+
 .skeleton-block {
   display: block;
   overflow: hidden;
