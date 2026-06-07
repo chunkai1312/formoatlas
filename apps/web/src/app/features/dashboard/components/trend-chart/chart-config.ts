@@ -29,6 +29,7 @@ export const TAB_DEFINITIONS: TabDef[] = [
       { key: 'dealersNetBuySell',   label: '自營商買賣超', unit: '億元', chartType: 'bar' },
       { key: 'marginBalance',       label: '融資餘額',   unit: '億元', chartType: 'bar', fixedColor: '#3B82F6', scaleAxis: true },
       { key: 'shortBalance',        label: '融券餘額',   unit: '張',   chartType: 'bar', fixedColor: '#3B82F6', scaleAxis: true },
+      { key: 'marginMaintenanceRatio', label: '融資維持率', unit: '%', chartType: 'line', fixedColor: '#3B82F6', scaleAxis: true },
     ],
   },
   {
@@ -68,6 +69,7 @@ const SCALE_MAP: Partial<Record<keyof MarketStats, number>> = {
   dealersNetBuySell: 1e8,
   marginBalance: 1e5,         // 仟元 → 億元
   marginBalanceChange: 1e5,
+  marginMaintenanceRatio: 0.01, // 小數 → %
   finiTxoCallsNetOiValue: 1e5,
   finiTxoPutsNetOiValue: 1e5,
   finiTxoNetOiValue: 1e5,

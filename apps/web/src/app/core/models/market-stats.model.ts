@@ -14,6 +14,7 @@ export interface MarketStats {
   // 融資券
   marginBalance: number;
   marginBalanceChange: number;
+  marginMaintenanceRatio?: number; // decimal ratio，例如 1.9898 = 198.98%
   shortBalance: number;
   shortBalanceChange: number;
 
