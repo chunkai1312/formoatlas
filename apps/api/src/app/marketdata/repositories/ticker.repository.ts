@@ -27,6 +27,16 @@ const HOT_STOCK_RANK_DEFS: Array<{
   { key: 'institutional.sitcSell', label: '投信賣超', tone: 'negative', getRows: hotStocks => hotStocks.institutional.sitcSell },
 ];
 
+export interface TwseFinancedMarketValue {
+  financedMarketValue: number;
+  eligibleCount: number;
+  missingClosePriceCount: number;
+}
+
+function isPositiveFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
 @Injectable()
 export class TickerRepository {
   constructor(
@@ -60,6 +70,38 @@ export class TickerRepository {
       .sort({ date: 1 })
       .lean()
       .exec();
+  }
+
+  async getTwseFinancedMarketValue(date: string): Promise<TwseFinancedMarketValue> {
+    const rows = await this.model
+      .find({
+        date,
+        exchange: Exchange.TWSE,
+        'marginTrading.marginBalance': { $gt: 0 },
+      })
+      .select({ _id: 0, closePrice: 1, marginTrading: 1 })
+      .lean()
+      .exec();
+
+    return rows.reduce<TwseFinancedMarketValue>((total, row: any) => {
+      const marginBalance = row.marginTrading?.marginBalance;
+      if (!isPositiveFiniteNumber(marginBalance)) {
+        return total;
+      }
+
+      if (!isPositiveFiniteNumber(row.closePrice)) {
+        total.missingClosePriceCount += 1;
+        return total;
+      }
+
+      total.financedMarketValue += marginBalance * row.closePrice * 1000;
+      total.eligibleCount += 1;
+      return total;
+    }, {
+      financedMarketValue: 0,
+      eligibleCount: 0,
+      missingClosePriceCount: 0,
+    });
   }
 
   async getStockSummary(options: { symbol: string; date?: string }): Promise<StockSummaryResponse | null> {

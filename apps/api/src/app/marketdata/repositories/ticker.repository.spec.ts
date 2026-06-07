@@ -6,6 +6,31 @@ vi.mock('../schemas/ticker.schema', () => ({
 
 import { TickerRepository } from './ticker.repository';
 
+describe('TickerRepository.getTwseFinancedMarketValue', () => {
+  it('sums TWSE margin balances with close prices and excludes rows without valid prices', async () => {
+    const model = createFindModel([
+      { symbol: '2330', closePrice: 100, marginTrading: { marginBalance: 10 } },
+      { symbol: '0050', closePrice: 200, marginTrading: { marginBalance: 5 } },
+      { symbol: '1589', closePrice: null, marginTrading: { marginBalance: 3 } },
+      { symbol: '00684R', marginTrading: { marginBalance: 2 } },
+      { symbol: '1101', closePrice: 50, marginTrading: { marginBalance: 0 } },
+    ]);
+    const repository = new TickerRepository(model as any);
+
+    await expect(repository.getTwseFinancedMarketValue('2026-06-05')).resolves.toEqual({
+      financedMarketValue: 2_000_000,
+      eligibleCount: 2,
+      missingClosePriceCount: 2,
+    });
+
+    expect(model.find).toHaveBeenCalledWith({
+      date: '2026-06-05',
+      exchange: 'TWSE',
+      'marginTrading.marginBalance': { $gt: 0 },
+    });
+  });
+});
+
 describe('TickerRepository.getMarketMap', () => {
   it('includes tradeValue in stock rows and totalTradeValue in sectors', async () => {
     let capturedPipeline: any[] = [];
@@ -211,6 +236,16 @@ function createAggregateModel(results: any[][]) {
   return {
     aggregate: vi.fn(() => ({
       exec: vi.fn().mockResolvedValue(results.shift() ?? []),
+    })),
+  };
+}
+
+function createFindModel(rows: any[]) {
+  return {
+    find: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      lean: vi.fn().mockReturnThis(),
+      exec: vi.fn().mockResolvedValue(rows),
     })),
   };
 }

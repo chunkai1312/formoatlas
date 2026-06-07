@@ -5,12 +5,14 @@ import { sumBy } from 'lodash';
 import { TwStock } from 'node-twstock';
 import { InjectTwStock } from 'nest-twstock';
 import { MarketStatsRepository } from '../repositories/market-stats.repository';
+import { TickerRepository } from '../repositories/ticker.repository';
 
 @Injectable()
 export class MarketStatsService {
   constructor(
     @InjectTwStock() private readonly twstock: TwStock,
     private readonly marketStatsRepository: MarketStatsRepository,
+    private readonly tickerRepository: TickerRepository,
   ) {}
 
   async updateMarketStats(date: string = DateTime.local().toISODate()) {
@@ -110,6 +112,34 @@ export class MarketStatsService {
 
     if (updated) Logger.log(`${date} 集中市場信用交易: 已更新`, MarketStatsService.name);
     else Logger.warn(`${date} 集中市場信用交易: 尚無資料或非交易日`, MarketStatsService.name);
+  }
+
+  @Cron('0 45 21-22 * * *')
+  async updateMarginMaintenanceRatio(date: string = DateTime.local().toISODate()) {
+    const marketStats = await this.marketStatsRepository.getMarketStatsByDate(date);
+    const marginBalance = marketStats?.marginBalance;
+
+    if (!Number.isFinite(marginBalance) || (marginBalance ?? 0) <= 0) {
+      Logger.warn(`${date} 大盤融資維持率: 缺少大盤融資金額餘額`, MarketStatsService.name);
+      return;
+    }
+
+    const financedMarketValue = await this.tickerRepository.getTwseFinancedMarketValue(date);
+    if (financedMarketValue.eligibleCount === 0 || financedMarketValue.financedMarketValue <= 0) {
+      Logger.warn(`${date} 大盤融資維持率: 無有效個股融資與收盤價資料`, MarketStatsService.name);
+      return;
+    }
+
+    if (!Number.isFinite(financedMarketValue.financedMarketValue) || financedMarketValue.financedMarketValue <= 0) {
+      Logger.warn(`${date} 大盤融資維持率: 無法計算`, MarketStatsService.name);
+      return;
+    }
+
+    const denominator = marginBalance * 1000;
+    const marginMaintenanceRatio = Math.round((financedMarketValue.financedMarketValue / denominator) * 10000) / 10000;
+
+    await this.marketStatsRepository.updateMarketStats({ date, marginMaintenanceRatio });
+    Logger.log(`${date} 大盤融資維持率: 已更新`, MarketStatsService.name);
   }
 
   @Cron('0 0 15-18 * * *')

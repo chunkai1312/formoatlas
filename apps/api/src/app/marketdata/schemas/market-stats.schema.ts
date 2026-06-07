@@ -91,6 +91,12 @@ export class MarketStats {
   marginBalanceChange: number;
 
   /**
+   * 融資維持率（decimal ratio，例如 1.9898 = 198.98%）
+   */
+  @Prop()
+  marginMaintenanceRatio?: number;
+
+  /**
    * 融券餘額
    */
   @Prop()

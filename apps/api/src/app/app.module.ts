@@ -53,6 +53,7 @@ export class AppModule implements OnApplicationBootstrap {
           await this.marketStatsService.updateMarketStats(dt.toISODate());
           await this.priceAdjustmentEventService.updatePriceAdjustmentEvents(dt.toISODate());
           await this.tickerService.updateTickers(dt.toISODate());
+          await this.marketStatsService.updateMarginMaintenanceRatio(dt.toISODate());
         } catch (error) {
           dt = dt.minus({ day: 1 });
           continue;
